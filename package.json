@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "build:cf": "npx @cloudflare/next-on-pages",
+    "preview:cf": "npx wrangler pages dev .vercel/output/static"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.4.2",
@@ -25,6 +27,7 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.16",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
@@ -41,7 +44,8 @@
     "ts-node": "^10.9.2",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "wrangler": "^4.70.0"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
