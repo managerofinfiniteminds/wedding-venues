@@ -17,9 +17,9 @@ if (!API_KEY) throw new Error("GOOGLE_PLACES_API_KEY not set");
 // California bounding box
 const CA_BOUNDS = {
   minLat: 32.5,  // San Diego south
-  maxLat: 42.0,  // Oregon border
-  minLng: -124.5, // Pacific coast
-  maxLng: -114.1, // Nevada/Arizona border
+  maxLat: 41.9,  // Just inside CA border (not 42.0 to avoid Oregon bleed)
+  minLng: -124.4, // Pacific coast (not too far offshore)
+  maxLng: -114.2, // Nevada/Arizona border
 };
 
 // Grid spacing: ~8 miles = ~0.12 degrees
