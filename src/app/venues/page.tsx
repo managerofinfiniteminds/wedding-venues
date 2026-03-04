@@ -283,6 +283,7 @@ export default async function VenuesPage({
               </div>
             ) : (
               <VenueList
+                key={JSON.stringify(params)}
                 initialVenues={venues}
                 initialTotal={totalVenues}
                 searchParams={params as Record<string, string | string[]>}
