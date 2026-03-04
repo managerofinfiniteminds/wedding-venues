@@ -14,7 +14,7 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative text-center text-white px-4 max-w-3xl mx-auto">
           <h1 className="playfair text-5xl md:text-7xl font-bold mb-4 leading-tight">
-            Venue by Vow
+            Green Bowtie
           </h1>
           <p className="text-xl md:text-2xl text-white/80 mb-8 font-light">
             Find your perfect moment in the Tri-Valley
