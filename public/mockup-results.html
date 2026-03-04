@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search Results – Venue by Vow</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f8f7f5; }
+    .playfair { font-family: 'Playfair Display', serif; }
+    .venue-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.10); background: #fff8f9; }
+    .pill-filter.active { background: #db2777; color: #fff; border-color: #db2777; }
+    .filter-section-content { overflow: hidden; transition: max-height 0.3s ease; max-height: 500px; }
+    .filter-section-content.collapsed { max-height: 0; }
+    .chevron { transition: transform 0.3s ease; }
+    .chevron.rotated { transform: rotate(180deg); }
+    .heart-btn.favorited svg { fill: #db2777; stroke: #db2777; }
+    .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .slide-panel { transform: translateX(-100%); transition: transform 0.3s ease; }
+    .slide-panel.open { transform: translateX(0); }
+    input[type=range] { accent-color: #db2777; }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- STICKY NAV -->
+<nav class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+  <div class="max-w-screen-xl mx-auto px-4 py-3 flex items-center gap-4">
+    <a href="venue-by-vow.html" class="playfair text-2xl font-bold text-pink-700 whitespace-nowrap">Venue by Vow</a>
+    <div class="flex-1 relative max-w-xl">
+      <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+      <input type="text" placeholder="Search city, venue name..." value="Livermore, CA"
+        class="w-full pl-9 pr-4 py-2 rounded-full border border-gray-300 text-sm focus:outline-none focus:border-pink-400 focus:ring-1 focus:ring-pink-300 bg-gray-50" />
+    </div>
+    <div class="flex items-center gap-3 ml-auto">
+      <button class="heart-btn text-gray-500 hover:text-pink-600 transition-colors" title="Favorites">
+        <i data-lucide="heart" class="w-5 h-5"></i>
+      </button>
+      <button class="bg-pink-700 hover:bg-pink-800 text-white text-sm font-medium px-4 py-2 rounded-full transition-colors">Sign In</button>
+    </div>
+  </div>
+</nav>
+
+<!-- MOBILE FILTER OVERLAY -->
+<div id="filter-overlay" class="fixed inset-0 bg-black/40 z-40 hidden" onclick="closeMobileFilters()"></div>
+<div id="mobile-filter-panel" class="slide-panel fixed top-0 left-0 h-full w-80 bg-white z-50 shadow-xl overflow-y-auto p-5">
+  <div class="flex justify-between items-center mb-5">
+    <span class="font-semibold text-lg">Filters</span>
+    <button onclick="closeMobileFilters()"><i data-lucide="x" class="w-5 h-5 text-gray-500"></i></button>
+  </div>
+  <div id="mobile-filter-content"></div>
+</div>
+
+<!-- MAIN -->
+<div class="max-w-screen-xl mx-auto px-4 py-5">
+
+  <!-- RESULTS HEADER -->
+  <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+    <div class="flex items-center gap-3">
+      <!-- Mobile filter button -->
+      <button onclick="openMobileFilters()" class="lg:hidden flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2 text-sm font-medium hover:border-pink-400 transition-colors bg-white">
+        <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> Filters
+      </button>
+      <span class="text-gray-600 text-sm"><span class="font-semibold text-gray-800">47 venues</span> found near Livermore, CA</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <label class="text-sm text-gray-500 whitespace-nowrap">Sort by:</label>
+      <select id="sort-select" class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-pink-400 bg-white">
+        <option>Recommended</option>
+        <option>Price: Low to High</option>
+        <option>Price: High to Low</option>
+        <option>Top Rated</option>
+        <option>Capacity</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- STYLE PILL FILTERS (mobile-friendly horizontal scroll) -->
+  <div class="flex gap-2 overflow-x-auto pb-2 mb-5 hide-scrollbar">
+    <span class="text-sm text-gray-500 whitespace-nowrap self-center mr-1">Style:</span>
+    <button class="pill-filter border border-gray-300 rounded-full px-3 py-1 text-sm whitespace-nowrap hover:border-pink-400 transition-colors bg-white" onclick="togglePill(this)">Romantic</button>
+    <button class="pill-filter border border-gray-300 rounded-full px-3 py-1 text-sm whitespace-nowrap hover:border-pink-400 transition-colors bg-white" onclick="togglePill(this)">Rustic</button>
+    <button class="pill-filter border border-gray-300 rounded-full px-3 py-1 text-sm whitespace-nowrap hover:border-pink-400 transition-colors bg-white" onclick="togglePill(this)">Modern</button>
+    <button class="pill-filter border border-gray-300 rounded-full px-3 py-1 text-sm whitespace-nowrap hover:border-pink-400 transition-colors bg-white" onclick="togglePill(this)">Garden</button>
+    <button class="pill-filter border border-gray-300 rounded-full px-3 py-1 text-sm whitespace-nowrap hover:border-pink-400 transition-colors bg-white" onclick="togglePill(this)">Boho</button>
+    <button class="pill-filter border border-gray-300 rounded-full px-3 py-1 text-sm whitespace-nowrap hover:border-pink-400 transition-colors bg-white" onclick="togglePill(this)">Industrial</button>
+    <button class="pill-filter border border-gray-300 rounded-full px-3 py-1 text-sm whitespace-nowrap hover:border-pink-400 transition-colors bg-white" onclick="togglePill(this)">Vintage</button>
+    <button class="pill-filter border border-gray-300 rounded-full px-3 py-1 text-sm whitespace-nowrap hover:border-pink-400 transition-colors bg-white" onclick="togglePill(this)">Elegant</button>
+  </div>
+
+  <!-- TWO COLUMN LAYOUT -->
+  <div class="flex gap-6 items-start">
+
+    <!-- FILTER SIDEBAR (desktop) -->
+    <aside class="hidden lg:block w-72 flex-shrink-0 bg-white rounded-2xl border border-gray-200 p-5 sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto">
+
+      <!-- City -->
+      <div class="filter-section mb-4 border-b border-gray-100 pb-4">
+        <button class="filter-toggle w-full flex justify-between items-center text-sm font-semibold text-gray-800 mb-3" onclick="toggleSection(this)">
+          City / Area <i data-lucide="chevron-down" class="w-4 h-4 chevron"></i>
+        </button>
+        <div class="filter-section-content space-y-2">
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" checked class="accent-pink-600" /> Livermore <span class="text-gray-400 ml-auto">(12)</span></label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Pleasanton <span class="text-gray-400 ml-auto">(11)</span></label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Dublin <span class="text-gray-400 ml-auto">(8)</span></label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> San Ramon <span class="text-gray-400 ml-auto">(9)</span></label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Danville <span class="text-gray-400 ml-auto">(7)</span></label>
+        </div>
+      </div>
+
+      <!-- Venue Type -->
+      <div class="filter-section mb-4 border-b border-gray-100 pb-4">
+        <button class="filter-toggle w-full flex justify-between items-center text-sm font-semibold text-gray-800 mb-3" onclick="toggleSection(this)">
+          Venue Type <i data-lucide="chevron-down" class="w-4 h-4 chevron"></i>
+        </button>
+        <div class="filter-section-content space-y-2">
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Vineyard / Winery</label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Barn / Ranch</label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Ballroom</label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Garden / Outdoor</label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Historic Estate</label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Golf Club</label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Hotel / Resort</label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Unique / Other</label>
+        </div>
+      </div>
+
+      <!-- Capacity -->
+      <div class="filter-section mb-4 border-b border-gray-100 pb-4">
+        <button class="filter-toggle w-full flex justify-between items-center text-sm font-semibold text-gray-800 mb-3" onclick="toggleSection(this)">
+          Guest Capacity <i data-lucide="chevron-down" class="w-4 h-4 chevron"></i>
+        </button>
+        <div class="filter-section-content">
+          <div class="text-sm text-pink-700 font-medium mb-2" id="capacity-label">50 – 250 guests</div>
+          <input type="range" min="0" max="500" value="50" class="w-full mb-1" oninput="updateCapacity(this.value, 'min')" />
+          <input type="range" min="0" max="500" value="250" class="w-full" oninput="updateCapacity(this.value, 'max')" />
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div class="filter-section mb-4 border-b border-gray-100 pb-4">
+        <button class="filter-toggle w-full flex justify-between items-center text-sm font-semibold text-gray-800 mb-3" onclick="toggleSection(this)">
+          Price Range <i data-lucide="chevron-down" class="w-4 h-4 chevron"></i>
+        </button>
+        <div class="filter-section-content">
+          <div class="text-sm text-pink-700 font-medium mb-2" id="price-label">$5,000 – $20,000</div>
+          <input type="range" min="0" max="30000" value="5000" step="500" class="w-full mb-1" oninput="updatePrice(this.value, 'min')" />
+          <input type="range" min="0" max="30000" value="20000" step="500" class="w-full" oninput="updatePrice(this.value, 'max')" />
+        </div>
+      </div>
+
+      <!-- What's Included -->
+      <div class="filter-section mb-4 border-b border-gray-100 pb-4">
+        <button class="filter-toggle w-full flex justify-between items-center text-sm font-semibold text-gray-800 mb-3" onclick="toggleSection(this)">
+          What's Included <i data-lucide="chevron-down" class="w-4 h-4 chevron"></i>
+        </button>
+        <div class="filter-section-content space-y-2">
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Tables &amp; Chairs</label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> In-house Catering</label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Full Bar</label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Bridal Suite</label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> On-site Coordinator</label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> Outdoor Ceremony Space</label>
+          <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="checkbox" class="accent-pink-600" /> ADA Accessible</label>
+        </div>
+      </div>
+
+      <!-- Rating -->
+      <div class="filter-section mb-4">
+        <button class="filter-toggle w-full flex justify-between items-center text-sm font-semibold text-gray-800 mb-3" onclick="toggleSection(this)">
+          Rating <i data-lucide="chevron-down" class="w-4 h-4 chevron"></i>
+        </button>
+        <div class="filter-section-content flex gap-2">
+          <button class="pill-filter border border-gray-300 rounded-full px-3 py-1 text-sm bg-white hover:border-pink-400" onclick="togglePill(this)">⭐ 4+</button>
+          <button class="pill-filter border border-gray-300 rounded-full px-3 py-1 text-sm bg-white hover:border-pink-400" onclick="togglePill(this)">⭐ 4.5+</button>
+          <button class="pill-filter border border-gray-300 rounded-full px-3 py-1 text-sm bg-white hover:border-pink-400" onclick="togglePill(this)">⭐ 5.0</button>
+        </div>
+      </div>
+
+      <button class="text-sm text-pink-600 hover:text-pink-800 underline mt-2">Clear All Filters</button>
+    </aside>
+
+    <!-- VENUE LIST -->
+    <div class="flex-1 min-w-0">
+      <div id="venue-list" class="space-y-4"></div>
+
+      <!-- Load More -->
+      <div class="text-center mt-8 pb-12">
+        <p class="text-sm text-gray-400 mb-3">Showing <span id="showing-count">10</span> of 47 venues</p>
+        <button id="load-more-btn" onclick="loadMore()" class="border-2 border-pink-600 text-pink-700 hover:bg-pink-50 font-medium px-8 py-3 rounded-full transition-colors">
+          Load More Venues
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-white border-t border-gray-200 mt-8 py-8">
+  <div class="max-w-screen-xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+    <div>
+      <span class="playfair text-xl font-bold text-pink-700">Venue by Vow</span>
+      <p class="text-gray-400 text-sm">Find your perfect moment.</p>
+    </div>
+    <div class="flex gap-5 text-sm text-gray-500">
+      <a href="#" class="hover:text-pink-600">About</a>
+      <a href="#" class="hover:text-pink-600">Privacy</a>
+      <a href="#" class="hover:text-pink-600">Contact</a>
+      <a href="#" class="hover:text-pink-600">List Your Venue</a>
+    </div>
+    <p class="text-gray-400 text-sm">© 2025 Venue by Vow</p>
+  </div>
+</footer>
+
+<script>
+// ─── VENUE DATA ───────────────────────────────────────────────────
+const venues = [
+  {
+    name: "The Wente Estate",
+    city: "Livermore", state: "CA",
+    type: "Vineyard & Winery",
+    tags: ["Romantic", "Wine Country", "Rustic Elegant"],
+    capacity: "50–250",
+    price: 8000,
+    rating: 4.9, reviews: 187,
+    desc: "Stunning vineyard setting with indoor and outdoor ceremony options in the heart of Livermore Valley wine country.",
+    amenities: ["Bridal Suite", "Outdoor Ceremony", "Full Bar"],
+    photo: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&h=280&fit=crop"
+  },
+  {
+    name: "Elliston Vineyards",
+    city: "Sunol", state: "CA",
+    type: "Garden & Vineyard",
+    tags: ["Romantic", "Garden", "Boho"],
+    capacity: "30–150",
+    price: 5500,
+    rating: 4.7, reviews: 93,
+    desc: "Intimate hillside vineyard with a romantic garden chapel and sweeping valley views.",
+    amenities: ["Garden Ceremony", "Bridal Suite", "Tables & Chairs"],
+    photo: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=280&fit=crop"
+  },
+  {
+    name: "Casa Real at Ruby Hill",
+    city: "Pleasanton", state: "CA",
+    type: "Ballroom & Garden",
+    tags: ["Elegant", "Romantic", "Modern"],
+    capacity: "100–400",
+    price: 12000,
+    rating: 4.8, reviews: 241,
+    desc: "Elegant Mediterranean-inspired estate with a grand ballroom and manicured outdoor gardens.",
+    amenities: ["Grand Ballroom", "On-site Coordinator", "Full Bar"],
+    photo: "https://images.unsplash.com/photo-1478146059778-26028b07395a?w=400&h=280&fit=crop"
+  },
+  {
+    name: "The Bridges Golf Club",
+    city: "San Ramon", state: "CA",
+    type: "Golf Club & Terrace",
+    tags: ["Modern", "Elegant", "Garden"],
+    capacity: "50–200",
+    price: 9000,
+    rating: 4.6, reviews: 78,
+    desc: "Scenic golf club terrace overlooking rolling greens, perfect for a modern outdoor celebration.",
+    amenities: ["Outdoor Terrace", "Catering Kitchen", "Parking"],
+    photo: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=400&h=280&fit=crop"
+  },
+  {
+    name: "Blackhawk Country Club",
+    city: "Danville", state: "CA",
+    type: "Country Club",
+    tags: ["Elegant", "Romantic", "Vintage"],
+    capacity: "80–300",
+    price: 11000,
+    rating: 4.8, reviews: 134,
+    desc: "Prestigious Danville country club with sweeping mountain views and refined indoor ballroom.",
+    amenities: ["Ballroom", "Full Bar", "On-site Coordinator"],
+    photo: "https://images.unsplash.com/photo-1510076857177-7470076d4098?w=400&h=280&fit=crop"
+  },
+  {
+    name: "The Purple Orchid Inn",
+    city: "Livermore", state: "CA",
+    type: "Boutique Estate",
+    tags: ["Rustic", "Boho", "Intimate"],
+    capacity: "30–100",
+    price: 4500,
+    rating: 4.5, reviews: 62,
+    desc: "Charming olive grove estate with a rustic barn and intimate courtyard for smaller weddings.",
+    amenities: ["Garden Courtyard", "Bridal Suite", "Tables & Chairs"],
+    photo: "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?w=400&h=280&fit=crop"
+  },
+  {
+    name: "Sequoia Mansion",
+    city: "Pleasanton", state: "CA",
+    type: "Historic Estate",
+    tags: ["Vintage", "Romantic", "Elegant"],
+    capacity: "50–180",
+    price: 7000,
+    rating: 4.7, reviews: 108,
+    desc: "A lovingly restored Victorian mansion with original architecture and lush private gardens.",
+    amenities: ["Garden Ceremony", "Bridal Suite", "Catering Kitchen"],
+    photo: null  // No photo
+  },
+  {
+    name: "Dublin Ranch Golf Course",
+    city: "Dublin", state: "CA",
+    type: "Golf Club & Lawn",
+    tags: ["Modern", "Garden", "Casual Elegant"],
+    capacity: "40–150",
+    price: 6000,
+    rating: 4.4, reviews: 45,
+    desc: "Casual yet elegant golf course venue with open lawn ceremony space and panoramic hills.",
+    amenities: ["Outdoor Lawn", "Full Bar", "Parking"],
+    photo: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=280&fit=crop"
+  },
+  {
+    name: "Shadow Cliff Regional Park",
+    city: "Pleasanton", state: "CA",
+    type: "Outdoor / Park",
+    tags: ["Garden", "Boho", "Rustic"],
+    capacity: "20–120",
+    price: 2500,
+    rating: 4.3, reviews: 38,
+    desc: "Natural lakeside setting with gorgeous open-air picnic facilities and affordable pricing.",
+    amenities: ["Lakeside Ceremony", "Open Lawn", "ADA Accessible"],
+    photo: null  // No photo
+  },
+  {
+    name: "Crow Canyon Country Club",
+    city: "Danville", state: "CA",
+    type: "Country Club & Garden",
+    tags: ["Elegant", "Modern", "Garden"],
+    capacity: "60–250",
+    price: 10500,
+    rating: 4.7, reviews: 89,
+    desc: "Elegant Danville club with a stunning tented terrace, manicured grounds, and full-service catering.",
+    amenities: ["Tented Terrace", "Full Bar", "On-site Coordinator"],
+    photo: "https://images.unsplash.com/photo-1532712938310-34cb3982ef74?w=400&h=280&fit=crop"
+  }
+];
+
+const extraVenues = [
+  { name: "Livermore Valley Cellars", city: "Livermore", state: "CA", type: "Winery", tags: ["Wine Country", "Rustic"], capacity: "40–180", price: 6500, rating: 4.6, reviews: 54, desc: "Boutique winery with barrel room events and vineyard lawn ceremonies.", amenities: ["Wine Cave", "Outdoor Ceremony", "Tables & Chairs"], photo: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&h=280&fit=crop" },
+  { name: "Pleasanton Hotel & Ballroom", city: "Pleasanton", state: "CA", type: "Hotel / Resort", tags: ["Modern", "Elegant"], capacity: "100–350", price: 13500, rating: 4.5, reviews: 72, desc: "Full-service hotel venue with on-site catering, accommodations, and elegant ballroom.", amenities: ["Ballroom", "Accommodations", "Full Bar"], photo: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?w=400&h=280&fit=crop" },
+  { name: "Iron Gate Ranch", city: "Dublin", state: "CA", type: "Barn / Ranch", tags: ["Rustic", "Boho", "Garden"], capacity: "50–220", price: 7500, rating: 4.8, reviews: 61, desc: "Sprawling rustic ranch with a restored barn, wildflower meadows, and golden California light.", amenities: ["Barn Reception", "Outdoor Ceremony", "Bridal Suite"], photo: null }
+];
+
+// ─── RENDER VENUE CARD ────────────────────────────────────────────
+function starsHtml(rating) {
+  return `<span class="text-yellow-400 text-sm">★</span> <span class="text-sm font-medium text-gray-800">${rating}</span>`;
+}
+
+function photoHtml(venue) {
+  if (venue.photo) {
+    return `<img src="${venue.photo}" alt="${venue.name}" class="w-full h-full object-cover rounded-lg" loading="lazy" />`;
+  }
+  return `<div class="w-full h-full bg-gray-100 rounded-lg flex flex-col items-center justify-center text-gray-400">
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+    <span class="text-xs">No photo yet</span>
+  </div>`;
+}
+
+function renderCard(v, idx) {
+  const tagHtml = v.tags.slice(0,3).map(t => `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-2 py-0.5 rounded-full">${t}</span>`).join('');
+  const amenityHtml = v.amenities.map(a => `<span class="flex items-center gap-1 text-xs text-gray-500"><span class="text-green-500">✓</span>${a}</span>`).join('');
+  return `
+  <div class="venue-card bg-white rounded-2xl border border-gray-200 p-4 flex gap-4 cursor-pointer transition-all duration-200 group" onclick="window.open('venue-by-vow.html','_self')">
+    <!-- Photo -->
+    <div class="flex-shrink-0 w-44 h-36 overflow-hidden rounded-lg">
+      ${photoHtml(v)}
+    </div>
+    <!-- Info -->
+    <div class="flex-1 min-w-0 flex flex-col justify-between">
+      <div>
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <h3 class="font-semibold text-gray-900 group-hover:text-pink-700 transition-colors text-base leading-tight">${v.name}</h3>
+            <p class="text-gray-400 text-xs mt-0.5">${v.city}, ${v.state} · ${v.type}</p>
+          </div>
+          <button class="heart-btn flex-shrink-0 text-gray-300 hover:text-pink-500 transition-colors mt-0.5" onclick="event.stopPropagation(); toggleHeart(this)" title="Save to Favorites">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-1 mt-2">${tagHtml}</div>
+        <p class="text-gray-500 text-sm mt-2 line-clamp-2">${v.desc}</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-3 mt-3">
+        ${starsHtml(v.rating)} <span class="text-gray-400 text-xs">(${v.reviews} reviews)</span>
+        <span class="text-gray-300">·</span>
+        <span class="text-xs text-gray-500">👥 ${v.capacity} guests</span>
+        <span class="text-gray-300 hidden sm:inline">·</span>
+        <div class="hidden sm:flex flex-wrap gap-2">${amenityHtml}</div>
+      </div>
+    </div>
+    <!-- Price -->
+    <div class="flex-shrink-0 text-right hidden sm:block">
+      <p class="font-bold text-pink-700 text-lg">$${v.price.toLocaleString()}</p>
+      <p class="text-gray-400 text-xs">venue rental</p>
+    </div>
+  </div>`;
+}
+
+function skeletonCard() {
+  return `<div class="bg-white rounded-2xl border border-gray-100 p-4 flex gap-4">
+    <div class="skeleton flex-shrink-0 w-44 h-36 rounded-lg"></div>
+    <div class="flex-1 space-y-3 pt-1">
+      <div class="skeleton h-4 rounded w-2/3"></div>
+      <div class="skeleton h-3 rounded w-1/3"></div>
+      <div class="skeleton h-3 rounded w-full"></div>
+      <div class="skeleton h-3 rounded w-4/5"></div>
+    </div>
+  </div>`;
+}
+
+// ─── INIT ────────────────────────────────────────────────────────
+function renderVenues(list) {
+  const el = document.getElementById('venue-list');
+  el.innerHTML = list.map((v, i) => renderCard(v, i)).join('');
+}
+
+renderVenues(venues);
+
+// ─── LOAD MORE ───────────────────────────────────────────────────
+let loaded = false;
+function loadMore() {
+  if (loaded) return;
+  loaded = true;
+  const list = document.getElementById('venue-list');
+  const btn = document.getElementById('load-more-btn');
+  btn.disabled = true;
+  btn.textContent = 'Loading...';
+  // Show skeletons
+  const skels = document.createElement('div');
+  skels.id = 'skeletons';
+  skels.className = 'space-y-4 mt-4';
+  skels.innerHTML = skeletonCard() + skeletonCard() + skeletonCard();
+  list.appendChild(skels);
+  setTimeout(() => {
+    skels.remove();
+    extraVenues.forEach(v => {
+      const div = document.createElement('div');
+      div.innerHTML = renderCard(v);
+      list.appendChild(div.firstElementChild);
+    });
+    document.getElementById('showing-count').textContent = '13';
+    btn.textContent = 'All venues loaded';
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+  }, 900);
+}
+
+// ─── FILTER TOGGLE ───────────────────────────────────────────────
+function toggleSection(btn) {
+  const content = btn.nextElementSibling;
+  const chevron = btn.querySelector('.chevron');
+  content.classList.toggle('collapsed');
+  chevron.classList.toggle('rotated');
+}
+
+// ─── PILL FILTER ─────────────────────────────────────────────────
+function togglePill(btn) {
+  btn.classList.toggle('active');
+}
+
+// ─── HEART ───────────────────────────────────────────────────────
+function toggleHeart(btn) {
+  const svg = btn.querySelector('svg');
+  if (svg.getAttribute('fill') === 'none') {
+    svg.setAttribute('fill', '#db2777');
+    svg.setAttribute('stroke', '#db2777');
+    btn.classList.add('text-pink-500');
+  } else {
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    btn.classList.remove('text-pink-500');
+  }
+}
+
+// ─── CAPACITY LABEL ──────────────────────────────────────────────
+let capMin = 50, capMax = 250;
+function updateCapacity(val, which) {
+  if (which === 'min') capMin = parseInt(val);
+  else capMax = parseInt(val);
+  document.getElementById('capacity-label').textContent = `${capMin} – ${capMax} guests`;
+}
+
+let priceMin = 5000, priceMax = 20000;
+function updatePrice(val, which) {
+  if (which === 'min') priceMin = parseInt(val);
+  else priceMax = parseInt(val);
+  document.getElementById('price-label').textContent = `$${priceMin.toLocaleString()} – $${priceMax.toLocaleString()}`;
+}
+
+// ─── MOBILE FILTERS ──────────────────────────────────────────────
+function openMobileFilters() {
+  const panel = document.getElementById('mobile-filter-panel');
+  const overlay = document.getElementById('filter-overlay');
+  const sidebar = document.querySelector('aside').innerHTML;
+  document.getElementById('mobile-filter-content').innerHTML = sidebar;
+  panel.classList.add('open');
+  overlay.classList.remove('hidden');
+}
+function closeMobileFilters() {
+  document.getElementById('mobile-filter-panel').classList.remove('open');
+  document.getElementById('filter-overlay').classList.add('hidden');
+}
+
+// ─── LUCIDE ──────────────────────────────────────────────────────
+lucide.createIcons();
+</script>
+</body>
+</html>
