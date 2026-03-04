@@ -1,11 +1,11 @@
 
 import { prisma } from "@/lib/prisma";
-import { VenueCard } from "@/components/VenueCard";
 import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { SortSelect } from "@/components/SortSelect";
 import { MobileFilters } from "@/components/MobileFilters";
 import { Nav } from "@/components/Nav";
+import { VenueList } from "@/components/VenueList";
 
 // California regions → cities mapping (by wedding destination identity)
 const REGIONS: Record<string, string[]> = {
@@ -49,7 +49,7 @@ const VENUE_TYPES = [
   "Event Venue",
 ];
 const STYLES = ["Romantic", "Rustic", "Modern", "Garden", "Bohemian", "Industrial", "Vintage", "Elegant"];
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 24;
 
 export interface SearchParams {
   q?: string;
@@ -274,7 +274,7 @@ export default async function VenuesPage({
             {sidebarContent}
           </aside>
 
-          <main className="flex-1 min-w-0 space-y-5">
+          <main className="flex-1 min-w-0">
             {venues.length === 0 ? (
               <div className="text-center py-20 text-gray-500 bg-white rounded-2xl border border-gray-100">
                 <p className="text-lg mb-2 font-semibold">No venues found</p>
@@ -282,10 +282,11 @@ export default async function VenuesPage({
                 {hasFilters && <Link href="/venues" className="text-pink-600 hover:underline text-sm font-medium">Clear all filters</Link>}
               </div>
             ) : (
-                <>
-                    {venues.map((venue) => <VenueCard key={venue.id} venue={venue} />)}
-                    {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} currentParams={params} />}
-                </>
+              <VenueList
+                initialVenues={venues}
+                initialTotal={totalVenues}
+                searchParams={params as Record<string, string | string[]>}
+              />
             )}
           </main>
         </div>
@@ -326,42 +327,5 @@ function FilterCheckbox({ label, count, checked, href }: { label: string; count?
     )
 }
 
-function Pagination({ currentPage, totalPages, currentParams }: { currentPage: number; totalPages: number; currentParams: SearchParams; }) {
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
-  const createPageUrl = (page: number) => {
-    const params = new URLSearchParams();
-    Object.entries(currentParams).forEach(([key, value]) => {
-      if (key !== 'page') {
-        toArray(value).forEach(v => params.append(key, v));
-      }
-    });
-    if (page > 1) {
-        params.set('page', page.toString());
-    } else {
-        params.delete('page');
-    }
-    return `/venues?${params.toString()}`
-  }
-
-  return (
-    <div className="flex justify-center items-center gap-2 mt-8">
-      {currentPage > 1 && (
-        <Link href={createPageUrl(currentPage - 1)} className="px-4 py-2 text-sm border bg-white rounded-lg hover:bg-gray-50 transition-colors">Previous</Link>
-      )}
-      {/* Simplified pagination display logic */}
-      {pages.map(p => (
-        <Link 
-          key={p} 
-          href={createPageUrl(p)} 
-          className={`px-4 py-2 text-sm border rounded-lg transition-colors ${p === currentPage ? 'bg-pink-700 border-pink-700 text-white' : 'bg-white hover:bg-gray-50'}`}>
-            {p}
-        </Link>
-      ))}
-      {currentPage < totalPages && (
-        <Link href={createPageUrl(currentPage + 1)} className="px-4 py-2 text-sm border bg-white rounded-lg hover:bg-gray-50 transition-colors">Next</Link>
-      )}
-    </div>
-  )
-}
 
