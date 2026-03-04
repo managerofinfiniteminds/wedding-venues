@@ -48,7 +48,7 @@ const VENUE_TYPES = [
   "Restaurant",
   "Event Venue",
 ];
-const STYLES = ["Romantic", "Rustic", "Modern", "Garden", "Boho", "Industrial", "Vintage", "Elegant"];
+const STYLES = ["Romantic", "Rustic", "Modern", "Garden", "Bohemian", "Industrial", "Vintage", "Elegant"];
 const PAGE_SIZE = 10;
 
 export interface SearchParams {

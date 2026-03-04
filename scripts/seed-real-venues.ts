@@ -74,7 +74,7 @@ function inferStyleTags(raw: RawVenue): string[] {
   if (/modern|contemporary|urban|loft|rooftop|sleek/.test(combined)) tags.push("Modern");
   if (/garden|botanical|outdoor|nature|floral/.test(combined)) tags.push("Garden");
   if (/elegant|luxury|grand|sophisticated|upscale/.test(combined)) tags.push("Elegant");
-  if (/boho|bohemian|eclectic|whimsical/.test(combined)) tags.push("Boho");
+  if (/boho|bohemian|eclectic|whimsical/.test(combined)) tags.push("Bohemian");
   if (/vintage|historic|victorian|classic|antique/.test(combined)) tags.push("Vintage");
   if (/beach|ocean|coastal|waterfront|marina|bay/.test(combined)) tags.push("Beachside");
   if (/mountain|hillside|view|scenic|vineyard/.test(combined)) tags.push("Scenic Views");
