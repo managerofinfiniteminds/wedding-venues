@@ -52,7 +52,11 @@ export default async function StateVenuesPage({
   const cities = toArray(params.city);
   const regions = toArray(params.region);
   const regionCities = regions.flatMap((r) => stateConfig.regions[r] ?? []);
-  const effectiveCities = cities.length > 0 ? cities : regionCities;
+  // Merge city search + region filter — both apply simultaneously
+  const effectiveCities = [
+    ...cities,
+    ...regionCities.filter(c => !cities.includes(c)),
+  ];
   const types = toArray(params.type);
   const styles = toArray(params.style);
   const sort = params.sort ?? 'rating';
@@ -205,6 +209,52 @@ export default async function StateVenuesPage({
                 </Link>
             ))}
         </div>
+
+        {/* Active filter chips */}
+        {hasFilters && (
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <span className="text-xs text-gray-500 font-medium">Active:</span>
+            {q && (() => {
+              const p = new URLSearchParams();
+              [...cities].forEach(c => p.append('city', c));
+              [...regions].forEach(r => p.append('region', r));
+              [...types].forEach(t => p.append('type', t));
+              [...styles].forEach(s => p.append('style', s));
+              if (sort !== 'rating') p.set('sort', sort);
+              return (
+                <Link href={`${basePath}?${p.toString()}`}
+                  className="inline-flex items-center gap-1.5 text-xs bg-pink-50 text-pink-700 border border-pink-200 px-2.5 py-1 rounded-full hover:bg-pink-100 transition-colors">
+                  🔍 "{q}" <span className="font-bold">×</span>
+                </Link>
+              );
+            })()}
+            {cities.map(c => (
+              <Link key={c} href={buildFilterUrl(basePath, params, 'city', c)}
+                className="inline-flex items-center gap-1.5 text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded-full hover:bg-blue-100 transition-colors">
+                📍 {c} <span className="font-bold">×</span>
+              </Link>
+            ))}
+            {regions.map(r => (
+              <Link key={r} href={buildFilterUrl(basePath, params, 'region', r)}
+                className="inline-flex items-center gap-1.5 text-xs bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full hover:bg-green-100 transition-colors">
+                🗺️ {r} <span className="font-bold">×</span>
+              </Link>
+            ))}
+            {types.map(t => (
+              <Link key={t} href={buildFilterUrl(basePath, params, 'type', t)}
+                className="inline-flex items-center gap-1.5 text-xs bg-purple-50 text-purple-700 border border-purple-200 px-2.5 py-1 rounded-full hover:bg-purple-100 transition-colors">
+                🏛️ {t} <span className="font-bold">×</span>
+              </Link>
+            ))}
+            {styles.map(s => (
+              <Link key={s} href={buildFilterUrl(basePath, params, 'style', s)}
+                className="inline-flex items-center gap-1.5 text-xs bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-full hover:bg-amber-100 transition-colors">
+                ✨ {s} <span className="font-bold">×</span>
+              </Link>
+            ))}
+            <Link href={basePath} className="text-xs text-gray-400 hover:text-pink-600 underline ml-1">Clear all</Link>
+          </div>
+        )}
 
         <div className="flex gap-8 items-start">
           <aside className="hidden lg:block w-72 flex-shrink-0 bg-white rounded-2xl border border-gray-100 p-6 sticky top-24">
