@@ -91,7 +91,10 @@ export default async function VenuesPage({
   const cities = toArray(params.city);
   const regions = toArray(params.region);
   // Expand regions into city lists
-  const regionCities = regions.flatMap((r) => REGIONS[r] ?? []);
+  const allRegionCities = Object.values(REGIONS).flat();
+  const regionCities = regions.includes("Other")
+    ? [] // handled separately below
+    : regions.flatMap((r) => REGIONS[r] ?? []);
   const effectiveCities = cities.length > 0 ? cities : regionCities;
   const types = toArray(params.type);
   const styles = toArray(params.style);
@@ -111,7 +114,11 @@ export default async function VenuesPage({
         { description: { contains: q, mode: "insensitive" } },
       ],
     }),
-    ...(effectiveCities.length > 0 && { city: { in: effectiveCities } }),
+    ...(regions.includes("Other")
+      ? { city: { notIn: allRegionCities } }
+      : effectiveCities.length > 0
+      ? { city: { in: effectiveCities } }
+      : {}),
     ...(types.length > 0 && { venueType: { in: types } }),
     ...(styles.length > 0 && { styleTags: { hasSome: styles } }),
     ...(minPrice !== undefined && { baseRentalMin: { gte: minPrice } }),
@@ -159,6 +166,10 @@ export default async function VenuesPage({
       cities.reduce((sum, city) => sum + (allCityCountMap[city] ?? 0), 0),
     ])
   );
+  const allKnownCities = Object.values(REGIONS).flat();
+  const otherCount = Object.entries(allCityCountMap)
+    .filter(([city]) => !allKnownCities.includes(city))
+    .reduce((sum, [, count]) => sum + count, 0);
 
   const typeCounts = await prisma.venue.groupBy({
     by: ['venueType'],
@@ -187,6 +198,12 @@ export default async function VenuesPage({
                     href={buildFilterUrl(params, 'region', r)}
                 />
                 ))}
+                <FilterCheckbox
+                    label="Other"
+                    count={otherCount}
+                    checked={regions.includes("Other")}
+                    href={buildFilterUrl(params, 'region', 'Other')}
+                />
             </FilterSection>
 
             <FilterSection title="Venue Type">
