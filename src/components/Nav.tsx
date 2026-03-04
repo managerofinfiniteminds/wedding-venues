@@ -1,14 +1,14 @@
 import Link from "next/link";
-import Image from "next/image";
 import { CitySearch } from "./CitySearch";
 
 export function Nav({ q }: { q?: string }) {
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center gap-4">
-        <Link href="/" className="flex items-center gap-2.5 whitespace-nowrap flex-shrink-0 group">
-          <Image src="/greenbowtie.svg" alt="Green Bowtie" width={28} height={28} className="shrink-0" />
-          <span className="playfair text-xl font-bold text-green-800 leading-none">Green Bowtie</span>
+        <Link href="/" className="flex items-center gap-3 whitespace-nowrap flex-shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/greenbowtie.svg" alt="Green Bowtie logo" style={{ width: 150, height: "auto" }} />
+          <span className="playfair font-bold leading-none" style={{ color: "#3b6341", fontSize: "2.25rem" }}>Green Bowtie</span>
         </Link>
         <CitySearch currentQ={q} />
         <div className="ml-auto flex items-center gap-3">
