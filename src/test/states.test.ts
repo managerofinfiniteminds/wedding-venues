@@ -2,8 +2,8 @@ import { describe, it, expect } from "vitest";
 import { STATES, getState, getLiveStates, getComingSoonStates, getStateCities, getStateRegions } from "@/lib/states";
 
 describe("STATES config", () => {
-  it("has all 50 US states", () => {
-    expect(Object.keys(STATES).length).toBe(50);
+  it("has all 50 US states plus Puerto Rico", () => {
+    expect(Object.keys(STATES).length).toBe(51);
   });
 
   it("california is the only live state", () => {
@@ -16,9 +16,9 @@ describe("STATES config", () => {
     expect(Object.keys(STATES.california.regions).length).toBeGreaterThan(15);
   });
 
-  it("all 49 other states are coming soon", () => {
+  it("all 50 non-California entries are coming soon", () => {
     const soon = getComingSoonStates();
-    expect(soon.length).toBe(49);
+    expect(soon.length).toBe(50);
     expect(soon.every((s) => !s.live)).toBe(true);
   });
 
@@ -92,7 +92,7 @@ describe("STATES config", () => {
     const slugs = Object.keys(STATES);
     ["texas", "new-york", "florida", "colorado", "washington", "oregon",
      "arizona", "georgia", "north-carolina", "tennessee", "virginia",
-     "hawaii", "alaska", "wyoming", "vermont", "rhode-island"].forEach((s) => {
+     "hawaii", "alaska", "wyoming", "vermont", "rhode-island", "puerto-rico"].forEach((s) => {
       expect(slugs, `missing state: ${s}`).toContain(s);
     });
   });

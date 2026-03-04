@@ -443,6 +443,14 @@ export const STATES: Record<string, StateConfig> = {
     description: "Grand Teton mountain backdrops, Yellowstone country, and dude ranch elegance.",
     regions: {},
   },
+  "puerto-rico": {
+    name: "Puerto Rico",
+    abbr: "PR",
+    slug: "puerto-rico",
+    live: false,
+    description: "Caribbean beach ceremonies, historic Old San Juan haciendas, and tropical luxury resorts.",
+    regions: {},
+  },
 };
 
 // ── Helpers ──────────────────────────────────────────────────

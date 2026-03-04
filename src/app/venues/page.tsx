@@ -78,7 +78,7 @@ export default async function VenuesHubPage() {
                     <span className="text-xs font-semibold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">
                         Coming Soon
                     </span>
-                     <a href={`mailto:hello@greenbowtie.com?subject=Notify me when ${s.name} launches on Green Bowtie`} className="text-xs text-[#3b6341] hover:underline font-semibold">Notify Me</a>
+
                   </div>
                 </div>
               ))}

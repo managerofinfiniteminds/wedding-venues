@@ -1,78 +1,60 @@
-
-import { PrismaClient } from '@prisma/client';
-import fetch from 'node-fetch';
 import { config } from 'dotenv';
+import pkg from 'pg';
+const { Pool } = pkg;
 
 config();
 
-const prisma = new PrismaClient();
-
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function geocodeVenues() {
-  console.log('Starting geocoding process...');
+  const { rows: venues } = await pool.query(
+    `SELECT id, name, street, city, state FROM "Venue" WHERE "isPublished" = true AND latitude IS NULL ORDER BY id`
+  );
 
-  const venuesToGeocode = await prisma.venue.findMany({
-    where: { isPublished: true, latitude: null },
-  });
+  console.log(`Found ${venues.length} venues to geocode. ETA ~${Math.round(venues.length * 1.1 / 60)} min.`);
 
-  console.log(`Found ${venuesToGeocode.length} venues to geocode.`);
-
-  let foundCount = 0;
-  for (const [index, venue] of venuesToGeocode.entries()) {
+  let found = 0;
+  for (const [i, venue] of venues.entries()) {
     const { id, name, street, city, state } = venue;
-    
-    // First attempt: with street address
-    let query = street ? `${street}, ${city}, ${state}` : `${name}, ${city}, CA`;
-    let url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
 
-    try {
-      const response = await fetch(url, { headers: { 'User-Agent': 'GreenBowtie/1.0' } });
-      const data = await response.json() as any[];
+    // Attempt 1: street address
+    let q = street ? `${street}, ${city}, ${state}` : `${name}, ${city}, CA`;
+    let result = await nominatim(q);
 
-      let result = data?.[0];
-
-      // Second attempt: just name and city if street fails
-      if (!result && street) {
-        console.log(`[${index + 1}/${venuesToGeocode.length}] Retrying with name for: ${name}`);
-        await sleep(1100);
-        query = `${name}, ${city}, CA`;
-        url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
-        const nameResponse = await fetch(url, { headers: { 'User-Agent': 'GreenBowtie/1.0' } });
-        const nameData = await nameResponse.json() as any[];
-        result = nameData?.[0];
-      }
-
-      if (result) {
-        const { lat, lon } = result;
-        await prisma.venue.update({
-          where: { id },
-          data: { latitude: parseFloat(lat), longitude: parseFloat(lon) },
-        });
-        console.log(`[${index + 1}/${venuesToGeocode.length}] ${name} — found: ${lat}, ${lon}`);
-        foundCount++;
-      } else {
-        console.log(`[${index + 1}/${venuesToGeocode.length}] ${name} — NOT FOUND`);
-      }
-    } catch (error) {
-      console.error(`Error geocoding ${name}:`, error);
+    // Attempt 2: name + city fallback
+    if (!result && street) {
+      await sleep(1100);
+      result = await nominatim(`${name}, ${city}, CA`);
     }
 
-    await sleep(1100); // Rate limit
+    if (result) {
+      await pool.query(
+        `UPDATE "Venue" SET latitude = $1, longitude = $2 WHERE id = $3`,
+        [parseFloat(result.lat), parseFloat(result.lon), id]
+      );
+      console.log(`[${i + 1}/${venues.length}] ✓ ${name} — ${result.lat}, ${result.lon}`);
+      found++;
+    } else {
+      console.log(`[${i + 1}/${venues.length}] ✗ ${name}`);
+    }
+
+    await sleep(1100); // Nominatim rate limit: 1 req/sec
   }
 
-  console.log(`
-Geocoding complete!
-Total venues attempted: ${venuesToGeocode.length}
-Successfully geocoded: ${foundCount}
-`);
+  console.log(`\nDone. ${found}/${venues.length} geocoded.`);
+  await pool.end();
 }
 
-geocodeVenues()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+async function nominatim(query: string): Promise<{ lat: string; lon: string } | null> {
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`;
+    const res = await fetch(url, { headers: { 'User-Agent': 'GreenBowtie/1.0 hello@greenbowtie.com' } });
+    const data = await res.json() as any[];
+    return data?.[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+geocodeVenues().catch((e) => { console.error(e); process.exit(1); });
