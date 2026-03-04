@@ -18,6 +18,7 @@ model Venue {
   street    String?
   city      String
   state     String  @default("CA")
+  stateSlug String @default("california")
   zip       String?
   latitude  Float?
   longitude Float?
@@ -121,4 +122,5 @@ model Venue {
   @@index([venueType])
   @@index([priceTier])
   @@index([isPublished])
+  @@index([stateSlug])
 }
