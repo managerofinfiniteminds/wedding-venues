@@ -20,6 +20,13 @@ export default async function VenueDetailPage({
     <div className="min-h-screen bg-stone-50">
       <Nav />
 
+      {/* Back link */}
+      <div className="max-w-screen-xl mx-auto px-4 pt-4">
+        <Link href="/venues" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-pink-700 transition-colors">
+          ← Back to venues
+        </Link>
+      </div>
+
       {/* Hero */}
       <section
         className="relative h-72 md:h-96 bg-gray-200 flex items-end"
