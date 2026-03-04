@@ -7,7 +7,7 @@ export function Nav({ q }: { q?: string }) {
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center gap-4">
         <Link href="/" className="flex items-center gap-2 whitespace-nowrap flex-shrink-0">
-          <Image src="/greenbowtie.svg" alt="Green Bowtie" width={36} height={36} />
+          <Image src="/greenbowtie.svg" alt="Green Bowtie" width={32} height={32} />
           <span className="playfair text-2xl font-bold text-green-800">Green Bowtie</span>
         </Link>
         <CitySearch currentQ={q} />
