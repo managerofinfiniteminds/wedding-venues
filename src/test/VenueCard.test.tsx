@@ -88,9 +88,10 @@ describe("VenueCard", () => {
     expect(screen.getByText("Test Vineyard")).toBeInTheDocument();
   });
 
-  it("renders city and state", () => {
+  it("renders city and state via address line", () => {
     render(<VenueCard venue={baseVenue} />);
-    expect(screen.getByText(/Livermore, CA · Vineyard & Winery/)).toBeInTheDocument();
+    // Address is now shown as a clickable location link
+    expect(screen.getByText(/123 Wine Rd, Livermore, CA/)).toBeInTheDocument();
   });
 
   it("renders venue type", () => {
@@ -104,9 +105,10 @@ describe("VenueCard", () => {
     expect(screen.getByText("Rustic")).toBeInTheDocument();
   });
 
-  it("renders price when available", () => {
+  it("does not render pricing (not populated in data)", () => {
     render(<VenueCard venue={baseVenue} />);
-    expect(screen.getByText("$8,000")).toBeInTheDocument();
+    // Pricing removed from card — no pricing data in DB
+    expect(screen.queryByText("$8,000")).not.toBeInTheDocument();
   });
 
   it("renders rating when available", () => {
@@ -137,10 +139,10 @@ describe("VenueCard", () => {
     expect(screen.getByText(/50.*200 guests/)).toBeInTheDocument();
   });
 
-  it("renders amenity checks for bridal suite", () => {
+  it("does not render amenities section (no amenity data in DB)", () => {
     render(<VenueCard venue={baseVenue} />);
-    // Bridal Suite shows in collapsed meta row
-    expect(screen.getByText(/Bridal Suite/)).toBeInTheDocument();
+    // Amenities removed from card — zero venues have amenity data
+    expect(screen.queryByText(/Bridal Suite/)).not.toBeInTheDocument();
   });
 
   it("is clickable and expandable (no nav link — inline expand)", () => {
