@@ -108,6 +108,7 @@ export default async function VenuesPage({
   if (sort === 'capacity') orderBy.push({ maxGuests: { sort: 'desc', nulls: 'last' } });
 
   const totalVenues = await prisma.venue.count({ where });
+  const grandTotal = await prisma.venue.count({ where: { isPublished: true } });
   const venues = await prisma.venue.findMany({
     where,
     orderBy,
@@ -181,7 +182,8 @@ export default async function VenuesPage({
       <div className="max-w-screen-xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-4">
           <p className="text-gray-600 text-sm">
-            Showing <span className="font-semibold text-gray-800">{venues.length}</span> of <span className="font-semibold text-gray-800">{totalVenues}</span> venues
+            Showing <span className="font-semibold text-gray-800">{venues.length}</span> of <span className="font-semibold text-gray-800">{totalVenues.toLocaleString()}</span> venues
+            {hasFilters && <span className="text-gray-400"> · {grandTotal.toLocaleString()} total in CA</span>}
           </p>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
