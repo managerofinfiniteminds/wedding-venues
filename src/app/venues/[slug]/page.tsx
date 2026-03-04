@@ -59,12 +59,10 @@ export default async function VenueDetailPage({
               <p className="font-semibold text-gray-800">{venue.minGuests ?? "?"}&ndash;{venue.maxGuests} guests</p>
             </div>
           )}
-          {venue.baseRentalMin && (
-            <div>
-              <p className="text-gray-500">Starting From</p>
-              <p className="font-semibold text-pink-700">${venue.baseRentalMin.toLocaleString()}</p>
+          <div>
+              <p className="text-gray-500">Pricing</p>
+              <p className="font-semibold text-gray-800">Contact for rates</p>
             </div>
-          )}
           {venue.earliestStart && venue.latestEnd && (
             <div>
               <p className="text-gray-500">Event Hours</p>
@@ -120,91 +118,42 @@ export default async function VenueDetailPage({
           </section>
 
           {/* Pricing */}
-          {venue.baseRentalMin && (
-            <section className="bg-white rounded-2xl border border-gray-200 p-6">
-              <h2 className="playfair text-2xl font-semibold text-gray-800 mb-4">Pricing</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                <div className="border border-gray-200 rounded-xl p-4 text-center">
-                  <p className="text-gray-500 text-sm mb-1">Weekday</p>
-                  <p className="text-2xl font-bold text-pink-700">${venue.baseRentalMin.toLocaleString()}</p>
-                  <p className="text-gray-400 text-xs">venue rental</p>
-                </div>
-                <div className="border-2 border-pink-200 rounded-xl p-4 text-center bg-pink-50/30">
-                  <p className="text-gray-500 text-sm mb-1">Sunday</p>
-                  <p className="text-2xl font-bold text-pink-700">
-                    ${Math.round(((venue.baseRentalMin ?? 0) + (venue.baseRentalMax ?? 0)) / 2).toLocaleString()}
-                  </p>
-                  <p className="text-gray-400 text-xs">venue rental</p>
-                </div>
-                <div className="border border-gray-200 rounded-xl p-4 text-center">
-                  <p className="text-gray-500 text-sm mb-1">Saturday Peak</p>
-                  <p className="text-2xl font-bold text-pink-700">${(venue.baseRentalMax ?? 0).toLocaleString()}</p>
-                  <p className="text-gray-400 text-xs">venue rental</p>
-                </div>
-              </div>
-              {venue.perHeadMin && (
-                <p className="text-sm text-gray-600">
-                  🍽️ Catering estimate: ${venue.perHeadMin}–${venue.perHeadMax}/person
-                </p>
-              )}
-              {venue.depositPercent && (
-                <p className="text-sm text-gray-600 mt-1">
-                  💳 {venue.depositPercent}% deposit to hold your date
-                </p>
-              )}
-              {venue.cancellationPolicy && (
-                <p className="text-sm text-gray-600 mt-1">
-                  📋 {venue.cancellationPolicy}
-                </p>
-              )}
-            </section>
-          )}
-
-          {/* Policies */}
           <section className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h2 className="playfair text-2xl font-semibold text-gray-800 mb-4">Policies</h2>
-            <div className="space-y-2 text-sm text-gray-700">
-              <p>🎤 <strong>Vendor Policy:</strong> {venue.outsideVendorsAllowed ? "Outside vendors welcome" : "Preferred vendor list required for some categories"}</p>
-              {venue.inHouseCateringRequired && <p>🍽️ <strong>Catering:</strong> In-house catering required</p>}
-              {venue.byobPolicy && <p>🍾 <strong>BYOB:</strong> {venue.byobPolicy}</p>}
-              {venue.noiseOrdinance && <p>🔊 <strong>Noise:</strong> {venue.noiseOrdinance}</p>}
-              {venue.setupHours && <p>⏱️ <strong>Setup:</strong> {venue.setupHours} hrs before · {venue.teardownHours} hrs teardown after</p>}
-              {venue.leadTimeMonths && <p>📅 <strong>Booking lead time:</strong> {venue.leadTimeMonths}+ months recommended</p>}
-            </div>
+            <h2 className="playfair text-2xl font-semibold text-gray-800 mb-3">Pricing</h2>
+            <p className="text-gray-500 text-sm">Pricing varies by date, guest count, and package. Contact this venue directly for a quote.</p>
           </section>
         </div>
 
-        {/* Sidebar CTA */}
+        {/* Sidebar — Contact */}
         <div className="space-y-4">
           <div className="bg-pink-50 border border-pink-200 rounded-2xl p-6 sticky top-24">
-            <h3 className="playfair text-xl font-semibold text-gray-800 mb-1">Check Availability</h3>
-            <p className="text-gray-500 text-xs mb-4">Most couples book {venue.leadTimeMonths ?? 12}–{(venue.leadTimeMonths ?? 12) + 6} months in advance</p>
-            <select className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm mb-2 focus:outline-none focus:border-pink-400">
-              <option>Select Month</option>
-              {["January","February","March","April","May","June","July","August","September","October","November","December"].map((m) => <option key={m}>{m}</option>)}
-            </select>
-            <select className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm mb-4 focus:outline-none focus:border-pink-400">
-              <option>Select Year</option>
-              <option>2025</option>
-              <option>2026</option>
-              <option>2027</option>
-            </select>
-            <button className="w-full bg-pink-700 hover:bg-pink-800 text-white font-medium py-3 rounded-xl transition-colors">
-              Check Dates
-            </button>
-            <div className="mt-4 pt-4 border-t border-pink-200 text-sm text-gray-600 space-y-1">
-              <p className="font-medium text-gray-700 mb-2">Or contact us directly</p>
-              {venue.phone && <p>📞 {venue.phone}</p>}
-              {venue.email && <p>✉️ {venue.email}</p>}
-              {venue.website && (
-                <a href={venue.website} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:underline block">
-                  🌐 Visit website
+            <h3 className="playfair text-xl font-semibold text-gray-800 mb-1">Contact this Venue</h3>
+            <p className="text-gray-500 text-sm mb-4">Reach out directly to ask about availability and pricing.</p>
+            <div className="space-y-3 text-sm text-gray-700">
+              {venue.phone && (
+                <a href={`tel:${venue.phone}`} className="flex items-center gap-2 hover:text-pink-700 transition-colors">
+                  <span>📞</span>
+                  <span>{venue.phone}</span>
                 </a>
+              )}
+              {venue.email && (
+                <a href={`mailto:${venue.email}`} className="flex items-center gap-2 hover:text-pink-700 transition-colors">
+                  <span>✉️</span>
+                  <span>{venue.email}</span>
+                </a>
+              )}
+              {venue.website && (
+                <a href={venue.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-pink-600 hover:text-pink-800 hover:underline transition-colors">
+                  <span>🌐</span>
+                  <span>Visit website</span>
+                </a>
+              )}
+              {!venue.phone && !venue.email && !venue.website && (
+                <p className="text-gray-400 italic">Contact details coming soon.</p>
               )}
             </div>
           </div>
 
-          {/* Data quality note */}
           {venue.completenessScore && venue.completenessScore < 70 && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-700">
               ⚠️ Some details for this venue are still being verified. Contact them directly for the most accurate information.
