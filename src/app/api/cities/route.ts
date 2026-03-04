@@ -16,5 +16,5 @@ export async function GET(req: NextRequest) {
     take: 10,
   });
 
-  return NextResponse.json(cities.map((c) => ({ city: c.city, count: c._count.city })));
+  return NextResponse.json(cities.map((c: { city: string; _count: { city: number } }) => ({ city: c.city, count: c._count.city })));
 }
