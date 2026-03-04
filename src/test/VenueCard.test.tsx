@@ -79,6 +79,9 @@ const baseVenue: Venue = {
   dataSource: null,
   completenessScore: 90,
   isPublished: true,
+  stateSlug: "california",
+  latitude: null,
+  longitude: null,
   description: "A beautiful test vineyard in the hills.",
 };
 
