@@ -33,13 +33,13 @@ export function CitySearch({ currentQ }: { currentQ?: string }) {
   const selectCity = (city: string) => {
     setQuery(city);
     setOpen(false);
-    router.push(`/venues?city=${encodeURIComponent(city)}`);
+    router.push(`/venues/california?city=${encodeURIComponent(city)}`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setOpen(false);
-    router.push(`/venues?q=${encodeURIComponent(query)}`);
+    router.push(`/venues/california?q=${encodeURIComponent(query)}`);
   };
 
   return (
