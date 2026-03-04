@@ -20,7 +20,7 @@ export default async function VenuesHubPage() {
       {/* Hero */}
       <section className="py-20 md:py-28 text-center bg-gradient-to-b from-[#f0f2ef] to-[#f8f7f5]">
         <div className="max-w-3xl mx-auto px-4">
-          <h1 className="playfair text-5xl md:text-7xl font-bold text-[#3b6341]">Find Your Perfect Wedding Venue</h1>
+          <h1 className="playfair text-5xl md:text-7xl font-bold text-[#3b6341]">Find Your Perfect Wedding Venue at Green Bow Tie</h1>
           <div className="mt-8 flex justify-center">
             <Image src="/greenbowtie.svg" alt="Green Bowtie" width={200} height={80} className="h-16 w-auto" priority />
           </div>
