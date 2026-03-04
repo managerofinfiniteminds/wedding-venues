@@ -7,7 +7,7 @@ export function Footer() {
       <div className="max-w-screen-xl mx-auto px-4 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/greenbowtie.svg" alt="Green Bowtie" style={{ width: 28, height: "auto" }} />
+          <img src="/greenbowtie.svg" alt="Green Bowtie" style={{ height: 42, width: "auto" }} />
           <span className="playfair text-base font-semibold" style={{ color: "#3b6341" }}>Green Bowtie</span>
         </Link>
         <p className="text-xs text-gray-400 text-center">

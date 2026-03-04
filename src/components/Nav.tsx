@@ -7,7 +7,7 @@ export function Nav({ q }: { q?: string }) {
       <div className="max-w-screen-xl mx-auto px-4 py-2 flex items-center gap-4">
         <Link href="/" className="flex items-center gap-2.5 whitespace-nowrap flex-shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/greenbowtie.svg" alt="Green Bowtie logo" style={{ height: 40, width: "auto" }} />
+          <img src="/greenbowtie.svg" alt="Green Bowtie logo" style={{ height: 60, width: "auto" }} />
           <span className="playfair font-bold leading-none" style={{ color: "#3b6341", fontSize: "1.5rem" }}>Green Bowtie</span>
         </Link>
         <CitySearch currentQ={q} />
