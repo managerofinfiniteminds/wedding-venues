@@ -5,9 +5,10 @@ import Link from "next/link";
 import { getState } from "@/lib/states";
 import { Metadata } from "next";
 
-export async function generateMetadata({ params }: { params: { state: string, slug: string } }): Promise<Metadata> {
-    const stateConfig = getState(params.state);
-    const venue = await prisma.venue.findUnique({ where: { slug: params.slug } });
+export async function generateMetadata({ params }: { params: Promise<{ state: string, slug: string }> }): Promise<Metadata> {
+    const { state, slug } = await params;
+    const stateConfig = getState(state);
+    const venue = await prisma.venue.findUnique({ where: { slug } });
 
     if (!stateConfig || !venue) {
         return { title: "Not Found" };

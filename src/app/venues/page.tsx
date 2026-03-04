@@ -2,7 +2,7 @@
 import { getLiveStates, getComingSoonStates } from "@/lib/states";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import Image from "next/image";
+
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -35,11 +35,11 @@ export default async function VenuesHubPage() {
                 return (
                   <Link key={s.slug} href={`/venues/${s.slug}`} className="block bg-white rounded-2xl border-2 border-[#3b6341] shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden group">
                      <div className="relative h-48">
-                        <Image
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
                             src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop&crop=center"
                             alt={`Scenery of ${s.name}`}
-                            layout="fill"
-                            objectFit="cover"
+                            className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"/>
                      </div>

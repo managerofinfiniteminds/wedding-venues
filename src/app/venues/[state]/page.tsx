@@ -11,8 +11,9 @@ import { VENUE_TYPES, STYLES, PAGE_SIZE, toArray, buildFilterUrl, VenueSearchPar
 import { notFound, redirect } from "next/navigation";
 import { Metadata } from "next";
 
-export async function generateMetadata({ params }: { params: { state: string } }): Promise<Metadata> {
-    const stateConfig = getState(params.state);
+export async function generateMetadata({ params }: { params: Promise<{ state: string }> }): Promise<Metadata> {
+    const { state } = await params;
+    const stateConfig = getState(state);
     if (!stateConfig) {
         return { title: "Wedding Venues | Green Bowtie" };
     }
@@ -28,12 +29,13 @@ export async function generateMetadata({ params }: { params: { state: string } }
 }
 
 export default async function StateVenuesPage({
-  params: { state },
+  params: rawParams,
   searchParams,
 }: {
-  params: { state: string };
+  params: Promise<{ state: string }>;
   searchParams: Promise<VenueSearchParams>;
 }) {
+  const { state } = await rawParams;
   const stateConfig = getState(state);
   if (!stateConfig) {
     // Legacy URL: /venues/[slug] — treat as a CA venue slug and redirect
