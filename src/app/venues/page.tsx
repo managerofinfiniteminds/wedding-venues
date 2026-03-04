@@ -87,17 +87,7 @@ export default async function VenuesHubPage() {
         </section>
       )}
 
-      {/* Bottom CTA */}
-      <section className="py-20 text-center">
-         <div className="max-w-xl mx-auto px-4">
-            <h3 className="text-2xl font-bold text-gray-800 mb-2">Don't see your state?</h3>
-            <p className="text-gray-600 mb-4">Tell us where to go next! We prioritize new states based on demand.</p>
-            <a href="mailto:hello@greenbowtie.com?subject=Green Bowtie Expansion Request" 
-               className="bg-[#be185d] text-white font-semibold px-6 py-3 rounded-lg hover:bg-opacity-90 transition-colors">
-                Request a State
-            </a>
-         </div>
-      </section>
+
 
     </div>
   );
