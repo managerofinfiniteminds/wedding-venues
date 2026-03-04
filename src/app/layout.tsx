@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Venue by Vow — Tri-Valley Wedding Venues",
+  title: "Green Bowtie — California Wedding Venues",
   description: "Find and book the perfect wedding venue in Livermore, Pleasanton, Dublin, San Ramon, and Danville.",
 };
 
