@@ -2,6 +2,7 @@
 import { getLiveStates, getComingSoonStates } from "@/lib/states";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import Image from "next/image";
 
 import { Metadata } from "next";
 
@@ -20,7 +21,10 @@ export default async function VenuesHubPage() {
       <section className="py-20 md:py-28 text-center bg-gradient-to-b from-[#f0f2ef] to-[#f8f7f5]">
         <div className="max-w-3xl mx-auto px-4">
           <h1 className="playfair text-5xl md:text-7xl font-bold text-[#3b6341]">Find Your Perfect Wedding Venue</h1>
-          <p className="mt-4 text-lg md:text-xl text-gray-600">Your comprehensive guide to wedding venues across the United States.</p>
+          <div className="mt-8 flex justify-center">
+            <Image src="/greenbowtie.svg" alt="Green Bowtie" width={200} height={80} className="h-16 w-auto" priority />
+          </div>
+          <p className="mt-6 text-lg md:text-xl text-gray-600">Your comprehensive guide to wedding venues across the United States.</p>
         </div>
       </section>
 
