@@ -7,6 +7,7 @@ import { SortSelect } from "@/components/SortSelect";
 import { MobileFilters } from "@/components/MobileFilters";
 import { VenueList } from "@/components/VenueList";
 import { getState } from "@/lib/states";
+import { PinIcon } from "@/components/Nav";
 import { VENUE_TYPES, STYLES, PAGE_SIZE, toArray, buildFilterUrl, VenueSearchParams } from "@/lib/venueFilters";
 import { notFound, redirect } from "next/navigation";
 import { Metadata } from "next";
@@ -158,20 +159,37 @@ export default async function StateVenuesPage({
   );
 
   return (
+    <>
     <div className="min-h-screen bg-[#f8f7f5]">
       <MobileFilters>{sidebarContent}</MobileFilters>
 
       <div className="max-w-screen-xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <p className="text-gray-600 text-sm">
             Showing <span className="font-semibold text-gray-800">{venues.length}</span> of <span className="font-semibold text-gray-800">{totalVenues.toLocaleString()}</span> venues in {stateConfig.name}
           </p>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-                <label htmlFor="sort" className="text-sm text-gray-600">Sort by:</label>
-                <SortSelect current={sort} />
+          <div className="flex items-center gap-3">
+            {/* List / Map toggle */}
+            <div className="flex items-center rounded-lg border border-gray-200 overflow-hidden text-sm font-medium">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[#3b6341] text-white">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                </svg>
+                List
+              </span>
+              <Link
+                href="/map"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-600 hover:bg-green-50 hover:text-[#3b6341] transition-colors"
+              >
+                <PinIcon className="w-4 h-4" />
+                Map
+              </Link>
             </div>
-           </div>
+            <div className="flex items-center gap-2">
+              <label htmlFor="sort" className="text-sm text-gray-600 hidden sm:block">Sort:</label>
+              <SortSelect current={sort} />
+            </div>
+          </div>
         </div>
         
         <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-5 -mx-4 px-4">
@@ -212,6 +230,16 @@ export default async function StateVenuesPage({
         </div>
       </div>
     </div>
+
+    {/* Floating Map button */}
+    <Link
+      href="/map"
+      className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-[#3b6341] text-white text-sm font-semibold px-4 py-3 rounded-full shadow-lg hover:bg-[#2f5035] transition-all hover:shadow-xl hover:scale-105 active:scale-95"
+    >
+      <PinIcon className="w-5 h-5" />
+      View Map
+    </Link>
+    </>
   );
 }
 
