@@ -129,12 +129,32 @@ export function VenueMap({ venues }: { venues: MapVenue[] }) {
     // Add markers
     venues.forEach((venue) => {
       if (!venue.latitude || !venue.longitude) return;
-      L.marker([venue.latitude, venue.longitude], { icon: greenPin() })
-        .addTo(map)
-        .bindPopup(buildPopupHtml(venue), {
-          maxWidth: 284,
-          className: "gb-popup",
-        });
+      const marker = L.marker([venue.latitude, venue.longitude], { icon: greenPin() })
+        .addTo(map);
+
+      // Hover: lightweight tooltip
+      marker.bindTooltip(
+        `<div style="font-family:Inter,sans-serif;font-size:12px;line-height:1.4;padding:2px 4px;">
+          <strong style="font-size:13px;color:#111827;">${venue.name}</strong><br/>
+          <span style="color:#6b7280;">${venue.city} · ${venue.venueType}</span>
+          ${venue.googleRating
+            ? `<br/><span style="color:#f59e0b;">★</span> <strong>${venue.googleRating}</strong> <span style="color:#9ca3af;">(${venue.googleReviews?.toLocaleString()})</span>`
+            : ""}
+        </div>`,
+        { direction: "top", offset: [0, -32], opacity: 0.97, className: "gb-tooltip" }
+      );
+
+      // Click: full contact card popup
+      marker.bindPopup(buildPopupHtml(venue), {
+        maxWidth: 284,
+        className: "gb-popup",
+      });
+
+      // Open popup on click, close tooltip while popup is open
+      marker.on("click", () => {
+        marker.closeTooltip();
+        marker.openPopup();
+      });
     });
 
     // Fit bounds if we have venues
@@ -154,12 +174,19 @@ export function VenueMap({ venues }: { venues: MapVenue[] }) {
           padding: 12px;
           box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
-        .gb-popup .leaflet-popup-content {
-          margin: 0;
+        .gb-popup .leaflet-popup-content { margin: 0; }
+        .gb-popup .leaflet-popup-tip-container { margin-top: -1px; }
+
+        .gb-tooltip {
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+          padding: 6px 10px;
+          white-space: nowrap;
         }
-        .gb-popup .leaflet-popup-tip-container {
-          margin-top: -1px;
-        }
+        .gb-tooltip::before { display: none; }
+        .leaflet-tooltip.gb-tooltip { color: inherit; }
       `}</style>
       <div ref={containerRef} style={{ height: "calc(100vh - 120px)", width: "100%" }} />
     </>
