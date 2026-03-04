@@ -25,6 +25,10 @@ async function getMapVenues() {
       longitude: true,
       phone: true,
       website: true,
+      street: true,
+      state: true,
+      zip: true,
+      googleReviews: true,
     },
   });
   return venues;

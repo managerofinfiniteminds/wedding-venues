@@ -25,6 +25,10 @@ export async function GET(request: Request) {
       longitude: true,
       phone: true,
       website: true,
+      street: true,
+      state: true,
+      zip: true,
+      googleReviews: true,
     }
   });
 
