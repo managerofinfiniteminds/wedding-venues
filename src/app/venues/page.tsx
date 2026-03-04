@@ -7,6 +7,19 @@ import { SortSelect } from "@/components/SortSelect";
 import { MobileFilters } from "@/components/MobileFilters";
 import { Nav } from "@/components/Nav";
 
+// California regions → cities mapping
+const REGIONS: Record<string, string[]> = {
+  "Bay Area": ["San Francisco", "Oakland", "San Jose", "Berkeley", "Palo Alto", "Sausalito", "Tiburon", "Mill Valley", "Marin", "Walnut Creek", "Fremont", "Hayward", "San Mateo", "Burlingame", "Half Moon Bay", "Santa Cruz", "Los Gatos", "Saratoga", "Campbell", "Morgan Hill", "Gilroy", "Los Altos", "Menlo Park", "Sunnyvale", "Santa Clara", "Mountain View", "Redwood City", "San Ramon", "Danville", "Pleasanton", "Livermore", "Dublin", "Alamo", "Lafayette", "Orinda", "Concord", "Walnut Creek"],
+  "Wine Country": ["Napa", "Sonoma", "Healdsburg", "St Helena", "Calistoga", "Yountville", "Santa Rosa", "Petaluma", "Sebastopol", "Windsor", "Cloverdale", "Hopland", "Boonville"],
+  "Los Angeles": ["Los Angeles", "Beverly Hills", "Malibu", "Santa Monica", "Pasadena", "Long Beach", "Burbank", "Glendale", "West Hollywood", "Culver City", "Manhattan Beach", "Redondo Beach", "Torrance", "Anaheim", "Irvine", "Fullerton", "Santa Ana", "Orange", "Huntington Beach", "Newport Beach", "Laguna Beach", "Dana Point", "San Clemente", "Rancho Cucamonga", "Pomona", "Claremont", "Upland", "Ontario", "Riverside"],
+  "San Diego": ["San Diego", "La Jolla", "Del Mar", "Coronado", "Chula Vista", "Escondido", "Carlsbad", "Encinitas", "Solana Beach", "Oceanside", "Temecula", "Fallbrook", "Rancho Santa Fe"],
+  "Central Coast": ["Santa Barbara", "Montecito", "Solvang", "Paso Robles", "San Luis Obispo", "Pismo Beach", "Carmel", "Monterey", "Pacific Grove", "Big Sur", "Cambria"],
+  "Desert": ["Palm Springs", "Palm Desert", "Rancho Mirage", "La Quinta", "Joshua Tree", "Yucca Valley"],
+  "Sacramento": ["Sacramento", "Folsom", "El Dorado Hills", "Roseville", "Granite Bay", "Davis", "Woodland", "Auburn", "Grass Valley", "Nevada City"],
+  "Central Valley": ["Fresno", "Bakersfield", "Stockton", "Modesto", "Visalia", "Madera", "Chico", "Redding"],
+  "Lake Tahoe": ["South Lake Tahoe", "Tahoe City", "Truckee", "Olympic Valley", "Kings Beach"],
+};
+
 const VENUE_TYPES = [
   "Vineyard & Winery",
   "Barn / Ranch",
@@ -29,6 +42,7 @@ const PAGE_SIZE = 10;
 export interface SearchParams {
   q?: string;
   city?: string | string[];
+  region?: string | string[];
   type?: string | string[];
   style?: string | string[];
   minPrice?: string;
@@ -74,6 +88,10 @@ export default async function VenuesPage({
   const params = await searchParams;
   const q = params.q;
   const cities = toArray(params.city);
+  const regions = toArray(params.region);
+  // Expand regions into city lists
+  const regionCities = regions.flatMap((r) => REGIONS[r] ?? []);
+  const effectiveCities = cities.length > 0 ? cities : regionCities;
   const types = toArray(params.type);
   const styles = toArray(params.style);
   const minPrice = params.minPrice ? parseInt(params.minPrice) : undefined;
@@ -92,7 +110,7 @@ export default async function VenuesPage({
         { description: { contains: q, mode: "insensitive" } },
       ],
     }),
-    ...(cities.length > 0 && { city: { in: cities } }),
+    ...(effectiveCities.length > 0 && { city: { in: effectiveCities } }),
     ...(types.length > 0 && { venueType: { in: types } }),
     ...(styles.length > 0 && { styleTags: { hasSome: styles } }),
     ...(minPrice !== undefined && { baseRentalMin: { gte: minPrice } }),
@@ -134,7 +152,7 @@ export default async function VenuesPage({
   });
   const typeCountMap = Object.fromEntries(typeCounts.map(t => [t.venueType, t._count.venueType]));
 
-  const hasFilters = q || cities.length > 0 || types.length > 0 || styles.length > 0 || minPrice || maxPrice || minGuests || maxGuests;
+  const hasFilters = q || cities.length > 0 || regions.length > 0 || types.length > 0 || styles.length > 0 || minPrice || maxPrice || minGuests || maxGuests;
   const totalPages = Math.ceil(totalVenues / PAGE_SIZE);
 
   const sidebarContent = (
@@ -144,14 +162,13 @@ export default async function VenuesPage({
             {hasFilters && <Link href="/venues" className="text-xs text-pink-600 hover:underline">Clear all</Link>}
         </div>
         <div className="space-y-4">
-            <FilterSection title="City">
-                {CITIES.map((c) => (
+            <FilterSection title="Region">
+                {Object.keys(REGIONS).map((r) => (
                 <FilterCheckbox
-                    key={c}
-                    label={c}
-                    count={cityCountMap[c]}
-                    checked={cities.includes(c)}
-                    href={buildFilterUrl(params, 'city', c)}
+                    key={r}
+                    label={r}
+                    checked={regions.includes(r)}
+                    href={buildFilterUrl(params, 'region', r)}
                 />
                 ))}
             </FilterSection>
