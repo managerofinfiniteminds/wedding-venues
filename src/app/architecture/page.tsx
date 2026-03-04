@@ -3,6 +3,10 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Architecture & Tech Stack",
   description: "Green Bowtie technology architecture — stack, infrastructure, testing, CI/CD pipeline, and data pipeline overview.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function ArchitecturePage() {
