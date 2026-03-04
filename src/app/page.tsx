@@ -26,7 +26,7 @@ export default function HomePage() {
               type="text"
               name="city"
               placeholder="Search by city (e.g. Livermore)..."
-              className="flex-1 px-5 py-3 rounded-full text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+              className="flex-1 px-5 py-3 rounded-full text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white shadow-lg"
             />
             <button
               type="submit"
