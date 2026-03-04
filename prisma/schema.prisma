@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Venue {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Basic Info
+  name      String
+  slug      String  @unique
+  street    String?
+  city      String
+  state     String  @default("CA")
+  zip       String?
+  website   String?
+  phone     String?
+  email     String?
+  instagram String?
+  facebook  String?
+  tiktok    String?
+
+  // Type & Style
+  venueType String
+  styleTags String[]
+
+  // Capacity
+  minGuests    Int?
+  maxGuests    Int?
+  seatedMax    Int?
+  standingMax  Int?
+  ceremonyOnly Boolean @default(false)
+
+  // Pricing
+  baseRentalMin   Int?
+  baseRentalMax   Int?
+  priceTier       String? // "budget" | "moderate" | "luxury"
+  perHeadMin      Int?
+  perHeadMax      Int?
+  depositPercent  Int?
+  peakPricing     Boolean @default(false)
+  offPeakDiscount Boolean @default(false)
+  allInclusive    Boolean @default(false)
+
+  // Spaces
+  spacesDescription String?
+  hasBridalSuite    Boolean @default(false)
+  hasGroomSuite     Boolean @default(false)
+  hasOutdoorSpace   Boolean @default(false)
+  hasIndoorSpace    Boolean @default(false)
+  parkingSpots      Int?
+
+  // What's Included
+  tablesChairsIncluded    Boolean @default(false)
+  linensIncluded          Boolean @default(false)
+  avIncluded              Boolean @default(false)
+  lightingIncluded        Boolean @default(false)
+  cateringKitchen         Boolean @default(false)
+  barSetup                Boolean @default(false)
+  onSiteCoordinator       Boolean @default(false)
+
+  // Vendor Policy
+  preferredVendorList     Boolean @default(false)
+  outsideVendorsAllowed   Boolean @default(true)
+  inHouseCateringRequired Boolean @default(false)
+  byobPolicy              String?
+
+  // Logistics
+  setupHours     Float?
+  teardownHours  Float?
+  earliestStart  String?
+  latestEnd      String?
+  noiseOrdinance String?
+  nearbyLodging  Boolean @default(false)
+
+  // Booking
+  leadTimeMonths     Int?
+  cancellationPolicy String?
+
+  // Aesthetics
+  photoTags        String[]
+  naturalLight     String? // "excellent" | "good" | "moderate" | "poor"
+  indoorOutdoorMix String?
+
+  // Accessibility
+  adaCompliant   Boolean @default(false)
+  elevatorAccess Boolean @default(false)
+
+  // Social Proof
+  googleRating       Float?
+  googleReviews      Int?
+  knotRating         Float?
+  knotReviews        Int?
+  weddingwireRating  Float?
+  weddingwireReviews Int?
+  featuredIn         String[]
+
+  // Media
+  primaryPhotoUrl String?
+  photoCount      Int?
+  virtualTourUrl  String?
+
+  // Data Quality
+  lastVerified      DateTime?
+  dataSource        String?
+  completenessScore Int?
+  isPublished       Boolean  @default(false)
+
+  // Description
+  description String?
+
+  @@index([city])
+  @@index([venueType])
+  @@index([priceTier])
+  @@index([isPublished])
+}
