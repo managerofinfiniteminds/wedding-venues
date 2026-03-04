@@ -97,3 +97,23 @@ Filters are URL-based (no client state). You can bookmark or share any filtered 
 - [ ] Venue inquiry form with email notification
 - [ ] Deploy to Cloudflare Pages
 - [ ] Expand beyond Tri-Valley
+
+## Testing
+
+This project uses [Vitest](https://vitest.dev/) for unit and component testing.
+
+To run the full test suite once:
+```bash
+npm test
+```
+
+To run tests in watch mode during development:
+```bash
+npm run test:watch
+```
+
+To generate a coverage report:
+```bash
+npm run test:coverage
+```
+The report will be available in the `coverage/` directory.

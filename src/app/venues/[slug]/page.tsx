@@ -1,32 +1,24 @@
+
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { Nav } from "@/components/Nav";
 
 export default async function VenueDetailPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
   const venue = await prisma.venue.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
   });
 
   if (!venue || !venue.isPublished) notFound();
 
   return (
     <div className="min-h-screen bg-stone-50">
-      {/* Nav */}
-      <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center gap-4">
-          <Link href="/" className="playfair text-2xl font-bold text-pink-700">
-            Venue by Vow
-          </Link>
-          <Link href="/venues" className="text-sm text-gray-500 hover:text-pink-600 ml-2 flex items-center gap-1">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-            Back to results
-          </Link>
-        </div>
-      </nav>
+      <Nav />
 
       {/* Hero */}
       <section
