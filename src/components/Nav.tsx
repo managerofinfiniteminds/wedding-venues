@@ -6,9 +6,9 @@ export function Nav({ q }: { q?: string }) {
   return (
     <nav className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center gap-4">
-        <Link href="/" className="flex items-center gap-2 whitespace-nowrap flex-shrink-0">
-          <Image src="/greenbowtie.svg" alt="Green Bowtie" width={32} height={32} />
-          <span className="playfair text-2xl font-bold text-green-800">Green Bowtie</span>
+        <Link href="/" className="flex items-center gap-2.5 whitespace-nowrap flex-shrink-0 group">
+          <Image src="/greenbowtie.svg" alt="Green Bowtie" width={28} height={28} className="shrink-0" />
+          <span className="playfair text-xl font-bold text-green-800 leading-none">Green Bowtie</span>
         </Link>
         <CitySearch currentQ={q} />
         <div className="ml-auto flex items-center gap-3">
