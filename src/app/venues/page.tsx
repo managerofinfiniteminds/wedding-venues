@@ -145,6 +145,20 @@ export default async function VenuesPage({
   const CITIES = cityCounts.map((c) => c.city).filter(Boolean);
   const cityCountMap = Object.fromEntries(cityCounts.map((c) => [c.city, c._count.city]));
 
+  // Compute region counts by summing city counts across all venues
+  const allCityCounts = await prisma.venue.groupBy({
+    by: ["city"],
+    _count: { city: true },
+    where: { isPublished: true },
+  });
+  const allCityCountMap = Object.fromEntries(allCityCounts.map((c) => [c.city, c._count.city]));
+  const regionCountMap = Object.fromEntries(
+    Object.entries(REGIONS).map(([region, cities]) => [
+      region,
+      cities.reduce((sum, city) => sum + (allCityCountMap[city] ?? 0), 0),
+    ])
+  );
+
   const typeCounts = await prisma.venue.groupBy({
     by: ['venueType'],
     _count: { venueType: true },
@@ -167,6 +181,7 @@ export default async function VenuesPage({
                 <FilterCheckbox
                     key={r}
                     label={r}
+                    count={regionCountMap[r]}
                     checked={regions.includes(r)}
                     href={buildFilterUrl(params, 'region', r)}
                 />
