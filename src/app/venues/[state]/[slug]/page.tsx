@@ -1,16 +1,37 @@
 
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { getState } from "@/lib/states";
+import { Metadata } from "next";
+
+export async function generateMetadata({ params }: { params: { state: string, slug: string } }): Promise<Metadata> {
+    const stateConfig = getState(params.state);
+    const venue = await prisma.venue.findUnique({ where: { slug: params.slug } });
+
+    if (!stateConfig || !venue) {
+        return { title: "Not Found" };
+    }
+
+    return {
+        title: `${venue.name} — ${venue.city}, ${stateConfig.abbr} Wedding Venue`,
+    };
+}
 
 export default async function VenueDetailPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ state: string, slug: string }>;
 }) {
-  const { slug } = await params;
+  const { state, slug } = await params;
+  const stateConfig = getState(state);
+
+  if (!stateConfig || !stateConfig.live) {
+    redirect(`/venues/${state}`);
+  }
+
   const venue = await prisma.venue.findUnique({
-    where: { slug },
+    where: { slug, stateSlug: state },
   });
 
   if (!venue || !venue.isPublished) notFound();
@@ -20,7 +41,7 @@ export default async function VenueDetailPage({
 
       {/* Back link */}
       <div className="max-w-screen-xl mx-auto px-4 pt-4">
-        <Link href="/venues" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-pink-700 transition-colors">
+        <Link href={`/venues/${state}`} className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-pink-700 transition-colors">
           ← Back to venues
         </Link>
       </div>
@@ -39,7 +60,7 @@ export default async function VenueDetailPage({
           <h1 className="playfair text-4xl md:text-5xl font-bold mb-2">{venue.name}</h1>
           <div className="flex flex-wrap items-center gap-3">
             <span className="bg-white text-pink-700 text-sm px-3 py-1 rounded-full font-medium">
-              {venue.city}, {venue.state}
+              {venue.city}, {stateConfig.abbr}
             </span>
             {venue.styleTags.map((tag) => (
               <span key={tag} className="bg-emerald-600/80 text-white text-sm px-3 py-1 rounded-full">
