@@ -7,18 +7,21 @@ import { SortSelect } from "@/components/SortSelect";
 import { MobileFilters } from "@/components/MobileFilters";
 import { Nav } from "@/components/Nav";
 
-const CITIES = ["Livermore", "Pleasanton", "Dublin", "San Ramon", "Danville", "Sunol"];
 const VENUE_TYPES = [
   "Vineyard & Winery",
   "Barn / Ranch",
-  "Ballroom & Garden",
-  "Golf Club & Terrace",
+  "Ballroom",
+  "Golf Club",
   "Country Club",
-  "Boutique Estate",
   "Historic Estate",
-  "Golf Club & Lawn",
+  "Resort",
+  "Hotel & Resort",
+  "Garden",
   "Outdoor / Park",
-  "Country Club & Garden",
+  "Urban / Rooftop",
+  "Museum & Gallery",
+  "Restaurant",
+  "Event Venue",
 ];
 const STYLES = ["Romantic", "Rustic", "Modern", "Garden", "Boho", "Industrial", "Vintage", "Elegant"];
 const PAGE_SIZE = 10;
@@ -112,11 +115,15 @@ export default async function VenuesPage({
     skip: (page - 1) * PAGE_SIZE,
   });
 
+  // Get top 20 cities by venue count dynamically
   const cityCounts = await prisma.venue.groupBy({
     by: ["city"],
     _count: { city: true },
-    where: { isPublished: true, city: { in: CITIES } }
+    where: { isPublished: true },
+    orderBy: { _count: { city: "desc" } },
+    take: 20,
   });
+  const CITIES = cityCounts.map((c) => c.city).filter(Boolean);
   const cityCountMap = Object.fromEntries(cityCounts.map((c) => [c.city, c._count.city]));
 
   const typeCounts = await prisma.venue.groupBy({
