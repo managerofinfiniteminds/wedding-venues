@@ -4,7 +4,6 @@ import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { SortSelect } from "@/components/SortSelect";
 import { MobileFilters } from "@/components/MobileFilters";
-import { Nav } from "@/components/Nav";
 import { VenueList } from "@/components/VenueList";
 
 // California regions → cities mapping (by wedding destination identity)
@@ -236,7 +235,6 @@ export default async function VenuesPage({
 
   return (
     <div className="min-h-screen bg-[#f8f7f5]">
-      <Nav q={q} />
       {/* MobileFilters can be adapted or simplified if needed */}
       <MobileFilters>{sidebarContent}</MobileFilters>
 

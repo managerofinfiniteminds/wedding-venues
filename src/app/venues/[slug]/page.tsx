@@ -2,7 +2,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Nav } from "@/components/Nav";
 
 export default async function VenueDetailPage({
   params,
@@ -18,7 +17,6 @@ export default async function VenueDetailPage({
 
   return (
     <div className="min-h-screen bg-stone-50">
-      <Nav />
 
       {/* Back link */}
       <div className="max-w-screen-xl mx-auto px-4 pt-4">

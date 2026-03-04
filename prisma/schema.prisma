@@ -19,6 +19,8 @@ model Venue {
   city      String
   state     String  @default("CA")
   zip       String?
+  latitude  Float?
+  longitude Float?
   website   String?
   phone     String?
   email     String?
