@@ -92,17 +92,28 @@ function namesSimilar(a: string, b: string): boolean {
 }
 
 // ── Knot scraping ────────────────────────────────────────────────────────────
+// Reuse a single context + page across all scrapes — much faster than open/close per venue
+let _sharedCtx: any = null;
+let _sharedPage: any = null;
+
+async function getSharedPage(browser: any) {
+  if (!_sharedPage) {
+    _sharedCtx  = await browser.newContext();
+    _sharedPage = await _sharedCtx.newPage();
+  }
+  return _sharedPage;
+}
+
 async function getKnotData(browser: any, url: string) {
-  const ctx  = await browser.newContext();
-  const page = await ctx.newPage();
+  const page = await getSharedPage(browser);
   try {
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 20000 });
-    await sleep(1200);
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await sleep(800); // shorter delay — domcontentloaded is faster than networkidle
     const text = await page.evaluate(() => document.body.innerText);
     if (!text || text.length < 500) return null;
     return parseKnotPage(text, url);
   } catch { return null; }
-  finally { await ctx.close(); await sleep(DELAY_MS); }
+  finally { await sleep(DELAY_MS); }
 }
 
 async function discoverKnotUrls(browser: any): Promise<Array<{name: string; url: string}>> {
@@ -159,6 +170,11 @@ async function getDBVenues() {
 }
 
 // ── Main ─────────────────────────────────────────────────────────────────────
+async function getVenueCount(): Promise<number> {
+  const result = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "Venue"`;
+  return Number(result[0].count);
+}
+
 async function main() {
   console.log('\n╔══════════════════════════════════════════════════════╗');
   console.log('║   Green Bowtie — Venue Enrichment Pipeline           ║');
@@ -167,6 +183,10 @@ async function main() {
   console.log(`  Mode:        ${DRY_RUN ? '🔍 DRY RUN (no DB writes)' : '✍️  LIVE'}`);
   console.log(`  Import new:  ${IMPORT_NEW ? 'YES — will create new venue records' : 'NO'}`);
   console.log(`  Limit:       ${LIMIT} Knot venues\n`);
+
+  // ── Safety: record count before any writes
+  const countBefore = await getVenueCount();
+  console.log(`  🛡️  Venue count before: ${countBefore}\n`);
 
   // ── Connect browser
   console.log('Connecting to browser...');
@@ -308,6 +328,21 @@ async function main() {
   console.log(`║  score=70+: ${String(results.filter(r => r.completenessScore >= 70).length).padEnd(5)} venues           ║`);
   console.log('╚══════════════════════════════════════╝\n');
 
+  // ── Safety: verify count didn't drop
+  if (!DRY_RUN) {
+    const countAfter = await getVenueCount();
+    const delta = countAfter - countBefore;
+    if (countAfter < countBefore) {
+      console.error(`\n🚨 SAFETY ALERT: Venue count DROPPED from ${countBefore} → ${countAfter}!`);
+      console.error(`   This should never happen during enrichment. Investigate immediately.`);
+      process.exit(1);
+    } else {
+      console.log(`\n  🛡️  Venue count after: ${countAfter} (${delta >= 0 ? '+' : ''}${delta} new)`);
+    }
+  }
+
+  // Close shared page/context if it was opened
+  if (_sharedPage) { try { await _sharedCtx.close(); } catch {} }
   await browser.close();
   await dbDisconnect();
   await prisma.$disconnect();
