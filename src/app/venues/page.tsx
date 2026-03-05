@@ -86,7 +86,7 @@ export default async function VenuesHubPage() {
             Find Your Perfect Wedding Venue at Green Bow Tie
           </h1>
           <div className="mt-8 flex justify-center">
-            <Image src="/greenbowtie.svg" alt="Green Bowtie" width={200} height={80} className="h-16 w-auto" priority />
+            <Image src="/greenbowtie.svg" alt="Green Bowtie" width={200} height={80} className="h-48 w-auto" priority />
           </div>
           <p className="mt-6 text-lg md:text-xl text-gray-600">
             {totalVenues.toLocaleString()} venues across all 50 states — find yours today.
