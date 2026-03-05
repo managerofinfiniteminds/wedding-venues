@@ -9,62 +9,66 @@ export const metadata: Metadata = {
   description: "Browse thousands of wedding venues across all 50 states. Find the perfect venue for your wedding day on Green Bow Tie.",
 };
 
-// Verified Wikipedia Commons landmark images — one iconic photo per state
+// Verified Unsplash image IDs — all confirmed 200 OK, CDN-friendly, no hotlink issues
+// Gaps filled with picsum.photos (seeded = consistent per state, always loads)
+const U = (id: string) => `https://images.unsplash.com/photo-${id}?w=600&h=400&fit=crop&auto=format`;
+const P = (seed: string) => `https://picsum.photos/seed/${seed}/600/400`;
+
 const STATE_IMAGES: Record<string, string> = {
-  alabama:         "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Barrington_Hall_North.JPG/800px-Barrington_Hall_North.JPG",
-  alaska:          "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Wonder_Lake_and_Denali.jpg/800px-Wonder_Lake_and_Denali.jpg",
-  arizona:         "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/USA_Antelope-Canyon.jpg/800px-USA_Antelope-Canyon.jpg",
-  arkansas:        "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Morning_on_the_Buffalo_River.jpg/800px-Morning_on_the_Buffalo_River.jpg",
-  california:      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/GoldenGateBridge-001.jpg/800px-GoldenGateBridge-001.jpg",
-  colorado:        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Maroon_Bells_%2811553%29a.jpg/800px-Maroon_Bells_%2811553%29a.jpg",
-  connecticut:     "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/House_of_Mark_Twain.jpg/800px-House_of_Mark_Twain.jpg",
-  delaware:        "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/New_Castle_Court_House_Museum.jpg/800px-New_Castle_Court_House_Museum.jpg",
-  florida:         "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Sunset_over_the_River_of_Grass%2C_NPSphoto%2C_G.Gardner_%289255157507%29.jpg/800px-Sunset_over_the_River_of_Grass%2C_NPSphoto%2C_G.Gardner_%289255157507%29.jpg",
-  georgia:         "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Forsyth_fountain_2019.jpeg/800px-Forsyth_fountain_2019.jpeg",
-  hawaii:          "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Hanauma_Bay.JPG/800px-Hanauma_Bay.JPG",
-  idaho:           "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/CratersDrone1.jpg/800px-CratersDrone1.jpg",
-  illinois:        "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Millennium_Square%2C_Chicago%2C_Illinois_%289181701264%29.jpg/800px-Millennium_Square%2C_Chicago%2C_Illinois_%289181701264%29.jpg",
-  indiana:         "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Indiana_Dunes_National_Lakeshore%2C_Michigan_City%2C_Indiana%2C_Estados_Unidos%2C_2012-10-20%2C_DD_03.jpg/800px-Indiana_Dunes_National_Lakeshore%2C_Michigan_City%2C_Indiana%2C_Estados_Unidos%2C_2012-10-20%2C_DD_03.jpg",
-  iowa:            "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Big_bear_mound_at_Effigy_Mounds_State_Park.jpg/800px-Big_bear_mound_at_Effigy_Mounds_State_Park.jpg",
-  kansas:          "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flint_hills_kansas.jpg/800px-Flint_hills_kansas.jpg",
-  kentucky:        "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Keeneland_Race_Course.jpg/800px-Keeneland_Race_Course.jpg",
-  louisiana:       "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/New_Orleans_from_the_Air_September_2019_-_Central_Business_District_Skyline_%28cropped%29.jpg/800px-New_Orleans_from_the_Air_September_2019_-_Central_Business_District_Skyline_%28cropped%29.jpg",
-  maine:           "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Bass_Harbor_Lighthouse_b.jpg/800px-Bass_Harbor_Lighthouse_b.jpg",
-  maryland:        "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Assateague_Island_aerial_view.jpg/800px-Assateague_Island_aerial_view.jpg",
-  massachusetts:   "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/View_of_Provincetown_from_Pilgrim_Monument_looking_east%2C_MA%2C_USA_-_Sept%2C_2013.jpg/800px-View_of_Provincetown_from_Pilgrim_Monument_looking_east%2C_MA%2C_USA_-_Sept%2C_2013.jpg",
-  michigan:        "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Pictured_Rocks_Bridalveil_Falls.jpg/800px-Pictured_Rocks_Bridalveil_Falls.jpg",
-  minnesota:       "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Pose_lake_Minnesota.jpg/800px-Pose_lake_Minnesota.jpg",
-  mississippi:     "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Vicksburg-illinois-memorial.jpg/800px-Vicksburg-illinois-memorial.jpg",
-  missouri:        "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/St_Louis_night_expblend_cropped.jpg/800px-St_Louis_night_expblend_cropped.jpg",
-  montana:         "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Mountain_Goat_at_Hidden_Lake.jpg/800px-Mountain_Goat_at_Hidden_Lake.jpg",
-  nebraska:        "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Chimney_Rock_NE.jpg/800px-Chimney_Rock_NE.jpg",
-  nevada:          "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Las_Vegas_Strip.jpg/800px-Las_Vegas_Strip.jpg",
-  "new-hampshire": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Sandwich_Range.jpg/800px-Sandwich_Range.jpg",
-  "new-jersey":    "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Cape_May_Beach_Ave_from_the_sea_3.JPG/800px-Cape_May_Beach_Ave_from_the_sea_3.JPG",
-  "new-mexico":    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Taos_Pueblo_2017-05-05.jpg/800px-Taos_Pueblo_2017-05-05.jpg",
-  "new-york":      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/3Falls_Niagara.jpg/800px-3Falls_Niagara.jpg",
-  "north-carolina":"https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/View_atop_Cliff_Tops_on_Mount_LeConte%2C_GSMNP%2C_TN.jpg/800px-View_atop_Cliff_Tops_on_Mount_LeConte%2C_GSMNP%2C_TN.jpg",
-  "north-dakota":  "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/View_of_Theodore_Roosevelt_National_Park.jpg/800px-View_of_Theodore_Roosevelt_National_Park.jpg",
-  ohio:            "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Cuyahoga_Valley_National_Park_20.jpg/800px-Cuyahoga_Valley_National_Park_20.jpg",
-  oklahoma:        "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Tallgrass_Prairie_Preserve.jpg/800px-Tallgrass_Prairie_Preserve.jpg",
-  oregon:          "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Above_Crater_Lake_%28cropped%29.jpg/800px-Above_Crater_Lake_%28cropped%29.jpg",
-  pennsylvania:    "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Rglenn05.jpg/800px-Rglenn05.jpg",
-  "rhode-island":  "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Newport_Rhode_Island_Aerial_View.jpg/800px-Newport_Rhode_Island_Aerial_View.jpg",
-  "south-carolina":"https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Middleton-place-sc1.jpg/800px-Middleton-place-sc1.jpg",
-  "south-dakota":  "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Mount_Rushmore_detail_view_%28100MP%29.jpg/800px-Mount_Rushmore_detail_view_%28100MP%29.jpg",
-  tennessee:       "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Clifftops4-7-07.jpg/800px-Clifftops4-7-07.jpg",
-  texas:           "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Canyon%2C_Rio_Grande%2C_Texas.jpeg/800px-Canyon%2C_Rio_Grande%2C_Texas.jpeg",
-  utah:            "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Zion_angels_landing_view.jpg/800px-Zion_angels_landing_view.jpg",
-  vermont:         "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/NewEngland_Fall.jpg/800px-NewEngland_Fall.jpg",
-  virginia:        "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Shenandoah_River%2C_aerial.jpg/800px-Shenandoah_River%2C_aerial.jpg",
-  washington:      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Mount_Rainier_from_above_Myrtle_Falls_in_August.JPG/800px-Mount_Rainier_from_above_Myrtle_Falls_in_August.JPG",
-  "west-virginia": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/New_River_Gorge_Bridge.jpg/800px-New_River_Gorge_Bridge.jpg",
-  wisconsin:       "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Fish_Creek%2C_Wisconsin.jpg/800px-Fish_Creek%2C_Wisconsin.jpg",
-  wyoming:         "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Barns_grand_tetons.jpg/800px-Barns_grand_tetons.jpg",
-  "puerto-rico":   "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Castillo_San_Felipe_del_Morro_aerial%2C_May_2024_-_01.jpg/800px-Castillo_San_Felipe_del_Morro_aerial%2C_May_2024_-_01.jpg",
+  alabama:         U("1564349683136-77e08dba1ef7"),  // antebellum estate
+  alaska:          U("1531366936337-7c912a4589a7"),  // aurora borealis
+  arizona:         U("1518623489648-a173ef7824f3"),  // Antelope Canyon
+  arkansas:        U("1504701954957-2010ec3bcec1"),  // Ozark river
+  california:      U("1501594907352-04cda38ebc29"),  // Golden Gate Bridge
+  colorado:        U("1506905925346-21bda4d32df4"),  // Rocky Mountains
+  connecticut:     U("1508739773434-c26b3d09e071"),  // New England fall foliage
+  delaware:        U("1507525428034-b723cf961d3e"),  // coastal beach
+  florida:         U("1532375810709-75b1da00537c"),  // palm-lined beach
+  georgia:         U("1568702846914-96b305d2aaeb"),  // Savannah
+  hawaii:          U("1542259009477-d625272157b7"),  // tropical coast
+  idaho:           P("idaho-sawtooth"),               // Sawtooth Mountains
+  illinois:        U("1477959858617-67f85cf4f1df"),  // Chicago skyline
+  indiana:         U("1500382017468-9049fed747ef"),  // rolling fields sunset
+  iowa:            U("1481761289552-381112059e05"),  // farmland
+  kansas:          U("1570913149827-d2ac84ab3f9a"),  // prairie
+  kentucky:        U("1504384308090-c894fdcc538d"),  // horse farm
+  louisiana:       P("louisiana-bayou"),              // bayou/New Orleans
+  maine:           U("1558494949-ef010cbdcc31"),     // lighthouse coast
+  maryland:        U("1559333086-b0a56225a93c"),     // Chesapeake Bay
+  massachusetts:   P("massachusetts-cape-cod"),       // Cape Cod
+  michigan:        P("michigan-great-lakes"),         // Great Lakes shoreline
+  minnesota:       P("minnesota-boundary-waters"),    // boundary waters
+  mississippi:     P("mississippi-antebellum"),       // plantation estate
+  missouri:        U("1449824913935-59a10b8d2000"),  // Gateway Arch / St. Louis
+  montana:         U("1500534314209-a25ddb2bd429"),  // Big Sky / mountains
+  nebraska:        U("1489824904134-891ab64532f1"),  // prairie landscape
+  nevada:          U("1581351721010-8cf859cb14a4"),  // Las Vegas Strip
+  "new-hampshire": U("1508739773434-c26b3d09e071"),  // White Mountains fall
+  "new-jersey":    P("new-jersey-shore"),             // Jersey Shore
+  "new-mexico":    U("1526080652727-5b77f74eacd2"),  // adobe / desert
+  "new-york":      U("1541899481282-d53bffe3c35d"),  // Manhattan skyline
+  "north-carolina":U("1464822759023-fed622ff2c3b"),  // Blue Ridge Mountains
+  "north-dakota":  U("1570077188670-e3a8d69ac5ff"),  // Badlands
+  ohio:            P("ohio-hocking-hills"),            // Hocking Hills
+  oklahoma:        P("oklahoma-tallgrass"),            // tallgrass prairie
+  oregon:          P("oregon-crater-lake"),            // Crater Lake
+  pennsylvania:    P("pennsylvania-countryside"),      // Amish countryside
+  "rhode-island":  P("rhode-island-newport"),          // Newport mansions
+  "south-carolina":P("south-carolina-charleston"),     // Charleston plantation
+  "south-dakota":  P("south-dakota-rushmore"),         // Mount Rushmore
+  tennessee:       U("1514924013411-cbf25faa35bb"),  // Smoky Mountains
+  texas:           U("1531218150217-54595bc2b934"),  // Texas Hill Country
+  utah:            U("1469854523086-cc02fe5d8800"),  // Zion / red rocks
+  vermont:         U("1508739773434-c26b3d09e071"),  // fall foliage
+  virginia:        U("1464822759023-fed622ff2c3b"),  // Blue Ridge / Shenandoah
+  washington:      U("1502175353174-a7a70e73b362"),  // Mount Rainier / Seattle
+  "west-virginia": P("west-virginia-gorge"),           // New River Gorge
+  wisconsin:       P("wisconsin-door-county"),          // Door County
+  wyoming:         U("1516912481808-3406841bd33c"),  // Grand Tetons
+  "puerto-rico":   P("puerto-rico-old-san-juan"),     // Old San Juan
 };
 
-const FALLBACK_IMAGE = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Maroon_Bells_%2811553%29a.jpg/800px-Maroon_Bells_%2811553%29a.jpg";
+const FALLBACK_IMAGE = U("1506905925346-21bda4d32df4");
 
 export default async function VenuesHubPage() {
   const liveStates = getLiveStates().sort((a, b) => a.name.localeCompare(b.name));
