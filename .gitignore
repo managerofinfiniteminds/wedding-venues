@@ -44,3 +44,7 @@ next-env.d.ts
 scripts/venues-all.json
 scripts/venues-full.json
 scripts/venues-raw.json
+
+# Scraper output — raw/converted venue data
+scripts/venues-*-raw.json
+scripts/venues-*-converted.json
