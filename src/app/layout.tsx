@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
-import { BetaBanner } from "@/components/BetaBanner";
+
 
 export const metadata: Metadata = {
   title: { template: "%s | Green Bowtie", default: "Green Bowtie — Wedding Venues Across the US" },
@@ -47,7 +47,7 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased bg-stone-50 text-gray-800 flex flex-col min-h-screen">
-        <BetaBanner />
+
         <Nav />
         <div className="flex-1">{children}</div>
         <Footer />
