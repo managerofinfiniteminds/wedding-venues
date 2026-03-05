@@ -274,6 +274,7 @@ export default async function StateVenuesPage({
                     initialVenues={venues}
                     initialTotal={totalVenues}
                     searchParams={params as Record<string, string | string[]>}
+                    stateSlug={state}
                 />
             )}
           </main>

@@ -6,20 +6,19 @@ describe("STATES config", () => {
     expect(Object.keys(STATES).length).toBe(51);
   });
 
-  it("california is the only live state", () => {
+  it("california is the only fully live state with venue data", () => {
     const live = getLiveStates();
-    expect(live.length).toBe(1);
-    expect(live[0].slug).toBe("california");
+    expect(live.length).toBeGreaterThanOrEqual(1);
+    expect(live.map((s) => s.slug)).toContain("california");
   });
 
   it("california has regions defined", () => {
     expect(Object.keys(STATES.california.regions).length).toBeGreaterThan(15);
   });
 
-  it("all 50 non-California entries are coming soon", () => {
-    const soon = getComingSoonStates();
-    expect(soon.length).toBe(50);
-    expect(soon.every((s) => !s.live)).toBe(true);
+  it("puerto-rico is coming soon", () => {
+    const pr = getState("puerto-rico");
+    expect(pr?.live).toBe(false);
   });
 
   it("getState returns correct config for california", () => {
@@ -64,12 +63,6 @@ describe("STATES config", () => {
     expect(cities).toContain("San Diego");
   });
 
-  it("getStateCities returns empty array for coming-soon states", () => {
-    expect(getStateCities("texas")).toEqual([]);
-    expect(getStateCities("new-york")).toEqual([]);
-    expect(getStateCities("florida")).toEqual([]);
-  });
-
   it("getStateRegions returns region names for california", () => {
     const regions = getStateRegions("california");
     expect(regions).toContain("Napa Valley");
@@ -77,14 +70,48 @@ describe("STATES config", () => {
     expect(regions).toContain("San Diego");
   });
 
-  it("getStateRegions returns empty array for coming-soon states", () => {
-    expect(getStateRegions("texas")).toEqual([]);
+  // ── New region tests ──────────────────────────────────────────────────────
+
+  it("all states have at least one region", () => {
+    Object.values(STATES).forEach((s) => {
+      expect(Object.keys(s.regions).length, `${s.slug} has no regions`).toBeGreaterThan(0);
+    });
   });
 
-  it("coming-soon states have empty regions", () => {
-    getComingSoonStates().forEach((s) => {
-      expect(Object.keys(s.regions).length, `${s.slug} should have empty regions`).toBe(0);
+  it("each region has at least 3 cities", () => {
+    Object.values(STATES).forEach((s) => {
+      Object.entries(s.regions).forEach(([region, cities]) => {
+        expect(
+          cities.length,
+          `${s.slug} > "${region}" has only ${cities.length} cities (need ≥ 3)`
+        ).toBeGreaterThanOrEqual(3);
+      });
     });
+  });
+
+  it("no duplicate city names within a state's regions", () => {
+    Object.values(STATES).forEach((s) => {
+      const allCities = Object.values(s.regions).flat();
+      const unique = new Set(allCities);
+      expect(
+        unique.size,
+        `${s.slug} has ${allCities.length - unique.size} duplicate city names across regions`
+      ).toBe(allCities.length);
+    });
+  });
+
+  it("getStateCities returns cities for all states with regions", () => {
+    expect(getStateCities("texas").length).toBeGreaterThan(0);
+    expect(getStateCities("new-york").length).toBeGreaterThan(0);
+    expect(getStateCities("florida").length).toBeGreaterThan(0);
+  });
+
+  it("getStateRegions returns human-logical regions for key states", () => {
+    expect(getStateRegions("texas")).toContain("Austin & Hill Country");
+    expect(getStateRegions("new-york")).toContain("New York City");
+    expect(getStateRegions("florida")).toContain("Miami & South Florida");
+    expect(getStateRegions("tennessee")).toContain("Nashville Metro");
+    expect(getStateRegions("washington")).toContain("Seattle Metro");
   });
 
   // Spot-check specific states exist

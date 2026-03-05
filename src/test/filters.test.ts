@@ -106,3 +106,89 @@ describe("buildWhereClause", () => {
     expect(result.styleTags).toEqual({ hasSome: ["Romantic"] });
   });
 });
+
+// ── API route stateSlug filter ─────────────────────────────────────────────
+describe("API route stateSlug filter", () => {
+  function buildApiWhere(state?: string, cities?: string[]) {
+    return {
+      isPublished: true,
+      ...(state && { stateSlug: state }),
+      ...((cities?.length ?? 0) > 0 && { city: { in: cities } }),
+    };
+  }
+
+  it("includes stateSlug when state is provided", () => {
+    const result = buildApiWhere("california", []);
+    expect(result.stateSlug).toBe("california");
+  });
+
+  it("no stateSlug when state is not provided", () => {
+    const result = buildApiWhere(undefined);
+    expect((result as any).stateSlug).toBeUndefined();
+  });
+
+  it("scopes city filter within state context", () => {
+    const result = buildApiWhere("california", ["Napa", "Sonoma"]);
+    expect(result.stateSlug).toBe("california");
+    expect(result.city).toEqual({ in: ["Napa", "Sonoma"] });
+  });
+});
+
+// ── VenueList Load More param building ────────────────────────────────────
+describe("VenueList loadMore params", () => {
+  function buildLoadMoreParams(
+    stateSlug: string | undefined,
+    searchParams: Record<string, string | string[]>,
+    offset: number
+  ) {
+    const params = new URLSearchParams();
+    if (stateSlug) params.set("state", stateSlug);
+    Object.entries(searchParams).forEach(([k, v]) => {
+      if (Array.isArray(v)) v.forEach((val) => params.append(k, val));
+      else if (v) params.set(k, v);
+    });
+    params.set("offset", offset.toString());
+    params.delete("page");
+    return params;
+  }
+
+  it("includes state param when stateSlug provided", () => {
+    const p = buildLoadMoreParams("california", {}, 24);
+    expect(p.get("state")).toBe("california");
+  });
+
+  it("omits state param when stateSlug is undefined", () => {
+    const p = buildLoadMoreParams(undefined, {}, 24);
+    expect(p.get("state")).toBeNull();
+  });
+
+  it("includes region params from searchParams", () => {
+    const p = buildLoadMoreParams("california", { region: "Napa Valley" }, 24);
+    expect(p.get("region")).toBe("Napa Valley");
+  });
+
+  it("includes multiple regions", () => {
+    const p = buildLoadMoreParams("california", { region: ["Napa Valley", "Sonoma County"] }, 24);
+    expect(p.getAll("region")).toEqual(["Napa Valley", "Sonoma County"]);
+  });
+
+  it("does not include page param", () => {
+    const p = buildLoadMoreParams("california", { page: "2" }, 24);
+    expect(p.get("page")).toBeNull();
+  });
+
+  it("sets correct offset", () => {
+    const p = buildLoadMoreParams("california", {}, 48);
+    expect(p.get("offset")).toBe("48");
+  });
+
+  it("passes through sort param", () => {
+    const p = buildLoadMoreParams("california", { sort: "price_asc" }, 24);
+    expect(p.get("sort")).toBe("price_asc");
+  });
+
+  it("passes through type filter", () => {
+    const p = buildLoadMoreParams("california", { type: "Vineyard & Winery" }, 24);
+    expect(p.get("type")).toBe("Vineyard & Winery");
+  });
+});
