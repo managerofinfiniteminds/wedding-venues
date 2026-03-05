@@ -1,98 +1,73 @@
-
-import { getLiveStates, getComingSoonStates } from "@/lib/states";
+import { getLiveStates } from "@/lib/states";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import Image from "next/image";
-
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Browse Wedding Venues by State | Green Bowtie",
-  description: "Find wedding venues across the United States. Browse California venues now, with more states coming soon on Green Bowtie.",
+  title: "Wedding Venues in Every State | Green Bow Tie",
+  description: "Browse thousands of wedding venues across all 50 states. Find the perfect venue for your wedding day on Green Bow Tie.",
 };
 
 export default async function VenuesHubPage() {
-  const liveStates = getLiveStates();
-  const comingSoonStates = getComingSoonStates();
+  const liveStates = getLiveStates().sort((a, b) => a.name.localeCompare(b.name));
+
+  // Get venue counts for all states in one query
+  const counts = await prisma.venue.groupBy({
+    by: ["stateSlug"],
+    where: { isPublished: true },
+    _count: { id: true },
+  });
+  const countMap = new Map(counts.map((c) => [c.stateSlug, c._count.id]));
+  const totalVenues = counts.reduce((sum, c) => sum + c._count.id, 0);
 
   return (
     <div className="min-h-screen bg-[#f8f7f5]">
       {/* Hero */}
       <section className="py-20 md:py-28 text-center bg-gradient-to-b from-[#f0f2ef] to-[#f8f7f5]">
         <div className="max-w-3xl mx-auto px-4">
-          <h1 className="playfair text-5xl md:text-7xl font-bold text-[#3b6341]">Find Your Perfect Wedding Venue at Green Bow Tie</h1>
+          <h1 className="playfair text-5xl md:text-7xl font-bold text-[#3b6341]">
+            Find Your Perfect Wedding Venue at Green Bow Tie
+          </h1>
           <div className="mt-8 flex justify-center">
             <Image src="/greenbowtie.svg" alt="Green Bowtie" width={200} height={80} className="h-16 w-auto" priority />
           </div>
-          <p className="mt-6 text-lg md:text-xl text-gray-600">Your comprehensive guide to wedding venues across the United States.</p>
+          <p className="mt-6 text-lg md:text-xl text-gray-600">
+            {totalVenues.toLocaleString()} venues across all 50 states — find yours today.
+          </p>
         </div>
       </section>
 
-      {/* Live States */}
-      {liveStates.length > 0 && (
-        <section className="py-16">
-          <div className="max-w-screen-xl mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl playfair font-bold text-gray-800 mb-8 text-center">Available Now</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {await Promise.all(liveStates.map(async (s) => {
-                const venueCount = await prisma.venue.count({ where: { stateSlug: s.slug, isPublished: true } });
-                return (
-                  <Link key={s.slug} href={`/venues/${s.slug}`} className="block bg-white rounded-2xl border-2 border-[#3b6341] shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden group">
-                     <div className="relative h-48">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                            src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop&crop=center"
-                            alt={`Scenery of ${s.name}`}
-                            className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"/>
-                     </div>
-                    <div className="p-6">
-                      <h3 className="playfair text-2xl font-bold text-gray-800 mb-2 group-hover:text-[#3b6341] transition-colors">{s.name}</h3>
-                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">{s.description}</p>
-                       <div className="flex justify-between items-center">
-                         <p className="text-sm text-gray-500 font-medium">{venueCount.toLocaleString()} venues</p>
-                         <div className="bg-[#3b6341] text-white text-sm font-semibold px-4 py-2 rounded-lg group-hover:bg-opacity-90 transition-all">
-                            Explore {s.name} &rarr;
-                         </div>
-                       </div>
-                    </div>
-                  </Link>
-                );
-              }))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Coming Soon States */}
-      {comingSoonStates.length > 0 && (
-        <section className="py-16 bg-[#f0f2ef]">
-          <div className="max-w-screen-xl mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl playfair font-bold text-gray-800 mb-8 text-center">Coming Soon — We're Expanding</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {comingSoonStates.map((s) => (
-                <div key={s.slug} className="bg-white border border-gray-200 rounded-2xl p-4 transition-opacity opacity-80 hover:opacity-100">
-                    <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-bold text-gray-800">{s.name}</h4>
-                        <span className="text-xs bg-gray-200 text-gray-600 font-semibold px-2 py-0.5 rounded-full">{s.abbr}</span>
-                    </div>
-                  <p className="text-gray-500 text-xs mb-3 line-clamp-2 h-8">{s.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">
-                        Coming Soon
+      {/* All States Grid */}
+      <section className="py-16">
+        <div className="max-w-screen-xl mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl playfair font-bold text-gray-800 mb-10 text-center">
+            Browse by State
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {liveStates.map((s) => {
+              const count = countMap.get(s.slug) ?? 0;
+              return (
+                <Link
+                  key={s.slug}
+                  href={`/venues/${s.slug}`}
+                  className="group bg-white border border-gray-200 hover:border-[#3b6341] rounded-2xl p-4 transition-all duration-200 hover:shadow-md"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-gray-800 group-hover:text-[#3b6341] transition-colors text-sm leading-tight">
+                      {s.name}
                     </span>
-
+                    <span className="text-xs bg-[#f0f2ef] text-[#3b6341] font-bold px-2 py-0.5 rounded-full ml-1 shrink-0">
+                      {s.abbr}
+                    </span>
                   </div>
-                </div>
-              ))}
-            </div>
+                  <p className="text-xs text-gray-500 mt-1">{count.toLocaleString()} venues</p>
+                </Link>
+              );
+            })}
           </div>
-        </section>
-      )}
-
-
-
+        </div>
+      </section>
     </div>
   );
 }
