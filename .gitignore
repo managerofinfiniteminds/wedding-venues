@@ -48,3 +48,4 @@ scripts/venues-raw.json
 # Scraper output — raw/converted venue data
 scripts/venues-*-raw.json
 scripts/venues-*-converted.json
+scripts/enrichment/results-*.json
