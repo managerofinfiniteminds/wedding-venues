@@ -82,6 +82,8 @@ export default async function StateVenuesPage({
   if (sort === 'price_asc') orderBy.push({ baseRentalMin: { sort: 'asc', nulls: 'last' } });
   if (sort === 'price_desc') orderBy.push({ baseRentalMin: { sort: 'desc', nulls: 'last' } });
   if (sort === 'capacity') orderBy.push({ maxGuests: { sort: 'desc', nulls: 'last' } });
+  // Stable tiebreaker — prevents duplicates across pages when sort values are equal
+  orderBy.push({ id: 'asc' });
 
   const totalVenues = await prisma.venue.count({ where });
   const grandTotal = await prisma.venue.count({ where: { isPublished: true, stateSlug: state } });
