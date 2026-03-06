@@ -11,12 +11,12 @@ export const metadata: Metadata = {
 
 // Curated featured states — most popular for weddings
 const FEATURED_STATES = [
-  { slug: "california",  label: "California",  image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=600&q=80&auto=format&fit=crop" },
-  { slug: "new-york",    label: "New York",    image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=600&q=80&auto=format&fit=crop" },
-  { slug: "texas",       label: "Texas",       image: "https://images.unsplash.com/photo-1531218150217-54595bc2b934?w=600&q=80&auto=format&fit=crop" },
-  { slug: "florida",     label: "Florida",     image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80&auto=format&fit=crop" },
-  { slug: "tennessee",   label: "Tennessee",   image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&auto=format&fit=crop" },
-  { slug: "colorado",    label: "Colorado",    image: "https://images.unsplash.com/photo-1539802901845-c31e4f3f4091?w=600&q=80&auto=format&fit=crop" },
+  { slug: "california",  label: "California",  image: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=600&q=85&auto=format&fit=crop" }, // vineyard rows
+  { slug: "new-york",    label: "New York",    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=85&auto=format&fit=crop" }, // Hudson Valley landscape
+  { slug: "texas",       label: "Texas",       image: "https://images.unsplash.com/photo-1523413307857-ef1e6b8c9f44?w=600&q=85&auto=format&fit=crop" }, // Texas hill country winery
+  { slug: "florida",     label: "Florida",     image: "https://images.unsplash.com/photo-1510525009512-ad7fc2a8f5f6?w=600&q=85&auto=format&fit=crop" }, // lush garden estate
+  { slug: "tennessee",   label: "Tennessee",   image: "https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?w=600&q=85&auto=format&fit=crop" }, // rolling green hills
+  { slug: "colorado",    label: "Colorado",    image: "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=600&q=85&auto=format&fit=crop" }, // mountain meadow
 ];
 
 export default async function VenuesHubPage() {
@@ -38,8 +38,8 @@ export default async function VenuesHubPage() {
         {/* Background image */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=1800&q=90&auto=format&fit=crop&crop=center"
-          alt="Wine country vineyard wedding"
+          src="https://images.unsplash.com/photo-1425421669292-0c3da3b8f529?w=1800&q=90&auto=format&fit=crop&crop=center"
+          alt="Vineyard wedding venue"
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
         {/* Light warm overlay — keeps it airy, not dark */}
