@@ -37,6 +37,18 @@ npx tsx@latest scripts/audit/pipeline.ts --photos-only --force-photos --cities l
 # Dry run (no writes)
 npx tsx@latest scripts/audit/pipeline.ts --cities livermore --dry-run`}</Pre>
 
+        <Step n="-1" title="Pre-Filter" color="#fef2f2">
+          Model: <strong>Gemini Flash 2.0</strong> (~$0.00005/venue) + <strong>free hardcoded patterns</strong><br />
+          Runs on all <em>unaudited</em> venues before Grok web search. Two-tier check:
+          <ol>
+            <li><strong>Free pattern match</strong> — venue name checked against 30+ hardcoded regex patterns (bowling, trampoline, go-kart, escape room, fast food chains, etc.). Instant reject, zero cost.</li>
+            <li><strong>LLM name screen</strong> — ambiguous cases sent to Gemini Flash for a quick yes/no based on name + existing description only. No web search. Permissive: only rejects high-confidence obvious misses.</li>
+          </ol>
+          Venues that pass are queued for Grok enrichment. Venues that fail are flagged <Code>prefilter_not_wedding</Code> and never pay for Grok.
+          <br /><br />
+          <strong>Cost saving:</strong> ~20-30% of raw scraped venues are non-wedding. Pre-filtering saves ~$1.50-2 on a California run and prevents polluting the DB with enriched go-kart track descriptions.
+        </Step>
+
         <Step n="0" title="Skip Gate" color="#e0f2fe">
           Venues processed within the last 30 days are skipped entirely. This is the core cost-control mechanism — running the pipeline twice in a week doesn't double the cost.
           <br /><br />
@@ -114,7 +126,8 @@ npx tsx@latest scripts/audit/pipeline.ts --cities livermore --dry-run`}</Pre>
           </thead>
           <tbody>
             {[
-              ["Enrich", "Grok 3 Mini :online", "~$0.001", "Only runs on venues with no description"],
+              ["Pre-filter", "Gemini Flash 2.0 + patterns", "~$0.00005", "Screens all unaudited venues; free for hardcoded pattern rejections"],
+              ["Enrich", "Grok 3 Mini :online", "~$0.001", "Only runs on venues that passed pre-filter"],
               ["Clean", "Gemini Flash 2.0", "~$0.00005", "Only runs on junk descriptions"],
               ["Re-gate", "Gemini Flash 2.0", "~$0.00008", "Skipped if pipelineProcessedAt < 30d"],
               ["Photo scoring", "Gemini Flash Vision", "~$0.002", "Up to 10 images scored; skipped if photoAuditedAt < 30d"],
@@ -298,6 +311,7 @@ R2_PUBLIC_URL=https://photos.greenbowtie.com`}</Pre>
           <tbody>
             {[
               ["✅", "3-city pilot (Livermore, Dublin, Pleasanton)", "Complete — 39 venues, all photos on R2"],
+              ["✅", "Pre-filter step — screen non-wedding venues before Grok", "Free pattern match + Gemini Flash; saves ~$1.50-2 per CA run"],
               ["✅", "Pipeline skip logic — pipelineProcessedAt", "Venues processed within 30 days skipped"],
               ["✅", "Photo R2 migration", "All 39 photos stable on Cloudflare R2"],
               ["✅", "Fix skip logic gap — never skip incomplete venues", "isComplete() check — no desc/short desc/Places photo always re-processed"],

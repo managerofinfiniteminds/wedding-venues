@@ -108,9 +108,51 @@ const isJunk  = (d: string) => d.length < 30 || JUNK_RE.some(r => r.test(d));
 const isConfirmedNonWedding = (flags: unknown) => {
   if (!Array.isArray(flags)) return false;
   return (flags as Array<{type:string}>).some(f =>
-    f.type === "manually_unpublished" || f.type === "web_search_not_wedding"
+    f.type === "manually_unpublished" || f.type === "web_search_not_wedding" ||
+    f.type === "prefilter_not_wedding"
   );
 };
+
+// ── Hardcoded name patterns — obviously not wedding venues ────────────────
+// These fire without any LLM call. Costs nothing.
+const OBVIOUS_NON_WEDDING_RE = [
+  /bowling/i, /trampoline/i, /go.?kart/i, /laser.?tag/i, /escape.?room/i,
+  /batting.?cage/i, /mini.?golf/i, /bumper.?boat/i, /amusement/i, /arcade/i,
+  /familysearch/i, /convention.?center/i, /tech.?corp/i, /archery/i,
+  /pizza\b/i, /\bburger\b/i, /\btaco\b/i, /mcdonald/i, /\bkfc\b/i,
+  /\bdenny.?s\b/i, /\bsubway\b/i, /\bapplebee/i, /\bchipotle/i,
+  /haunted.?(park|house|attraction)/i, /\bwater.?park\b/i, /\btheme.?park\b/i,
+  /kids.?(birthday|party|fun)/i, /\bpump.?it.?up\b/i, /\bchuck.?e\b/i,
+  /\bsports.?bar\b/i, /\bnight.?club\b/i, /\bstrip.?club\b/i,
+  /motocross/i, /\bracetrack\b/i, /\bskate.?park\b/i, /\bskateboard\b/i,
+  /\brock.?climbing\b/i, /\bpaintball\b/i, /\bairsoft\b/i,
+];
+
+function isObviouslyNotWedding(name: string): boolean {
+  return OBVIOUS_NON_WEDDING_RE.some(re => re.test(name));
+}
+
+// ── Step -1: LLM pre-filter (Gemini Flash, no web search, ~$0.00005/venue)
+// Screens unaudited venues by name + description before paying for Grok web search.
+async function stepPreFilter(v: { name: string; venueType: string; description: string | null }): Promise<{
+  isWedding: boolean; confidence: string; reason: string;
+}> {
+  const r = j<{ isWeddingVenue: boolean; confidence: string; reason: string }>(
+    await llm(MODEL_FAST, `Quick wedding venue pre-screen. No web search — judge only on what you know.
+
+Venue name: "${v.name}"
+Type: ${v.venueType}
+Description: ${(v.description ?? "none").slice(0, 200)}
+
+Is this plausibly a wedding venue? Use common sense — a bowling alley isn't, a vineyard is.
+Be permissive: if unsure, say YES. Only say NO if the name makes it obviously wrong.
+
+Return ONLY JSON: {"isWeddingVenue":true/false,"confidence":"high/medium/low","reason":"3-5 words"}`, 100)
+  );
+  return r
+    ? { isWedding: r.isWeddingVenue, confidence: r.confidence, reason: r.reason }
+    : { isWedding: true, confidence: "low", reason: "parse error — allow through" };
+}
 
 // ── Step 1: Enrich ────────────────────────────────────────────────────────
 type EnrichResult = Partial<Prisma.VenueUpdateInput> & { _wedding: boolean | null; _reason: string };
@@ -299,9 +341,17 @@ async function main() {
     return (v.auditFlags as Array<{type:string}>).filter(f => f.type === "enrich_uncertain").length;
   };
 
+  // Pre-filter candidates: unaudited venues with no/thin description
+  // Run cheap Gemini Flash name-screen BEFORE paying for Grok web search
+  const needsPreFilter = venues.filter(v =>
+    !confirmed.includes(v) && !recentlyProcessed(v) &&
+    !v.auditStatus && // only unaudited — skip venues already processed
+    (!v.description || v.description.trim().length < MIN_DESC_LENGTH));
+
   const needsEnrich = venues.filter(v =>
     !confirmed.includes(v) && !recentlyProcessed(v) &&
     (!v.description || v.description.trim().length < MIN_DESC_LENGTH) &&
+    v.auditStatus !== null && v.auditStatus !== undefined && // pre-filter already ran (has a status)
     uncertainAttempts(v) < 2); // stop after 2 uncertain attempts — flag for manual review
 
   const needsClean = venues.filter(v =>
@@ -327,7 +377,82 @@ async function main() {
       v.photoSource === "places" // always try to upgrade Places photos to website/R2
     ));
 
-  console.log(`📋 Queue: ${needsEnrich.length} enrich  ${needsClean.length} clean  ${needsReGate.length} re-gate  ${needsPhoto.length} photo  ${descMismatch.length} desc-mismatch\n`);
+  console.log(`📋 Queue: ${needsPreFilter.length} pre-filter  ${needsEnrich.length} enrich  ${needsClean.length} clean  ${needsReGate.length} re-gate  ${needsPhoto.length} photo  ${descMismatch.length} desc-mismatch\n`);
+
+  // ── STEP -1: PRE-FILTER ───────────────────────────────────────────────────
+  // Screens unaudited venues by name + description before paying for Grok web search.
+  // Cost: ~$0.00005/venue (Gemini Flash, no web search) vs $0.001 for Grok.
+  // Hardcoded obvious rejects fire for free (no LLM call at all).
+  if (!photosOnly && needsPreFilter.length) {
+    console.log(`🔎 Step -1 — Pre-filter (${needsPreFilter.length} unaudited venues, cheap name screen)`);
+    let rejected = 0, allowed = 0;
+    for (const v of needsPreFilter) {
+      process.stdout.write(`   ${v.name.slice(0, 48).padEnd(48)} `);
+
+      // Free hardcoded check first
+      if (isObviouslyNotWedding(v.name)) {
+        console.log(`🚫 obvious reject (name pattern)`);
+        if (!dryRun) {
+          await prisma.venue.update({ where: { id: v.id }, data: {
+            isPublished: false,
+            auditStatus: "flagged",
+            auditFlags: [...(Array.isArray(v.auditFlags) ? v.auditFlags as object[] : []),
+              { type: "prefilter_not_wedding", severity: "critical", detail: "Hardcoded name pattern match", autoFixed: true }
+            ],
+            lastAuditedAt: new Date(),
+          }});
+          if (!changed.includes(v.id)) changed.push(v.id);
+        }
+        log.push({ name: v.name, city: v.city, action: "prefilter:rejected-pattern", changes: ["isPublished"], reason: "hardcoded pattern match" });
+        rejected++;
+        continue;
+      }
+
+      // LLM screen for ambiguous cases
+      try {
+        const { isWedding, confidence, reason } = await stepPreFilter(v);
+        if (!isWedding && confidence === "high") {
+          console.log(`🚫 rejected (${reason})`);
+          if (!dryRun) {
+            await prisma.venue.update({ where: { id: v.id }, data: {
+              isPublished: false,
+              auditStatus: "flagged",
+              auditFlags: [...(Array.isArray(v.auditFlags) ? v.auditFlags as object[] : []),
+                { type: "prefilter_not_wedding", severity: "critical", detail: reason, autoFixed: true }
+              ],
+              lastAuditedAt: new Date(),
+            }});
+            if (!changed.includes(v.id)) changed.push(v.id);
+          }
+          log.push({ name: v.name, city: v.city, action: "prefilter:rejected", changes: ["isPublished"], reason });
+          rejected++;
+        } else {
+          console.log(`✓ allowed (${reason})`);
+          // Mark as needing enrich — set auditStatus so it joins needsEnrich next pass
+          if (!dryRun) {
+            await prisma.venue.update({ where: { id: v.id }, data: {
+              auditStatus: "needs_review", // placeholder — enrich will set to clean/flagged
+              lastAuditedAt: new Date(),
+            }});
+            if (!changed.includes(v.id)) changed.push(v.id);
+            // Queue for enrich this same run
+            if (!needsEnrich.find(e => e.id === v.id)) needsEnrich.push(v);
+          }
+          log.push({ name: v.name, city: v.city, action: "prefilter:allowed", changes: [], reason });
+          allowed++;
+        }
+      } catch (err) {
+        console.log(`— error, allowing through`);
+        if (!dryRun) {
+          await prisma.venue.update({ where: { id: v.id }, data: { auditStatus: "needs_review", lastAuditedAt: new Date() }});
+          if (!needsEnrich.find(e => e.id === v.id)) needsEnrich.push(v);
+        }
+        allowed++;
+      }
+      await new Promise(r => setTimeout(r, 150)); // fast — no web search
+    }
+    console.log(`   → ${allowed} allowed for enrich, ${rejected} rejected\n`);
+  }
 
   // ── STEP 0: DESCRIPTION MISMATCH ─────────────────────────────────────────
   // Clear descriptions that appear to be about a DIFFERENT venue (e.g. Par 5 got Dublin Ranch's text).
