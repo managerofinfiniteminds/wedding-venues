@@ -38,12 +38,12 @@ export default async function VenuesHubPage() {
         {/* Background image */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://images.unsplash.com/photo-1519741497674-611481863552?w=1800&q=85&auto=format&fit=crop"
-          alt="Beautiful outdoor wedding ceremony"
+          src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=1800&q=90&auto=format&fit=crop&crop=center"
+          alt="Wine country vineyard wedding"
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
-        {/* Gradient overlay — dark bottom for text legibility, lighter top */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/70" />
+        {/* Light warm overlay — keeps it airy, not dark */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/55" />
 
         {/* Hero content */}
         <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
