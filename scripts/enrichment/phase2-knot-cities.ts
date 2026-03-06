@@ -204,7 +204,7 @@ async function run() {
         processedCities.add(cityStateKey);
         currentProcessedBatch.add(cityStateKey);
         await saveProcessedCities(processedCities);
-        await sleep(1500);
+        await sleep(5000);
         continue;
       }
 
@@ -214,7 +214,7 @@ async function run() {
         processedCities.add(cityStateKey);
         currentProcessedBatch.add(cityStateKey);
         await saveProcessedCities(processedCities);
-        await sleep(1500);
+        await sleep(5000);
         continue;
       }
 
@@ -264,7 +264,7 @@ async function run() {
       processedCities.add(cityStateKey);
       currentProcessedBatch.add(cityStateKey);
       await saveProcessedCities(processedCities); // Save state after each city
-      await sleep(1500); // Delay between cities
+      await sleep(5000); // Polite delay — 5s to avoid Cloudflare rate limiting
     }
   } catch (error: any) {
     console.error('[phase2] Fatal error:', error);
