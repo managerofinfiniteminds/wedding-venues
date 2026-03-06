@@ -38,8 +38,8 @@ export default async function VenuesHubPage() {
         {/* Background image */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="https://images.unsplash.com/photo-1425421669292-0c3da3b8f529?w=1800&q=90&auto=format&fit=crop&crop=center"
-          alt="Vineyard wedding venue"
+          src="/hero-wedding.jpg"
+          alt="Beautiful wedding venue"
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
         {/* Light warm overlay — keeps it airy, not dark */}
