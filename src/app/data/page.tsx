@@ -263,6 +263,25 @@ R2_PUBLIC_URL=https://photos.greenbowtie.com`}</Pre>
         </ol>
         <Pre>{`npx tsx@latest scripts/photos/migrate-to-r2.ts --cities livermore,dublin,pleasanton`}</Pre>
         <p>After migration, all future pipeline runs auto-upload to R2. The <Code>photoSource</Code> column will show <Code>r2</Code> for every migrated venue.</p>
+
+        <div style={{ background: "#fef3c7", border: "1px solid #f59e0b", borderRadius: 8, padding: "14px 18px", marginTop: 16 }}>
+          <strong>⚠️ TODO — Switch to custom domain before going national</strong>
+          <p style={{ margin: "8px 0 0", fontSize: 14 }}>
+            Currently using the temporary R2 dev URL: <Code>pub-368e73bce8ae44c7b984173913a6fb7e.r2.dev</Code>
+            <br />This works fine but isn't brandable or memorable. Switch to <Code>photos.greenbowtie.com</Code> before scaling nationally.
+          </p>
+          <p style={{ margin: "8px 0 0", fontSize: 14 }}><strong>How to do it (5 min):</strong></p>
+          <ol style={{ margin: "6px 0 0", fontSize: 14 }}>
+            <li>R2 → greenbowtie-photos → Settings → Custom Domains → Add Domain</li>
+            <li>Enter <Code>photos.greenbowtie.com</Code> (Cloudflare will auto-configure DNS since greenbowtie.com is already on Cloudflare)</li>
+            <li>Update <Code>R2_PUBLIC_URL</Code> in <Code>.env</Code> to <Code>https://photos.greenbowtie.com</Code></li>
+            <li>Update environment variable in Vercel/deployment too</li>
+            <li>Re-run migrate script with <Code>--force</Code> to update all DB URLs to the new domain</li>
+          </ol>
+          <p style={{ margin: "8px 0 0", fontSize: 13, color: "#92400e" }}>
+            The old <Code>r2.dev</Code> URLs will still work after switching — no broken photos. The migration just updates the DB to use the cleaner domain going forward.
+          </p>
+        </div>
       </Section>
 
       {/* ── ROLLOUT PLAN ── */}
