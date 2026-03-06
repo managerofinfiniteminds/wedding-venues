@@ -20,6 +20,7 @@ export function VenueCard({ venue }: { venue: Venue }) {
     <Link
       href={`/venues/${venue.stateSlug}/${venue.slug}`}
       className="block bg-white rounded-2xl border border-gray-100 transition-all duration-200 hover:shadow-md hover:border-pink-100 overflow-hidden"
+      onClick={() => sessionStorage.setItem("venueListScroll", window.scrollY.toString())}
     >
       <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5">
         {/* Photo */}

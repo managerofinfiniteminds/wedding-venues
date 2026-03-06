@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { VenueCard } from "./VenueCard";
 import type { Venue } from "@prisma/client";
 
@@ -18,6 +18,15 @@ export function VenueList({ initialVenues, initialTotal, searchParams, stateSlug
   const [total] = useState(initialTotal);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialVenues.length < initialTotal);
+
+  // Restore scroll position when returning from detail page
+  useEffect(() => {
+    const saved = sessionStorage.getItem("venueListScroll");
+    if (saved) {
+      sessionStorage.removeItem("venueListScroll");
+      window.scrollTo({ top: parseInt(saved, 10), behavior: "instant" });
+    }
+  }, []);
 
   const loadMore = useCallback(async () => {
     setLoading(true);
