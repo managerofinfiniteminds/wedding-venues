@@ -102,15 +102,18 @@ function buildPopupHtml(v: MapVenue): string {
   `;
 }
 
+const STATE_ZOOM_THRESHOLD = 6; // below this zoom = show state markers; at/above = show venue pins
+
 interface VenueMapProps {
   initialVenues?: MapVenue[];
-  stateSlug?: string;         // if set, only fetch venues for this state
+  stateSlug?: string;
 }
 
 export function VenueMap({ initialVenues = [], stateSlug }: VenueMapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const clusterRef = useRef<L.MarkerClusterGroup | null>(null);
+  const stateLayerRef = useRef<L.LayerGroup | null>(null);
   const loadingRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastBoundsRef = useRef<string>("");
@@ -214,7 +217,59 @@ export function VenueMap({ initialVenues = [], stateSlug }: VenueMapProps) {
     }) as L.MarkerClusterGroup;
 
     clusterRef.current = cluster;
-    map.addLayer(cluster);
+    // Don't add cluster to map yet — updateLayers() decides based on zoom
+
+    // ── State marker layer (national zoom only) ──
+    const stateLayer = L.layerGroup().addTo(map);
+    stateLayerRef.current = stateLayer;
+
+    async function renderStateMarkers() {
+      stateLayer.clearLayers();
+      const res = await fetch("/api/states/map");
+      const states: { slug: string; name: string; abbr: string; count: number; lat: number; lng: number }[] = await res.json();
+      states.forEach((s) => {
+        const marker = L.marker([s.lat, s.lng], {
+          icon: L.divIcon({
+            className: "",
+            html: `<div style="
+              background:#3b6341;color:white;
+              border-radius:8px;
+              border:2px solid white;
+              box-shadow:0 2px 8px rgba(0,0,0,0.3);
+              padding:4px 8px;
+              font-size:11px;font-weight:700;
+              font-family:Inter,sans-serif;
+              white-space:nowrap;
+              line-height:1.2;
+              text-align:center;
+            "><div>${s.abbr}</div><div style="font-size:9px;font-weight:400;opacity:0.85;">${s.count.toLocaleString()} venues</div></div>`,
+            iconAnchor: [30, 20],
+          }),
+        });
+        marker.on("click", () => {
+          map.flyTo([s.lat, s.lng], 7, { duration: 0.8 });
+        });
+        marker.bindTooltip(`<strong>${s.name}</strong><br/>${s.count.toLocaleString()} venues`, {
+          direction: "top", offset: [0, -24], opacity: 0.97, className: "gb-tooltip",
+        });
+        stateLayer.addLayer(marker);
+      });
+    }
+
+    function updateLayers() {
+      const zoom = map.getZoom();
+      if (zoom < STATE_ZOOM_THRESHOLD) {
+        // National view — show state markers, hide venue clusters
+        if (!map.hasLayer(stateLayer)) map.addLayer(stateLayer);
+        if (map.hasLayer(cluster)) map.removeLayer(cluster);
+        if (stateLayer.getLayers().length === 0) renderStateMarkers();
+      } else {
+        // State/city view — show venue pins, hide state markers
+        if (map.hasLayer(stateLayer)) map.removeLayer(stateLayer);
+        if (!map.hasLayer(cluster)) map.addLayer(cluster);
+        fetchAndRenderVenues(map, cluster);
+      }
+    }
 
     // If we have initial venues (e.g. from SSR), render them immediately
     if (initialVenues.length > 0) {
@@ -236,16 +291,14 @@ export function VenueMap({ initialVenues = [], stateSlug }: VenueMapProps) {
     // Fetch on viewport change (debounced)
     const onMoveEnd = () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-        fetchAndRenderVenues(map, cluster);
-      }, 300);
+      debounceRef.current = setTimeout(() => updateLayers(), 300);
     };
 
     map.on("moveend", onMoveEnd);
     map.on("zoomend", onMoveEnd);
 
     // Initial load
-    fetchAndRenderVenues(map, cluster);
+    updateLayers();
 
     return () => {
       map.off("moveend", onMoveEnd);
