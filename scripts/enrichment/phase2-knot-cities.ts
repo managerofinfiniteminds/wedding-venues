@@ -234,7 +234,7 @@ async function run() {
             const updateData: any = {};
 
             if (knotVenue.price && dbVenue.baseRentalMin === null) {
-              const priceValue = parseFloat(knotVenue.price.replace(/[^\\d.]/g, ''));
+              const priceValue = parseInt(knotVenue.price.replace(/[^0-9]/g, ''), 10);
               if (!isNaN(priceValue)) {
                 updateData.baseRentalMin = priceValue;
                 needsUpdate = true;
