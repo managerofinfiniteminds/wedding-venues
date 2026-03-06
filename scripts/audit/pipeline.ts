@@ -45,7 +45,9 @@ const prisma = new PrismaClient({ adapter });
 // ── CLI ───────────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
 const dryRun    = args.includes("--dry-run");
-const skipSync  = args.includes("--skip-sync");
+const skipSync    = args.includes("--skip-sync");
+const photosOnly  = args.includes("--photos-only");   // skip enrich/clean/regate, just redo photos
+const forcePhotos = args.includes("--force-photos");  // re-score ALL photos, not just bad ones
 const citiesArg = args[args.indexOf("--cities") + 1];
 const targetCities = citiesArg
   ? citiesArg.split(",").map(c => c.trim().replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()))
@@ -93,15 +95,18 @@ const isConfirmedNonWedding = (flags: unknown) => {
 type EnrichResult = Partial<Prisma.VenueUpdateInput> & { _wedding: boolean | null; _reason: string };
 
 async function stepEnrich(v: { name: string; city: string; state: string; website: string | null; phone: string | null; maxGuests: number | null; baseRentalMin: number | null; styleTags: string[]; venueType: string }): Promise<EnrichResult> {
-  type R = { isWeddingVenue: boolean; confidence: string; sourceIsThisVenue: boolean; description: string | null; website: string | null; phone: string | null; maxGuests: number | null; startingPrice: number | null; venueType: string | null; styleTags: string[]; hasBridalSuite: boolean; hasOutdoorSpace: boolean; hasIndoorSpace: boolean; onSiteCoordinator: boolean; reasoning: string };
+  type R = { isWeddingVenue: boolean; confidence: string; sourceIsThisVenue: boolean; description: string | null; website: string | null; phone: string | null; maxGuests: number | null; startingPrice: number | null; venueType: string | null; styleTags: string[]; hasBridalSuite: boolean; hasOutdoorSpace: boolean; hasIndoorSpace: boolean; onSiteCoordinator: boolean; photoUrl: string | null; reasoning: string };
   const raw = await llm(MODEL_ENRICH, `Research this for a wedding venue directory.
 Search NOW: "${v.name}" wedding ${v.city} ${v.state}
 
 CRITICAL: Only use information that is SPECIFICALLY about "${v.name}" — not a nearby venue with a similar name.
 If search results are about a different venue, set sourceIsThisVenue=false and isWeddingVenue=false.
 
+Also find the best photo URL from their website showing the actual wedding/event space (not logo, not food).
+Look for: gallery pages, weddings page, og:image, hero images. Direct image URL preferred (.jpg/.png/.webp).
+
 Return ONLY JSON:
-{"isWeddingVenue":true/false,"confidence":"high/medium/low","sourceIsThisVenue":true/false,"description":"2-3 sentence wedding description about THIS specific venue or null","website":"URL or null","phone":"or null","maxGuests":int/null,"startingPrice":int/null,"venueType":"Vineyard & Winery|Barn / Ranch|Ballroom|Hotel & Resort|Golf Club|Garden|Historic Estate|Museum & Gallery|Event Venue|Resort|Outdoor / Park or null","styleTags":[],"hasBridalSuite":bool,"hasOutdoorSpace":bool,"hasIndoorSpace":bool,"onSiteCoordinator":bool,"reasoning":"one sentence"}`, 600);
+{"isWeddingVenue":true/false,"confidence":"high/medium/low","sourceIsThisVenue":true/false,"description":"2-3 sentence wedding description about THIS specific venue or null","website":"URL or null","phone":"or null","maxGuests":int/null,"startingPrice":int/null,"venueType":"Vineyard & Winery|Barn / Ranch|Ballroom|Hotel & Resort|Golf Club|Garden|Historic Estate|Museum & Gallery|Event Venue|Resort|Outdoor / Park or null","styleTags":[],"hasBridalSuite":bool,"hasOutdoorSpace":bool,"hasIndoorSpace":bool,"onSiteCoordinator":bool,"photoUrl":"direct image URL from their website or null","reasoning":"one sentence"}`, 700);
   const r = j<R>(raw);
   if (!r) return { _wedding: null, _reason: "parse error" };
   // If the model found info about a different venue, treat as uncertain — don't write bad data
@@ -123,6 +128,10 @@ Return ONLY JSON:
   if (r.hasOutdoorSpace) out.hasOutdoorSpace = true;
   if (r.hasIndoorSpace) out.hasIndoorSpace = true;
   if (r.onSiteCoordinator) out.onSiteCoordinator = true;
+  // Photo from website — only store if it looks like a real image URL
+  if (r.photoUrl && /\.(jpg|jpeg|png|webp)/i.test(r.photoUrl)) {
+    out.primaryPhotoUrl = r.photoUrl;
+  }
   return out;
 }
 
@@ -251,8 +260,10 @@ async function main() {
   // Description mismatch: catch venues where description was written about a different venue
   const descMismatch = venues.filter(v => !confirmed.includes(v) && v.description &&
     descriptionMentionsWrongVenue(v.name, v.description));
-  // Photo check: all published venues with a photo
-  const needsPhoto   = venues.filter(v => !confirmed.includes(v) && v.isPublished && v.primaryPhotoUrl);
+  // Photo check: --force-photos rescans ALL published venues; default only scans published ones
+  const needsPhoto = forcePhotos
+    ? venues.filter(v => !confirmed.includes(v) && v.isPublished)
+    : venues.filter(v => !confirmed.includes(v) && v.isPublished);
 
   console.log(`📋 Queue: ${needsEnrich.length} enrich  ${needsClean.length} clean  ${needsReGate.length} re-gate  ${needsPhoto.length} photo  ${descMismatch.length} desc-mismatch\n`);
 
@@ -277,7 +288,7 @@ async function main() {
   }
 
   // ── STEP 1: ENRICH ───────────────────────────────────────────────────────
-  if (needsEnrich.length) {
+  if (!photosOnly && needsEnrich.length) {
     console.log("🌐 Step 1 — Enrich (web search)");
     for (const v of needsEnrich) {
       process.stdout.write(`   ${v.name.slice(0, 48).padEnd(48)} `);
@@ -313,7 +324,7 @@ async function main() {
   }
 
   // ── STEP 2: CLEAN ────────────────────────────────────────────────────────
-  if (needsClean.length) {
+  if (!photosOnly && needsClean.length) {
     console.log("\n🧹 Step 2 — Clean descriptions");
     for (const v of needsClean) {
       process.stdout.write(`   ${v.name.slice(0, 48).padEnd(48)} `);
@@ -335,7 +346,7 @@ async function main() {
   }
 
   // ── STEP 3: RE-GATE (published venues) ────────────────────────────────
-  if (needsReGate.length) {
+  if (!photosOnly && needsReGate.length) {
     console.log("\n🔍 Step 3 — Re-gate published venues");
     for (const v of needsReGate) {
       // Re-fetch in case description was just updated
@@ -372,10 +383,10 @@ async function main() {
     for (const v of needsPhoto) {
       // Re-fetch in case publish status changed
       const fresh = await prisma.venue.findUnique({ where: { id: v.id } });
-      if (!fresh?.isPublished || !fresh.primaryPhotoUrl) continue;
+      if (!fresh?.isPublished) continue;
       process.stdout.write(`   ${fresh.name.slice(0, 48).padEnd(48)} `);
       try {
-        const result = await auditAndFixPhoto(fresh, OR_KEY, dryRun);
+        const result = await auditAndFixPhoto(fresh, OR_KEY, forcePhotos);
         if (result.action === "ok") {
           console.log(`✓ photo ok (${result.oldScore}/10)  ${result.reason.slice(0, 50)}`);
           log.push({ name: v.name, city: v.city, action: "photo:ok", changes: [], reason: `${result.oldScore}/10 — ${result.reason}` });
