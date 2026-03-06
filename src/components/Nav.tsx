@@ -40,7 +40,7 @@ export function Nav({ q }: { q?: string }) {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/greenbowtie.svg" alt="Green Bowtie logo" style={{ height: 60, width: "auto" }} />
+          <img src="/greenbowtie-round.svg" alt="Green Bowtie logo" style={{ height: 60, width: "auto" }} />
           <span className="playfair font-bold leading-none" style={{ color: "#3b6341", fontSize: "1.25rem" }}>Green Bowtie</span>
         </Link>
 

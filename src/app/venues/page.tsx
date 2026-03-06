@@ -50,7 +50,7 @@ export default async function VenuesHubPage() {
           {/* Logo */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/greenbowtie.svg"
+            src="/greenbowtie-round.svg"
             alt="Green Bow Tie"
             className="h-32 sm:h-44 md:h-56 w-auto mx-auto mb-6 drop-shadow-xl"
           />
