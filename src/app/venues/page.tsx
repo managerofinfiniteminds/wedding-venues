@@ -69,15 +69,7 @@ export default async function VenuesHubPage() {
             >
               Browse by State
             </a>
-            <Link
-              href="/map"
-              className="inline-flex items-center justify-center gap-2 bg-[#3b6341] text-white font-semibold px-7 py-3.5 rounded-full text-sm shadow-lg hover:shadow-xl hover:bg-[#2f5035] transition-all border border-white/20"
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path fillRule="evenodd" clipRule="evenodd" d="M12 2C8.134 2 5 5.134 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.866-3.134-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" />
-              </svg>
-              View Map
-            </Link>
+
           </div>
         </div>
 
