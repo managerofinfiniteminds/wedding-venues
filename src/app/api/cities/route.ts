@@ -1,12 +1,13 @@
 import { prisma } from "@/lib/prisma";
+import { getState } from "@/lib/states";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q") ?? "";
   if (q.length < 2) return NextResponse.json([]);
 
-  const cities = await prisma.venue.groupBy({
-    by: ["city"],
+  const results = await prisma.venue.groupBy({
+    by: ["city", "stateSlug"],
     _count: { city: true },
     where: {
       isPublished: true,
@@ -16,5 +17,12 @@ export async function GET(req: NextRequest) {
     take: 10,
   });
 
-  return NextResponse.json(cities.map((c: { city: string; _count: { city: number } }) => ({ city: c.city, count: c._count.city })));
+  return NextResponse.json(
+    results.map((r) => ({
+      city: r.city,
+      stateSlug: r.stateSlug,
+      stateAbbr: getState(r.stateSlug ?? "")?.abbr ?? r.stateSlug?.toUpperCase().slice(0, 2) ?? "",
+      count: r._count.city,
+    }))
+  );
 }
