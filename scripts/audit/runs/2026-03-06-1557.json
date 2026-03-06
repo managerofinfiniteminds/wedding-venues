@@ -1,0 +1,19 @@
+{
+  "runAt": "2026-03-06T15:57:09.260Z",
+  "cities": [
+    "Livermore",
+    "Dublin",
+    "Pleasanton"
+  ],
+  "dryRun": false,
+  "before": {
+    "total": 70,
+    "published": 38
+  },
+  "after": {
+    "total": 70,
+    "published": 38
+  },
+  "changed": 0,
+  "log": []
+}

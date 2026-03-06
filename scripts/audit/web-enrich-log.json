@@ -1,0 +1,874 @@
+{
+  "runAt": "2026-03-06T15:38:53.626Z",
+  "summary": {
+    "beforeCount": 70,
+    "beforePublished": 33,
+    "afterCount": 70,
+    "afterPublished": 38,
+    "enriched": 22,
+    "published": 16,
+    "notWedding": 6,
+    "errors": 0
+  },
+  "log": [
+    {
+      "id": "cmmbku0s104dpc21nbn02cgm4",
+      "name": "Creative Space Studios",
+      "city": "Dublin",
+      "action": "enriched_kept_unpublished",
+      "before": {
+        "isPublished": false,
+        "description": null,
+        "website": "http://www.creativespacestudios.co/",
+        "venueType": "Resort",
+        "phone": "(925) 967-4558",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:39:08.373Z",
+        "auditStatus": "clean",
+        "hasBridalSuite": true,
+        "hasIndoorSpace": true,
+        "isPublished": false
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false, \"description\"=NULL, \"website\"='http://www.creativespacestudios.co/' WHERE id='cmmbku0s104dpc21nbn02cgm4'; -- Creative Space Studios",
+      "reasoning": "While the space is used for events like bridal showers, there is no explicit mention of it hosting weddings.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbku0rs04dlc21ntbo3f17u",
+      "name": "Dublin Civic Center",
+      "city": "Dublin",
+      "action": "confirmed_not_wedding",
+      "before": {
+        "isPublished": false
+      },
+      "after": {
+        "isPublished": false
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false WHERE id='cmmbku0rs04dlc21ntbo3f17u'; -- Dublin Civic Center",
+      "reasoning": "The Dublin Civic Center is primarily designed for administrative offices, community meetings, and business events, with no explicit mention of hosting weddings, and it suggests social gatherings are better suited elsewhere.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq7v000qc21nx1famp2v",
+      "name": "Dublin Ranch Golf Course",
+      "city": "Dublin",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": true,
+        "description": null,
+        "website": "http://www.dublinranchgolf.com/",
+        "venueType": "Barn / Ranch",
+        "phone": "(925) 556-7040",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Rustic"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:39:40.710Z",
+        "auditStatus": "clean",
+        "description": "Dublin Ranch Golf Course in Dublin, CA, offers picturesque outdoor wedding ceremonies on a lush lawn overlooking the golf course and valley, accommodating up to 150 guests with features like a white arch and golf carts for photos. The venue also provides an elegant indoor ballroom for receptions, complete with in-house catering, a bridal suite, and professional staff to ensure a seamless event. Couples can enjoy exclusive access and customizable options for both intimate and grand weddings.",
+        "maxGuests": 150,
+        "baseRentalMin": 5000,
+        "venueType": "Golf Club",
+        "hasBridalSuite": true,
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "onSiteCoordinator": true,
+        "isPublished": "Dublin Ranch Golf Course in Dublin, CA, offers picturesque outdoor wedding ceremonies on a lush lawn overlooking the golf course and valley, accommodating up to 150 guests with features like a white arch and golf carts for photos. The venue also provides an elegant indoor ballroom for receptions, complete with in-house catering, a bridal suite, and professional staff to ensure a seamless event. Couples can enjoy exclusive access and customizable options for both intimate and grand weddings."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true, \"description\"=NULL, \"website\"='http://www.dublinranchgolf.com/' WHERE id='cmmbktq7v000qc21nx1famp2v'; -- Dublin Ranch Golf Course",
+      "reasoning": "The venue's official website and multiple sources explicitly detail services for wedding ceremonies and receptions, including dedicated staff and specific wedding inclusions.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq7q000mc21ngggfwyo4",
+      "name": "Hillview Event Hall",
+      "city": "Dublin",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": true,
+        "description": null,
+        "website": "http://www.hillvieweventhall.com/",
+        "venueType": "Ballroom",
+        "phone": "(510) 585-5541",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Scenic Views"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:39:55.182Z",
+        "auditStatus": "clean",
+        "description": "Hillview Event Hall in Dublin, CA, features a 4,500 square foot banquet hall with panoramic views of the Pleasanton foothills and natural light, making it an ideal setting for weddings with up to 250 guests and amenities like a stage, dance floor, and audio-visual equipment. Couples can customize their event with their own catering and decorations, while enjoying easy access to freeways and ample parking. The venue supports both intimate and grand wedding styles with optional outdoor spaces.",
+        "maxGuests": 250,
+        "baseRentalMin": 3200,
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "isPublished": "Hillview Event Hall in Dublin, CA, features a 4,500 square foot banquet hall with panoramic views of the Pleasanton foothills and natural light, making it an ideal setting for weddings with up to 250 guests and amenities like a stage, dance floor, and audio-visual equipment. Couples can customize their event with their own catering and decorations, while enjoying easy access to freeways and ample parking. The venue supports both intimate and grand wedding styles with optional outdoor spaces."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true, \"description\"=NULL, \"website\"='http://www.hillvieweventhall.com/' WHERE id='cmmbktq7q000mc21ngggfwyo4'; -- Hillview Event Hall",
+      "reasoning": "The venue explicitly lists weddings as one of the events it hosts, along with providing suitable amenities like a banquet hall, stage, and dance floor.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbku0s304dqc21nou9gi5gd",
+      "name": "Par 5 Golfing",
+      "city": "Dublin",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": false,
+        "description": null,
+        "website": "https://par5golfing.com/",
+        "venueType": "Golf Club",
+        "phone": "(925) 361-0940",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:40:11.963Z",
+        "auditStatus": "clean",
+        "description": "Dublin Ranch Golf Course in Dublin, CA, provides a scenic hilltop setting for weddings with a ceremony lawn overlooking the golf course and valley, accommodating up to 150 guests with options for outdoor and indoor spaces. They offer full wedding services including a bridal suite, groom's room, catering, and a dedicated banquet manager to ensure a seamless experience. Couples appreciate the exclusive use of the venue and features like golf carts for photos and a waterfall backdrop for romantic pictures.",
+        "maxGuests": 150,
+        "baseRentalMin": 5000,
+        "hasBridalSuite": true,
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "onSiteCoordinator": true,
+        "isPublished": "Dublin Ranch Golf Course in Dublin, CA, provides a scenic hilltop setting for weddings with a ceremony lawn overlooking the golf course and valley, accommodating up to 150 guests with options for outdoor and indoor spaces. They offer full wedding services including a bridal suite, groom's room, catering, and a dedicated banquet manager to ensure a seamless experience. Couples appreciate the exclusive use of the venue and features like golf carts for photos and a waterfall backdrop for romantic pictures."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false, \"description\"=NULL, \"website\"='https://par5golfing.com/' WHERE id='cmmbku0s304dqc21nou9gi5gd'; -- Par 5 Golfing",
+      "reasoning": "The venue explicitly advertises and provides detailed services for weddings, including ceremonies, receptions, and bridal facilities, as confirmed across multiple sources.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq7x000sc21nz0uj8y9v",
+      "name": "Peacock Banquet Hall",
+      "city": "Dublin",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": true,
+        "description": null,
+        "website": "https://peacockdublin.com/Banquet",
+        "venueType": "Ballroom",
+        "phone": "(925) 833-8282",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:40:29.656Z",
+        "auditStatus": "clean",
+        "description": "Peacock Party Hall in Dublin, CA, specializes in hosting weddings and events, offering banquet halls suitable for ceremonies and receptions with customizable services for up to various guest sizes. It provides a dedicated space for celebrations, including wedding-related gatherings, ensuring all party needs are met. The venue is ideal for couples seeking a straightforward indoor setting for their special day.",
+        "venueType": "Event Venue",
+        "hasIndoorSpace": true,
+        "isPublished": "Peacock Party Hall in Dublin, CA, specializes in hosting weddings and events, offering banquet halls suitable for ceremonies and receptions with customizable services for up to various guest sizes. It provides a dedicated space for celebrations, including wedding-related gatherings, ensuring all party needs are met. The venue is ideal for couples seeking a straightforward indoor setting for their special day."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true, \"description\"=NULL, \"website\"='https://peacockdublin.com/Banquet' WHERE id='cmmbktq7x000sc21nz0uj8y9v'; -- Peacock Banquet Hall",
+      "reasoning": "The venue explicitly lists wedding and events as part of its services, indicating it hosts weddings.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq7w000rc21nqq20sjlk",
+      "name": "Shannon Community Center",
+      "city": "Dublin",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": false,
+        "description": null,
+        "website": "https://dublin.ca.gov/Facilities/Facility/Details/Shannon-Community-Center-19",
+        "venueType": "Event Venue",
+        "phone": "(925) 556-4500",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:40:48.999Z",
+        "auditStatus": "clean",
+        "description": "The Shannon Community Center's Ambrose Hall is a premier wedding venue in Dublin, CA, featuring a spacious 5,940 square-foot hall that can accommodate up to 300 guests, with elegant mission-style architecture, floor-to-ceiling windows overlooking a creek, and natural wood elements for a romantic atmosphere. It includes a full catering kitchen and an outdoor courtyard perfect for ceremonies or receptions, enhancing the overall wedding experience with its traditional design and lush landscapes. This venue combines indoor elegance with outdoor beauty, making it ideal for couples seeking a blend of historic charm and modern functionality.",
+        "maxGuests": 300,
+        "venueType": "Ballroom",
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "isPublished": "The Shannon Community Center's Ambrose Hall is a premier wedding venue in Dublin, CA, featuring a spacious 5,940 square-foot hall that can accommodate up to 300 guests, with elegant mission-style architecture, floor-to-ceiling windows overlooking a creek, and natural wood elements for a romantic atmosphere. It includes a full catering kitchen and an outdoor courtyard perfect for ceremonies or receptions, enhancing the overall wedding experience with its traditional design and lush landscapes. This venue combines indoor elegance with outdoor beauty, making it ideal for couples seeking a blend of historic charm and modern functionality."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false, \"description\"=NULL, \"website\"='https://dublin.ca.gov/Facilities/Facility/Details/Shannon-Community-Center-19' WHERE id='cmmbktq7w000rc21nqq20sjlk'; -- Shannon Community Center",
+      "reasoning": "It is explicitly stated on the official website that Ambrose Hall is ideal for weddings and other social events.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq82000vc21nqbec36bz",
+      "name": "Wildwood Rustic Rentals and Planning",
+      "city": "Dublin",
+      "action": "confirmed_not_wedding",
+      "before": {
+        "isPublished": false
+      },
+      "after": {
+        "isPublished": false
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false WHERE id='cmmbktq82000vc21nqbec36bz'; -- Wildwood Rustic Rentals and Planning",
+      "reasoning": "Wildwood Rustic Rentals provides wedding rentals and planning services but does not own or operate a physical venue for hosting weddings, as indicated by their website and listings on wedding directories.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbku13504ifc21ng6bxib0a",
+      "name": "Badrinath Hall",
+      "city": "Livermore",
+      "action": "enriched_kept_unpublished",
+      "before": {
+        "isPublished": false,
+        "description": null,
+        "website": null,
+        "venueType": "Ballroom",
+        "phone": null,
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:41:15.782Z",
+        "auditStatus": "clean",
+        "isPublished": false
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false, \"description\"=NULL, \"website\"=NULL WHERE id='cmmbku13504ifc21ng6bxib0a'; -- Badrinath Hall",
+      "reasoning": "No information on Badrinath Hall was found in the search results.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbku0sx04ebc21n7r8aopqy",
+      "name": "Casa de Milagros",
+      "city": "Livermore",
+      "action": "confirmed_not_wedding",
+      "before": {
+        "isPublished": true
+      },
+      "after": {
+        "isPublished": false
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true WHERE id='cmmbku0sx04ebc21n7r8aopqy'; -- Casa de Milagros",
+      "reasoning": "The website describes Casa de Milagros as a Christian retreat center focused on spiritual and personal retreats, with no explicit mention of hosting weddings.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq7e000gc21nlatv8kne",
+      "name": "Clubhouse",
+      "city": "Livermore",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": false,
+        "description": null,
+        "website": null,
+        "venueType": "Event Venue",
+        "phone": null,
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:41:52.539Z",
+        "auditStatus": "clean",
+        "description": "The Clubhouse at Las Positas in Livermore, CA, offers a picturesque wedding venue on a golf course with a banquet room featuring high ceilings, windows with views, and access to a patio for al fresco receptions; ceremonies can be held on the private lawn under an archway amidst rolling hills and colorful blooms, making it ideal for couples seeking a blend of indoor and outdoor settings in wine country.",
+        "website": "https://www.clubhouselaspositas.com/",
+        "phone": "(925) 455-7070",
+        "maxGuests": 300,
+        "venueType": "Golf Club",
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "onSiteCoordinator": true,
+        "isPublished": "The Clubhouse at Las Positas in Livermore, CA, offers a picturesque wedding venue on a golf course with a banquet room featuring high ceilings, windows with views, and access to a patio for al fresco receptions; ceremonies can be held on the private lawn under an archway amidst rolling hills and colorful blooms, making it ideal for couples seeking a blend of indoor and outdoor settings in wine country."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false, \"description\"=NULL, \"website\"=NULL WHERE id='cmmbktq7e000gc21nlatv8kne'; -- Clubhouse",
+      "reasoning": "The venue's official website and wedding-focused reviews confirm it hosts weddings, including ceremonies and receptions, with dedicated event planning services.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbku0jd04akc21nr6o7wcw1",
+      "name": "Del Valle Campground Amphitheater",
+      "city": "Livermore",
+      "action": "enriched_kept_unpublished",
+      "before": {
+        "isPublished": false,
+        "description": null,
+        "website": "http://www.ebparks.org/parks/del_valle",
+        "venueType": "Event Venue",
+        "phone": "(510) 544-3146",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:42:08.305Z",
+        "auditStatus": "clean",
+        "hasOutdoorSpace": true,
+        "isPublished": false
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false, \"description\"=NULL, \"website\"='http://www.ebparks.org/parks/del_valle' WHERE id='cmmbku0jd04akc21nr6o7wcw1'; -- Del Valle Campground Amphitheater",
+      "reasoning": "The search results for Del Valle Campground Amphitheater describe it as a campground and event space for outdoor activities like camping and performances, with no specific mention of hosting weddings.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq6i0002c21ndp3v0g6q",
+      "name": "Good Morning Maxwell",
+      "city": "Livermore",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": false,
+        "description": null,
+        "website": "http://www.goodmorningmaxwell.com/",
+        "venueType": "Event Venue",
+        "phone": "(925) 738-8003",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:42:25.204Z",
+        "auditStatus": "clean",
+        "description": "Good Morning Maxwell in Livermore offers an elegant event space inspired by the Danish concept of hygge, perfect for micro-weddings and intimate celebrations with its modern design and cozy atmosphere. The venue features 1,500 sq. ft. of interior elegance with comfortable seating and outdoor patios, making it ideal for creating memorable wedding moments. It's designed to foster creativity and serenity for special occasions like weddings and receptions.",
+        "maxGuests": 65,
+        "baseRentalMin": 1350,
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "isPublished": "Good Morning Maxwell in Livermore offers an elegant event space inspired by the Danish concept of hygge, perfect for micro-weddings and intimate celebrations with its modern design and cozy atmosphere. The venue features 1,500 sq. ft. of interior elegance with comfortable seating and outdoor patios, making it ideal for creating memorable wedding moments. It's designed to foster creativity and serenity for special occasions like weddings and receptions."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false, \"description\"=NULL, \"website\"='http://www.goodmorningmaxwell.com/' WHERE id='cmmbktq6i0002c21ndp3v0g6q'; -- Good Morning Maxwell",
+      "reasoning": "The venue's website explicitly mentions hosting micro-weddings and receptions, confirming it as a wedding venue.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq8s001bc21ngnd8lkm2",
+      "name": "Las Positas Vineyards",
+      "city": "Livermore",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": true,
+        "description": "--> Winery | Las Positas Vineyards | Livermore l Food I Restaurant l Live Music top of page HOME What&#x27;s New Our Wines Wine Club Menu Live Music Calendar Stranger Vines Exclusive Pairing & More Accolades THE TEAM Contact More Use tab to navigate through the menu items. View More Events Events Calendar  Info on upcoming concerts! View More Wine Club Information on Wine Club Benifits, Releases, Sign Up View More About Us Las Positas Vineyards is dedicated to the marriage of Old World craftsmanship and New World pioneer spirit in the production of world class wines from our estate winery in California s historic Livermore Valley AVA. 3 Time Winner of the San Francisco Chronicle Competition&#39;s Sweepstakes Best of Show Award; 2019 Best Red, 2024 Best White, and 2025 Best White.",
+        "website": "https://www.laspositasvineyards.com/",
+        "venueType": "Vineyard & Winery",
+        "phone": "(925) 449-9463",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Romantic",
+          "Scenic Views"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:42:39.499Z",
+        "auditStatus": "clean",
+        "description": "Las Positas Vineyards in Livermore, CA, provides a romantic winery setting ideal for weddings, featuring breathtaking vineyard views, outdoor ceremony spaces, and elegant indoor banquet rooms for receptions. Couples can enjoy a picturesque backdrop with options for al fresco events on lawns or patios, complemented by the venue's wine country charm and professional event support. This family-friendly location has hosted numerous weddings, blending Old World craftsmanship with modern amenities for memorable celebrations.",
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "onSiteCoordinator": true,
+        "isPublished": "Las Positas Vineyards in Livermore, CA, provides a romantic winery setting ideal for weddings, featuring breathtaking vineyard views, outdoor ceremony spaces, and elegant indoor banquet rooms for receptions. Couples can enjoy a picturesque backdrop with options for al fresco events on lawns or patios, complemented by the venue's wine country charm and professional event support. This family-friendly location has hosted numerous weddings, blending Old World craftsmanship with modern amenities for memorable celebrations."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true, \"description\"='--> Winery | Las Positas Vineyards | Livermore l Food I Restaurant l Live Music top of page HOME What&#x27;s New Our Wines Wine Club Menu Live Music Calendar Stranger Vines Exclusive Pairing & More Accolades THE TEAM Contact More Use tab to navigate through the menu items. View More Events Events Calendar  Info on upcoming concerts! View More Wine Club Information on Wine Club Benifits, Releases, Sign Up View More About Us Las Positas Vineyards is dedicated to the marriage of Old World craftsmanship and New World pioneer spirit in the production of world class wines from our estate winery in California s historic Livermore Valley AVA. 3 Time Winner of the San Francisco Chronicle Competition&#39;s Sweepstakes Best of Show Award; 2019 Best Red, 2024 Best White, and 2025 Best White.', \"website\"='https://www.laspositasvineyards.com/' WHERE id='cmmbktq8s001bc21ngnd8lkm2'; -- Las Positas Vineyards",
+      "reasoning": "Multiple sources, including venue listings and wedding descriptions, explicitly confirm that Las Positas Vineyards hosts weddings in addition to other events.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq8v001dc21npyuzje4n",
+      "name": "McGrail Vineyards and Winery",
+      "city": "Livermore",
+      "action": "confirmed_not_wedding",
+      "before": {
+        "isPublished": false
+      },
+      "after": {
+        "isPublished": false
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false WHERE id='cmmbktq8v001dc21npyuzje4n'; -- McGrail Vineyards and Winery",
+      "reasoning": "The venue explicitly states on their website that they do not host ceremonies or weddings.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbku13704igc21nd6vos359",
+      "name": "Mud Factor East Bay",
+      "city": "Livermore",
+      "action": "confirmed_not_wedding",
+      "before": {
+        "isPublished": false
+      },
+      "after": {
+        "isPublished": false
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false WHERE id='cmmbku13704igc21nd6vos359'; -- Mud Factor East Bay",
+      "reasoning": "Mud Factor is an obstacle course event company and the search results indicate it hosts mud runs, not weddings.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbku0sr04e7c21nh7qvtqrf",
+      "name": "R PLACE MUSIC CLUB",
+      "city": "Livermore",
+      "action": "enriched_kept_unpublished",
+      "before": {
+        "isPublished": false,
+        "description": null,
+        "website": null,
+        "venueType": "Event Venue",
+        "phone": "(925) 294-9693",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:43:20.357Z",
+        "auditStatus": "clean",
+        "website": "http://rplacemusicclub.com/",
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "isPublished": false
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false, \"description\"=NULL, \"website\"=NULL WHERE id='cmmbku0sr04e7c21nh7qvtqrf'; -- R PLACE MUSIC CLUB",
+      "reasoning": "The search results describe R Place Music Club primarily as a live music venue, bar, and event space for music and social gatherings, with no specific mention of hosting weddings.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq94001ic21n9wbkhki0",
+      "name": "Robert Livermore Community Center",
+      "city": "Livermore",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": false,
+        "description": null,
+        "website": "https://www.larpd.org/robert-livermore-community-center",
+        "venueType": "Event Venue",
+        "phone": "(925) 373-5700",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:43:41.488Z",
+        "auditStatus": "clean",
+        "description": "The Robert Livermore Community Center in Livermore, CA, is a versatile venue that hosts weddings with options for both indoor and outdoor ceremonies, accommodating up to 350 guests in its spacious ballrooms and outdoor areas. It offers amenities like a bridal suite, on-site catering, and event staff to ensure a seamless wedding experience. Located near Livermore Valley Wine Country, it's ideal for couples seeking an elegant and accessible setting.",
+        "maxGuests": 350,
+        "baseRentalMin": 200,
+        "venueType": "Ballroom",
+        "hasBridalSuite": true,
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "onSiteCoordinator": true,
+        "isPublished": "The Robert Livermore Community Center in Livermore, CA, is a versatile venue that hosts weddings with options for both indoor and outdoor ceremonies, accommodating up to 350 guests in its spacious ballrooms and outdoor areas. It offers amenities like a bridal suite, on-site catering, and event staff to ensure a seamless wedding experience. Located near Livermore Valley Wine Country, it's ideal for couples seeking an elegant and accessible setting."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false, \"description\"=NULL, \"website\"='https://www.larpd.org/robert-livermore-community-center' WHERE id='cmmbktq94001ic21n9wbkhki0'; -- Robert Livermore Community Center",
+      "reasoning": "The venue explicitly lists options for wedding ceremonies and receptions, along with amenities like a bridal suite and event staff.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq6x0008c21n9ohm2z8t",
+      "name": "The Martinelli Event Center",
+      "city": "Livermore",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": true,
+        "description": null,
+        "website": null,
+        "venueType": "Museum & Gallery",
+        "phone": "(925) 371-8200",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:43:59.382Z",
+        "auditStatus": "clean",
+        "description": "The Martinelli Event Center, located in Livermore's wine country, offers a rustic and elegant setting with indoor and outdoor spaces surrounded by vineyards, ideal for weddings accommodating up to 375 guests. It features old-world charm with options for ceremonies and receptions, including in-house catering and event coordination to ensure a seamless experience. Couples can enjoy a romantic atmosphere with vineyard views and customizable packages for their special day.",
+        "maxGuests": 375,
+        "baseRentalMin": 87,
+        "venueType": "Vineyard & Winery",
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "onSiteCoordinator": true,
+        "isPublished": "The Martinelli Event Center, located in Livermore's wine country, offers a rustic and elegant setting with indoor and outdoor spaces surrounded by vineyards, ideal for weddings accommodating up to 375 guests. It features old-world charm with options for ceremonies and receptions, including in-house catering and event coordination to ensure a seamless experience. Couples can enjoy a romantic atmosphere with vineyard views and customizable packages for their special day."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true, \"description\"=NULL, \"website\"=NULL WHERE id='cmmbktq6x0008c21n9ohm2z8t'; -- The Martinelli Event Center",
+      "reasoning": "Multiple sources explicitly describe it as a wedding venue with features for ceremonies and receptions, including wedding examples and event coordination services.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbku0sw04eac21nfepgl83g",
+      "name": "University of California Livermore Collaboration Center - UCLCC",
+      "city": "Livermore",
+      "action": "confirmed_not_wedding",
+      "before": {
+        "isPublished": false
+      },
+      "after": {
+        "isPublished": false
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false WHERE id='cmmbku0sw04eac21nfepgl83g'; -- University of California Livermore Collaboration Center - UCLCC",
+      "reasoning": "The UCLCC is designed for professional collaborations, research events, and UC system partnerships, with no evidence or mention of hosting weddings in the available information.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbku0qz04dfc21ne1u5p3qb",
+      "name": "Alameda County Fairgrounds",
+      "city": "Pleasanton",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": false,
+        "description": null,
+        "website": "http://www.alamedacountyfair.com/",
+        "venueType": "Event Venue",
+        "phone": "(925) 426-7600",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:44:29.748Z",
+        "auditStatus": "clean",
+        "description": "The Alameda County Fairgrounds in Pleasanton, CA, is a 267-acre venue featuring beautiful gardens and courtyards like the Wine Garden for outdoor wedding ceremonies. It offers versatile indoor spaces such as the Palm Pavilion and Building Q for receptions, accommodating up to 1,000 guests with in-house catering and event coordination services.",
+        "maxGuests": 1000,
+        "venueType": "Outdoor / Park",
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "onSiteCoordinator": true,
+        "isPublished": "The Alameda County Fairgrounds in Pleasanton, CA, is a 267-acre venue featuring beautiful gardens and courtyards like the Wine Garden for outdoor wedding ceremonies. It offers versatile indoor spaces such as the Palm Pavilion and Building Q for receptions, accommodating up to 1,000 guests with in-house catering and event coordination services."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false, \"description\"=NULL, \"website\"='http://www.alamedacountyfair.com/' WHERE id='cmmbku0qz04dfc21ne1u5p3qb'; -- Alameda County Fairgrounds",
+      "reasoning": "Multiple sources explicitly describe the venue as hosting weddings with dedicated spaces for ceremonies and receptions.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq6f0001c21ng8w89ccy",
+      "name": "Casa Real at Ruby Hill Winery",
+      "city": "Pleasanton",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": true,
+        "description": null,
+        "website": "http://www.casarealevents.com/",
+        "venueType": "Vineyard & Winery",
+        "phone": "(925) 931-0200",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Romantic"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:44:45.457Z",
+        "auditStatus": "clean",
+        "description": "Casa Real at Ruby Hill Winery is a luxurious Mediterranean-style villa nestled in Pleasanton's Livermore Valley wine country, providing an idyllic setting for weddings with lush vineyards, elegant gardens, and sophisticated indoor spaces. It offers options for both outdoor ceremonies in the Sun Garden and indoor receptions in the Grand Salon or Amber Room, complete with professional coordination and amenities. The venue is designed for romantic celebrations, blending natural beauty with refined architecture to create unforgettable wedding experiences.",
+        "maxGuests": 550,
+        "baseRentalMin": 22800,
+        "hasBridalSuite": true,
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "onSiteCoordinator": true,
+        "isPublished": "Casa Real at Ruby Hill Winery is a luxurious Mediterranean-style villa nestled in Pleasanton's Livermore Valley wine country, providing an idyllic setting for weddings with lush vineyards, elegant gardens, and sophisticated indoor spaces. It offers options for both outdoor ceremonies in the Sun Garden and indoor receptions in the Grand Salon or Amber Room, complete with professional coordination and amenities. The venue is designed for romantic celebrations, blending natural beauty with refined architecture to create unforgettable wedding experiences."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true, \"description\"=NULL, \"website\"='http://www.casarealevents.com/' WHERE id='cmmbktq6f0001c21ng8w89ccy'; -- Casa Real at Ruby Hill Winery",
+      "reasoning": "Multiple wedding directories and the venue's official site explicitly describe it as a wedding venue with dedicated spaces and services for ceremonies and receptions.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbku0sb04dwc21nv06wzwee",
+      "name": "Dolores Bengtson Aquatic Center",
+      "city": "Pleasanton",
+      "action": "enriched_kept_unpublished",
+      "before": {
+        "isPublished": false,
+        "description": null,
+        "website": "https://www.cityofpleasantonca.gov/your-community/recreation/aquatics/",
+        "venueType": "Event Venue",
+        "phone": "(925) 931-3420",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:45:00.419Z",
+        "auditStatus": "clean",
+        "hasOutdoorSpace": true,
+        "isPublished": false
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false, \"description\"=NULL, \"website\"='https://www.cityofpleasantonca.gov/your-community/recreation/aquatics/' WHERE id='cmmbku0sb04dwc21nv06wzwee'; -- Dolores Bengtson Aquatic Center",
+      "reasoning": "The facility is primarily an aquatic center focused on swimming, lessons, and pool parties, with no specific mention of hosting weddings in the search results.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbku0s704duc21ntog1ghjy",
+      "name": "Muslim Community Center - East Bay (MCC East Bay)",
+      "city": "Pleasanton",
+      "action": "enriched_kept_unpublished",
+      "before": {
+        "isPublished": false,
+        "description": null,
+        "website": "http://mcceastbay.org/",
+        "venueType": "Event Venue",
+        "phone": "(925) 485-1786",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Beachside"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:45:14.342Z",
+        "auditStatus": "clean",
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "isPublished": false
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=false, \"description\"=NULL, \"website\"='http://mcceastbay.org/' WHERE id='cmmbku0s704duc21ntog1ghjy'; -- Muslim Community Center - East Bay (MCC East Bay)",
+      "reasoning": "The search results describe MCC East Bay as a community center focused on spiritual, educational, and social programs for Muslims, with no mention of hosting weddings.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq6n0004c21n4k9yhuzm",
+      "name": "Palm Event Center in the Vineyard",
+      "city": "Pleasanton",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": true,
+        "description": null,
+        "website": "http://www.palmeventcenter.com/",
+        "venueType": "Vineyard & Winery",
+        "phone": "(925) 426-8666",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Romantic",
+          "Scenic Views"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:45:31.894Z",
+        "auditStatus": "clean",
+        "description": "The Palm Event Center in the Vineyard is a contemporary private winery estate in Livermore Valley Wine Country, offering stunning vineyard views and spaces for both indoor and outdoor weddings, including a ballroom for up to 350 guests and an outdoor lawn for ceremonies. Couples can enjoy award-winning catering, a full open bar, and day-of coordination services as part of inclusive wedding packages. This venue provides a romantic, wine country atmosphere perfect for creating unforgettable wedding memories.",
+        "maxGuests": 370,
+        "baseRentalMin": 18500,
+        "hasBridalSuite": true,
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "onSiteCoordinator": true,
+        "isPublished": "The Palm Event Center in the Vineyard is a contemporary private winery estate in Livermore Valley Wine Country, offering stunning vineyard views and spaces for both indoor and outdoor weddings, including a ballroom for up to 350 guests and an outdoor lawn for ceremonies. Couples can enjoy award-winning catering, a full open bar, and day-of coordination services as part of inclusive wedding packages. This venue provides a romantic, wine country atmosphere perfect for creating unforgettable wedding memories."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true, \"description\"=NULL, \"website\"='http://www.palmeventcenter.com/' WHERE id='cmmbktq6n0004c21n4k9yhuzm'; -- Palm Event Center in the Vineyard",
+      "reasoning": "Multiple reliable sources, including The Knot and the venue's own website, explicitly describe it as a wedding venue with dedicated services for ceremonies and receptions.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq7t000pc21nj5q956o4",
+      "name": "Rosewood Commons",
+      "city": "Pleasanton",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": true,
+        "description": null,
+        "website": "https://www.rosewoodcommons.com/",
+        "venueType": "Event Venue",
+        "phone": "(925) 737-1900",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:45:47.604Z",
+        "auditStatus": "clean",
+        "description": "Rosewood Commons Conference Center in Pleasanton, CA, provides versatile event spaces suitable for weddings, including a courtyard for outdoor ceremonies and rooms like the Tassajara Room that can accommodate up to 225 guests for receptions. The venue offers modern amenities such as A/V equipment and a stage, making it adaptable for wedding events. Its convenient location near highways and public transit adds ease for wedding parties.",
+        "maxGuests": 225,
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "onSiteCoordinator": true,
+        "isPublished": "Rosewood Commons Conference Center in Pleasanton, CA, provides versatile event spaces suitable for weddings, including a courtyard for outdoor ceremonies and rooms like the Tassajara Room that can accommodate up to 225 guests for receptions. The venue offers modern amenities such as A/V equipment and a stage, making it adaptable for wedding events. Its convenient location near highways and public transit adds ease for wedding parties."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true, \"description\"=NULL, \"website\"='https://www.rosewoodcommons.com/' WHERE id='cmmbktq7t000pc21nj5q956o4'; -- Rosewood Commons",
+      "reasoning": "Although the venue is primarily described as a conference center for events, its flexible spaces and amenities indicate it can accommodate weddings.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq7o000kc21ncb0b6zxa",
+      "name": "The Club at Castlewood",
+      "city": "Pleasanton",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": true,
+        "description": null,
+        "website": "http://www.castlewoodcc.org/",
+        "venueType": "Golf Club",
+        "phone": "(925) 846-2871",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:46:06.718Z",
+        "auditStatus": "clean",
+        "description": "The Club at Castlewood in Pleasanton, CA, is a historic estate offering weddings with ceremonies under majestic oak trees and receptions in an elegant ballroom overlooking the golf course. It provides spaces for up to 500 guests, including outdoor patios and indoor lounges, with 'day of' coordination to ensure a seamless celebration. The venue combines natural beauty and sophisticated amenities for a romantic and picturesque wedding experience.",
+        "maxGuests": 500,
+        "hasBridalSuite": true,
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "onSiteCoordinator": true,
+        "isPublished": "The Club at Castlewood in Pleasanton, CA, is a historic estate offering weddings with ceremonies under majestic oak trees and receptions in an elegant ballroom overlooking the golf course. It provides spaces for up to 500 guests, including outdoor patios and indoor lounges, with 'day of' coordination to ensure a seamless celebration. The venue combines natural beauty and sophisticated amenities for a romantic and picturesque wedding experience."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true, \"description\"=NULL, \"website\"='http://www.castlewoodcc.org/' WHERE id='cmmbktq7o000kc21ncb0b6zxa'; -- The Club at Castlewood",
+      "reasoning": "The Club at Castlewood has dedicated wedding pages on their official website and is featured on wedding directories, explicitly detailing wedding services, capacities, and amenities.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    },
+    {
+      "id": "cmmbktq7h000ic21n5tow4vt5",
+      "name": "The Club at Ruby Hill",
+      "city": "Pleasanton",
+      "action": "enriched_and_published",
+      "before": {
+        "isPublished": true,
+        "description": null,
+        "website": "https://www.rubyhill.com/?utm_source=google&utm_medium=organic&utm_campaign=google_business_profile",
+        "venueType": "Golf Club",
+        "phone": "(925) 417-5840",
+        "maxGuests": null,
+        "baseRentalMin": null,
+        "styleTags": [
+          "Elegant"
+        ],
+        "hasBridalSuite": false,
+        "hasOutdoorSpace": false,
+        "hasIndoorSpace": false,
+        "onSiteCoordinator": false
+      },
+      "after": {
+        "lastAuditedAt": "2026-03-06T15:46:21.108Z",
+        "auditStatus": "clean",
+        "description": "The Club at Ruby Hill is a luxurious wedding venue in Pleasanton, CA, set against the backdrop of Livermore Wine Country and a Jack Nicklaus Signature Golf Course, offering both indoor and outdoor ceremony sites with panoramic views. It provides personalized wedding services, including exquisite catering, event coordination, and complimentary amenities for up to 230 guests, ensuring a sophisticated and memorable celebration.",
+        "maxGuests": 230,
+        "baseRentalMin": 5000,
+        "hasBridalSuite": true,
+        "hasOutdoorSpace": true,
+        "hasIndoorSpace": true,
+        "onSiteCoordinator": true,
+        "isPublished": "The Club at Ruby Hill is a luxurious wedding venue in Pleasanton, CA, set against the backdrop of Livermore Wine Country and a Jack Nicklaus Signature Golf Course, offering both indoor and outdoor ceremony sites with panoramic views. It provides personalized wedding services, including exquisite catering, event coordination, and complimentary amenities for up to 230 guests, ensuring a sophisticated and memorable celebration."
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true, \"description\"=NULL, \"website\"='https://www.rubyhill.com/?utm_source=google&utm_medium=organic&utm_campaign=google_business_profile' WHERE id='cmmbktq7h000ic21n5tow4vt5'; -- The Club at Ruby Hill",
+      "reasoning": "Multiple reliable sources, including the venue's own website and wedding directories, explicitly describe The Club at Ruby Hill as hosting weddings with dedicated services and packages.",
+      "timestamp": "2026-03-06T15:38:53.626Z"
+    }
+  ]
+}
