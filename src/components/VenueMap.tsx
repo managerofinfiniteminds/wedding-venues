@@ -190,9 +190,10 @@ export function VenueMap({ initialVenues = [], stateSlug }: VenueMapProps) {
       maxZoom: 18,
     }).addTo(map);
 
-    // Marker cluster group with green theme
+    // Marker cluster group — only cluster at national zoom (z<7), individual pins at state/city level
     const cluster = (L as any).markerClusterGroup({
-      maxClusterRadius: 60,
+      maxClusterRadius: (zoom: number) => zoom < 7 ? 80 : 0, // 0 = no clustering at state/city zoom
+      disableClusteringAtZoom: 8,
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
