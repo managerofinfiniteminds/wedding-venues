@@ -30,6 +30,7 @@ import fs from "fs";
 import path from "path";
 import { generateReport } from "./report";
 import { auditAndFixPhoto } from "./photo-check";
+import { mirrorPhotoToR2 } from "../photos/r2-upload";
 import type { AuditRunSummary, VenueAuditResult } from "./types";
 
 if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL required");
@@ -387,13 +388,28 @@ async function main() {
       process.stdout.write(`   ${fresh.name.slice(0, 48).padEnd(48)} `);
       try {
         const result = await auditAndFixPhoto(fresh, OR_KEY, forcePhotos);
+
+        // After choosing the best photo URL, mirror it to R2 for stability
+        const chosenUrl = result.action === "swapped" ? result.newUrl! : fresh.primaryPhotoUrl;
+        let finalUrl = chosenUrl;
+        if (!dryRun && chosenUrl && !chosenUrl.startsWith(process.env.R2_PUBLIC_URL ?? "~~never~~")) {
+          const r2Url = await mirrorPhotoToR2(chosenUrl, fresh.slug ?? fresh.id);
+          if (r2Url) finalUrl = r2Url;
+        }
+
         if (result.action === "ok") {
-          console.log(`✓ photo ok (${result.oldScore}/10)  ${result.reason.slice(0, 50)}`);
+          const r2note = finalUrl !== chosenUrl ? " →R2" : "";
+          console.log(`✓ photo ok (${result.oldScore}/10)${r2note}  ${result.reason.slice(0, 45)}`);
+          if (!dryRun && finalUrl !== fresh.primaryPhotoUrl) {
+            await prisma.venue.update({ where: { id: v.id }, data: { primaryPhotoUrl: finalUrl!, lastAuditedAt: new Date() } });
+            if (!changed.includes(v.id)) changed.push(v.id);
+          }
           log.push({ name: v.name, city: v.city, action: "photo:ok", changes: [], reason: `${result.oldScore}/10 — ${result.reason}` });
         } else if (result.action === "swapped") {
-          console.log(`🔄 photo swapped (${result.oldScore}→${result.newScore}/10)  ${result.reason.slice(0, 45)}`);
+          const r2note = finalUrl !== result.newUrl ? " →R2" : "";
+          console.log(`🔄 photo swapped (${result.oldScore}→${result.newScore}/10)${r2note}  ${result.reason.slice(0, 38)}`);
           if (!dryRun) {
-            await prisma.venue.update({ where: { id: v.id }, data: { primaryPhotoUrl: result.newUrl!, lastAuditedAt: new Date() } });
+            await prisma.venue.update({ where: { id: v.id }, data: { primaryPhotoUrl: finalUrl!, lastAuditedAt: new Date() } });
             if (!changed.includes(v.id)) changed.push(v.id);
           }
           log.push({ name: v.name, city: v.city, action: "photo:swapped", changes: ["primaryPhotoUrl"], reason: result.reason });
