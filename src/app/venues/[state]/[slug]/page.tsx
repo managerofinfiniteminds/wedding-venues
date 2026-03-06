@@ -87,9 +87,15 @@ export default async function VenueDetailPage({
             </div>
           )}
           <div>
-              <p className="text-gray-500">Pricing</p>
-              <p className="font-semibold text-gray-800">Contact for rates</p>
-            </div>
+            <p className="text-gray-500">Pricing</p>
+            <p className="font-semibold text-gray-800">
+              {venue.baseRentalMin
+                ? `From $${venue.baseRentalMin.toLocaleString()}`
+                : venue.priceTier
+                  ? venue.priceTier.charAt(0).toUpperCase() + venue.priceTier.slice(1)
+                  : "Contact for rates"}
+            </p>
+          </div>
           {venue.earliestStart && venue.latestEnd && (
             <div>
               <p className="text-gray-500">Event Hours</p>
@@ -145,9 +151,64 @@ export default async function VenueDetailPage({
           </section>
 
           {/* Pricing */}
-          <section className="bg-white rounded-2xl border border-gray-200 p-6">
-            <h2 className="playfair text-2xl font-semibold text-gray-800 mb-3">Pricing</h2>
-            <p className="text-gray-500 text-sm">Pricing varies by date, guest count, and package. Contact this venue directly for a quote.</p>
+          <section className="bg-[#f3f7f4] rounded-2xl border border-[#d4e4d8] p-6">
+            <h2 className="playfair text-2xl font-semibold text-gray-800 mb-4">Pricing &amp; Capacity</h2>
+            {(venue.baseRentalMin || venue.priceTier || venue.perHeadMin || venue.perHeadMax || venue.maxGuests) ? (
+              <div className="space-y-4">
+                {/* Site fee */}
+                {venue.baseRentalMin && (
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-[#3b6341]">
+                      ${venue.baseRentalMin.toLocaleString()}
+                    </span>
+                    {venue.baseRentalMax && venue.baseRentalMax !== venue.baseRentalMin && (
+                      <span className="text-xl text-[#3b6341] font-semibold">
+                        &ndash; ${venue.baseRentalMax.toLocaleString()}
+                      </span>
+                    )}
+                    <span className="text-sm text-gray-500">starting site fee</span>
+                  </div>
+                )}
+                {/* Price tier badge (when no exact price) */}
+                {!venue.baseRentalMin && venue.priceTier && (
+                  <div>
+                    <span className={`inline-block text-sm font-semibold px-3 py-1 rounded-full ${
+                      venue.priceTier === "budget" ? "bg-green-100 text-green-800" :
+                      venue.priceTier === "moderate" ? "bg-blue-100 text-blue-800" :
+                      "bg-purple-100 text-purple-800"
+                    }`}>
+                      {venue.priceTier === "budget" ? "💰 Budget" :
+                       venue.priceTier === "moderate" ? "💰💰 Moderate" :
+                       "💰💰💰 Luxury"}
+                    </span>
+                  </div>
+                )}
+                {/* Per-head pricing */}
+                {(venue.perHeadMin || venue.perHeadMax) && (
+                  <div className="text-sm text-gray-700">
+                    <span className="font-medium">Per person: </span>
+                    {venue.perHeadMin && venue.perHeadMax && venue.perHeadMin !== venue.perHeadMax
+                      ? `$${venue.perHeadMin.toLocaleString()} – $${venue.perHeadMax.toLocaleString()}`
+                      : `$${(venue.perHeadMin ?? venue.perHeadMax)!.toLocaleString()}`}
+                  </div>
+                )}
+                {/* Capacity */}
+                {venue.maxGuests && (
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
+                    <span>👥</span>
+                    <span className="font-medium">
+                      {venue.minGuests ? `${venue.minGuests.toLocaleString()}–` : "Up to "}
+                      {venue.maxGuests.toLocaleString()} guests
+                    </span>
+                  </div>
+                )}
+                <p className="text-xs text-gray-400 pt-2 border-t border-[#d4e4d8]">
+                  Pricing varies by date and season. Contact venue for exact quote.
+                </p>
+              </div>
+            ) : (
+              <p className="text-gray-500 text-sm">Pricing varies by date, guest count, and package. Contact this venue directly for a quote.</p>
+            )}
           </section>
         </div>
 

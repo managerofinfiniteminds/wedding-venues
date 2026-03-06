@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { VenueCard } from "@/components/VenueCard";
 import type { Venue } from "@prisma/client";
 
@@ -108,10 +108,21 @@ describe("VenueCard", () => {
     expect(screen.getByText("Rustic")).toBeInTheDocument();
   });
 
-  it("does not render pricing (not populated in data)", () => {
+  it("renders From $X,XXX pricing chip when baseRentalMin is set", () => {
     render(<VenueCard venue={baseVenue} />);
-    // Pricing removed from card — no pricing data in DB
-    expect(screen.queryByText("$8,000")).not.toBeInTheDocument();
+    // baseVenue has baseRentalMin: 8000
+    expect(screen.getByText(/From \$8,000/)).toBeInTheDocument();
+  });
+
+  it("does not render pricing chip when baseRentalMin and priceTier are both null", () => {
+    render(<VenueCard venue={{ ...baseVenue, baseRentalMin: null, priceTier: null }} />);
+    expect(screen.queryByText(/From \$/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Budget|Moderate|Luxury/)).not.toBeInTheDocument();
+  });
+
+  it("renders priceTier badge when baseRentalMin is null but priceTier is set", () => {
+    render(<VenueCard venue={{ ...baseVenue, baseRentalMin: null, priceTier: "luxury" }} />);
+    expect(screen.getByText(/Luxury/)).toBeInTheDocument();
   });
 
   it("renders rating when available", () => {
@@ -152,5 +163,16 @@ describe("VenueCard", () => {
     render(<VenueCard venue={baseVenue} />);
     // Card renders as a div, not a link — just verify the name is present and clickable
     expect(screen.getByText("Test Vineyard")).toBeInTheDocument();
+  });
+
+  it("renders View full details link in expanded panel pointing to correct URL", () => {
+    const { getByText } = render(<VenueCard venue={baseVenue} />);
+    // Click to expand
+    const card = getByText("Test Vineyard").closest("[class*='rounded-2xl']") as HTMLElement;
+    fireEvent.click(card);
+    // After expand, link should be present
+    const link = screen.getByText(/View full details/);
+    expect(link).toBeInTheDocument();
+    expect(link.closest("a")).toHaveAttribute("href", "/venues/california/test-vineyard");
   });
 });

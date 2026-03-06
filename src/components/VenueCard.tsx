@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { Venue } from "@prisma/client";
 
 function stripDomain(url: string) {
@@ -94,6 +95,18 @@ export function VenueCard({ venue }: { venue: Venue }) {
                 <span className="text-gray-400">({venue.googleReviews?.toLocaleString()})</span>
               </span>
             )}
+            {venue.baseRentalMin ? (
+              <span className="flex items-center gap-1">
+                <span>💵</span>
+                <span>From ${venue.baseRentalMin.toLocaleString()}</span>
+              </span>
+            ) : venue.priceTier === "budget" ? (
+              <span className="flex items-center gap-1"><span>💰</span><span>Budget</span></span>
+            ) : venue.priceTier === "moderate" ? (
+              <span className="flex items-center gap-1"><span>💰💰</span><span>Moderate</span></span>
+            ) : venue.priceTier === "luxury" ? (
+              <span className="flex items-center gap-1"><span>💰💰💰</span><span>Luxury</span></span>
+            ) : null}
             {venue.maxGuests && (
               <span className="flex items-center gap-1">
                 <span>👥</span>
@@ -222,6 +235,15 @@ export function VenueCard({ venue }: { venue: Venue }) {
               <p className="text-sm text-gray-700 leading-relaxed">{venue.description}</p>
             </div>
           )}
+
+          {/* View full details */}
+          <Link
+            href={`/venues/${venue.stateSlug}/${venue.slug}`}
+            className="block w-full text-center text-sm font-semibold text-white bg-[#3b6341] hover:bg-[#2f5035] px-6 py-3 rounded-full transition-colors shadow-sm"
+            onClick={(e) => e.stopPropagation()}
+          >
+            View full details →
+          </Link>
 
           {/* Close */}
           <button
