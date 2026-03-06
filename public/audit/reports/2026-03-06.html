@@ -1,0 +1,1889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Green Bowtie — Venue Audit Report — 2026-03-06</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f4f5f7; color: #1a1a2e; line-height: 1.5; }
+    header { background: #3b6341; color: white; padding: 24px 32px; }
+    header h1 { font-size: 1.6rem; font-weight: 700; }
+    header p { opacity: 0.85; font-size: 0.9rem; margin-top: 4px; }
+    .noindex-notice { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px 16px; font-size: 0.8rem; color: #78350f; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+    /* Summary cards */
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 32px; }
+    .summary-card { background: white; border-radius: 10px; padding: 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .summary-card .big { font-size: 2rem; font-weight: 800; }
+    .summary-card .label { font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: .05em; margin-top: 4px; }
+    .big-clean { color: #15803d; }
+    .big-review { color: #d97706; }
+    .big-flagged { color: #dc2626; }
+    .big-score { color: #3b6341; }
+
+    /* City sections */
+    .city-section { margin-bottom: 40px; }
+    .city-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+    .city-header h2 { font-size: 1.3rem; font-weight: 700; color: #3b6341; }
+    .city-stats { display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.82rem; }
+    .stat-clean { color: #15803d; } .stat-review { color: #d97706; } .stat-flagged { color: #dc2626; }
+
+    /* Venue cards */
+    .venue-card { background: white; border-radius: 10px; margin-bottom: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+    .venue-card.venue-flagged { border-left: 4px solid #dc2626; }
+    .venue-card.venue-review { border-left: 4px solid #d97706; }
+    .venue-card.venue-clean { border-left: 4px solid #15803d; }
+    .venue-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; flex-wrap: wrap; background: #fafafa; border-bottom: 1px solid #f0f0f0; }
+    .venue-name { font-weight: 600; font-size: 0.95rem; }
+    .venue-city { font-size: 0.8rem; color: #6b7280; background: #f3f4f6; padding: 2px 8px; border-radius: 9999px; }
+    .venue-meta { margin-left: auto; display: flex; gap: 8px; font-size: 0.75rem; flex-wrap: wrap; }
+    .meta-critical { color: #dc2626; font-weight: 600; }
+    .meta-warning { color: #d97706; }
+    .meta-fixed { color: #15803d; }
+    .no-issues { padding: 10px 16px; font-size: 0.85rem; color: #6b7280; font-style: italic; }
+
+    /* Flags table */
+    .flags-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .flags-table th { padding: 8px 12px; background: #f9fafb; border-bottom: 1px solid #e5e7eb; text-align: left; font-size: 0.72rem; text-transform: uppercase; color: #6b7280; letter-spacing: .04em; }
+    .flags-table td { padding: 8px 12px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+    .flags-table tr:last-child td { border-bottom: none; }
+    .row-critical td { background: #fef2f2; }
+    .row-warning td { background: #fffbeb; }
+    .row-info td { background: #f0f9ff; }
+    .row-fixed td { background: #f0fdf4; }
+    code { font-family: ui-monospace, monospace; font-size: 0.8em; background: rgba(0,0,0,.04); padding: 1px 5px; border-radius: 4px; }
+    .fix-detail { color: #15803d; }
+
+    /* Badges */
+    .badge { font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 9999px; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+    .badge-critical { background: #fee2e2; color: #dc2626; }
+    .badge-warning { background: #fef3c7; color: #d97706; }
+    .badge-info { background: #dbeafe; color: #2563eb; }
+    .badge-fixed { background: #dcfce7; color: #15803d; }
+
+    /* Status */
+    .status-clean { color: #15803d; font-weight: 600; font-size: 0.82rem; white-space: nowrap; }
+    .status-review { color: #d97706; font-weight: 600; font-size: 0.82rem; white-space: nowrap; }
+    .status-flagged { color: #dc2626; font-weight: 600; font-size: 0.82rem; white-space: nowrap; }
+
+    /* Nav */
+    .report-nav { background: white; border-radius: 10px; padding: 16px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,.07); }
+    .report-nav h3 { font-size: 0.8rem; text-transform: uppercase; color: #6b7280; margin-bottom: 8px; }
+    .report-nav a { color: #3b6341; text-decoration: none; margin-right: 16px; font-size: 0.85rem; }
+    .report-nav a:hover { text-decoration: underline; }
+
+    footer { text-align: center; padding: 24px; font-size: 0.75rem; color: #9ca3af; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>🌿 Green Bowtie — Venue Audit Report</h1>
+  <p>Run: 2026-03-06 at 01:13 AM PST &nbsp;·&nbsp; Cities: Livermore, Dublin, Pleasanton &nbsp;·&nbsp; 70 venues audited</p>
+</header>
+<div class="noindex-notice">🔒 This page is excluded from search engine indexing (noindex, nofollow). Internal use only.</div>
+
+<div class="container">
+
+  <!-- Summary -->
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="big">70</div>
+      <div class="label">Venues Audited</div>
+    </div>
+    <div class="summary-card">
+      <div class="big big-clean">52</div>
+      <div class="label">Clean</div>
+    </div>
+    <div class="summary-card">
+      <div class="big big-review">5</div>
+      <div class="label">Needs Review</div>
+    </div>
+    <div class="summary-card">
+      <div class="big big-flagged">13</div>
+      <div class="label">Flagged</div>
+    </div>
+    <div class="summary-card">
+      <div class="big big-score">83</div>
+      <div class="label">Avg Score</div>
+    </div>
+    <div class="summary-card">
+      <div class="big" style="color:#dc2626">14</div>
+      <div class="label">Critical Issues</div>
+    </div>
+    <div class="summary-card">
+      <div class="big" style="color:#d97706">51</div>
+      <div class="label">Warnings</div>
+    </div>
+    <div class="summary-card">
+      <div class="big" style="color:#15803d">4</div>
+      <div class="label">Auto-Fixed</div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="report-nav">
+    <h3>Jump to City</h3>
+    <a href="#dublin">Dublin</a><a href="#livermore">Livermore</a><a href="#pleasanton">Pleasanton</a>
+  </div>
+
+  <!-- City Sections -->
+  <div id="dublin">
+  <section class="city-section">
+    <div class="city-header">
+      <h2>Dublin</h2>
+      <div class="city-stats">
+        <span>14 venues</span>
+        <span class="stat-clean">✅ 9 clean</span>
+        <span class="stat-review">⚠️ 0 review</span>
+        <span class="stat-flagged">🚨 5 flagged</span>
+        <span class="stat-score">avg score: <strong>80</strong></span>
+      </div>
+    </div>
+    
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Dublin Civic Center</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-flagged">🚨 FLAGGED (57)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>url_404</code></td>
+      <td><code>website</code></td>
+      <td>Website returns 404 Not Found: https://www.dublin.ca.gov/Facilities/Facility/Details/18</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">K1 Speed Dublin</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-flagged">🚨 FLAGGED (67)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>not_wedding_venue</code></td>
+      <td><code>name/description</code></td>
+      <td>Venue appears unrelated to weddings. Matched: "go-kart", "karting", "indoor racing"</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Shannon Community Center</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-flagged">🚨 FLAGGED (57)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>url_404</code></td>
+      <td><code>website</code></td>
+      <td>Website returns 404 Not Found: https://dublin.ca.gov/Facilities/Facility/Details/Shannon-Community-Center-19</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Sky Zone Trampoline Park</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-flagged">🚨 FLAGGED (67)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>not_wedding_venue</code></td>
+      <td><code>name/description</code></td>
+      <td>Venue appears unrelated to weddings. Matched: "trampoline"</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Wildwood Rustic Rentals and Planning</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-flagged">🚨 FLAGGED (57)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>url_404</code></td>
+      <td><code>website</code></td>
+      <td>Website returns 404 Not Found: http://www.wildwoodrusticrentals.com/</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Creative Space Studios</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Dublin Ranch Golf Course</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Dublin Technology Center Workspaces</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Hillview Event Hall</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Holiday Inn Dublin-Pleasanton by IHG</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-clean">✅ CLEAN (94)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>url_blocked</code></td>
+      <td><code>website</code></td>
+      <td>Website blocks automated checks (403). Manually verify: https://www.ihg.com/holidayinn/hotels/us/en/dublin/dubrm/hoteldetail?cm_mmc=GoogleMaps-_-HI-_-US-_-DUBRM</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Koi Palace - Dublin</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Par 5 Golfing</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Peacock Banquet Hall</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Peacock Indian Cuisine</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  </section></div><div id="livermore">
+  <section class="city-section">
+    <div class="city-header">
+      <h2>Livermore</h2>
+      <div class="city-stats">
+        <span>42 venues</span>
+        <span class="stat-clean">✅ 35 clean</span>
+        <span class="stat-review">⚠️ 4 review</span>
+        <span class="stat-flagged">🚨 3 flagged</span>
+        <span class="stat-score">avg score: <strong>88</strong></span>
+      </div>
+    </div>
+    
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Club Moto Motocross Track</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-flagged">🚨 FLAGGED (57)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>not_wedding_venue</code></td>
+      <td><code>name/description</code></td>
+      <td>Venue appears unrelated to weddings. Matched: "motocross"</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Garré Vineyard, Restaurant, & Event Center</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-flagged">🚨 FLAGGED (67)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>not_wedding_venue</code></td>
+      <td><code>name/description</code></td>
+      <td>Venue appears unrelated to weddings. Matched: "pizza"</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Stampede Bar & Grill</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-flagged">🚨 FLAGGED (57)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>not_wedding_venue</code></td>
+      <td><code>name/description</code></td>
+      <td>Venue appears unrelated to weddings. Matched: "bar & grill"</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-review">
+    <div class="venue-header">
+      <span class="venue-name">Casa de Milagros</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-review">⚠️ NEEDS REVIEW (67)</span>
+      <span class="venue-meta"> <span class="meta-warning">3 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_website</code></td>
+      <td><code>website</code></td>
+      <td>No website URL. Brides can't learn more or book.</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_photo</code></td>
+      <td><code>primaryPhotoUrl</code></td>
+      <td>No photo. Listings without images perform significantly worse.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-review">
+    <div class="venue-header">
+      <span class="venue-name">R PLACE MUSIC CLUB</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-review">⚠️ NEEDS REVIEW (74)</span>
+      <span class="venue-meta"> <span class="meta-warning">2 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>all_caps_name</code></td>
+      <td><code>name</code></td>
+      <td>Venue name is ALL CAPS: "R PLACE MUSIC CLUB". Consider title-casing for presentation.</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_website</code></td>
+      <td><code>website</code></td>
+      <td>No website URL. Brides can't learn more or book.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-review">
+    <div class="venue-header">
+      <span class="venue-name">The Martinelli Event Center</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-review">⚠️ NEEDS REVIEW (67)</span>
+      <span class="venue-meta"> <span class="meta-warning">3 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>wedding_relevance_unclear</code></td>
+      <td><code>description</code></td>
+      <td>No wedding-related keywords found in name, type, or description. Verify this is a legitimate venue.</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_website</code></td>
+      <td><code>website</code></td>
+      <td>No website URL. Brides can't learn more or book.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-review">
+    <div class="venue-header">
+      <span class="venue-name">Tri-Valley Quarter Midget Association</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-review">⚠️ NEEDS REVIEW (67)</span>
+      <span class="venue-meta"> <span class="meta-warning">3 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>wedding_relevance_unclear</code></td>
+      <td><code>description</code></td>
+      <td>No wedding-related keywords found in name, type, or description. Verify this is a legitimate venue.</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_website</code></td>
+      <td><code>website</code></td>
+      <td>No website URL. Brides can't learn more or book.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Almost Famous Wine</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"> <span class="meta-fixed">1 auto-fixed</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-fixed">
+      <td><span class="badge badge-fixed">✓ AUTO-FIXED</span></td>
+      <td><code>html_entities</code></td>
+      <td><code>description</code></td>
+      <td>HTML entities found in text (e.g. &mdash; &#8211;). Auto-fixed.<br><small class="fix-detail">Fix: Decoded HTML entities to plain text</small></td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Badrinath Hall</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (77)</span>
+      <span class="venue-meta"> <span class="meta-warning">2 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_website</code></td>
+      <td><code>website</code></td>
+      <td>No website URL. Brides can't learn more or book.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Bankhead Theater</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Caldeira Estate</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (77)</span>
+      <span class="venue-meta"> <span class="meta-warning">2 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>truncated_description</code></td>
+      <td><code>description</code></td>
+      <td>Description appears to be truncated or scraped ("opdown Discover Golfing Bliss with St...").</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>scraped_navigation_text</code></td>
+      <td><code>description</code></td>
+      <td>Description contains scraped website navigation text (e.g. "Skip to Content", "All Rights Reserved").</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Clubhouse</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (77)</span>
+      <span class="venue-meta"> <span class="meta-warning">2 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_website</code></td>
+      <td><code>website</code></td>
+      <td>No website URL. Brides can't learn more or book.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Clubhouse at Las Positas</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span> <span class="meta-fixed">1 auto-fixed</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-fixed">
+      <td><span class="badge badge-fixed">✓ AUTO-FIXED</span></td>
+      <td><code>html_entities</code></td>
+      <td><code>description</code></td>
+      <td>HTML entities found in text (e.g. &mdash; &#8211;). Auto-fixed.<br><small class="fix-detail">Fix: Decoded HTML entities to plain text</small></td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>scraped_navigation_text</code></td>
+      <td><code>description</code></td>
+      <td>Description contains scraped website navigation text (e.g. "Skip to Content", "All Rights Reserved").</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Concannon Vineyard</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Concerts at Wente Vineyards</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Del Valle Campground Amphitheater</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Del Valle Winery</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">El Charro Mexican Food & Cantina</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Fenestra Winery</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span> <span class="meta-fixed">1 auto-fixed</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-fixed">
+      <td><span class="badge badge-fixed">✓ AUTO-FIXED</span></td>
+      <td><code>html_entities</code></td>
+      <td><code>description</code></td>
+      <td>HTML entities found in text (e.g. &mdash; &#8211;). Auto-fixed.<br><small class="fix-detail">Fix: Decoded HTML entities to plain text</small></td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>scraped_navigation_text</code></td>
+      <td><code>description</code></td>
+      <td>Description contains scraped website navigation text (e.g. "Skip to Content", "All Rights Reserved").</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Good Morning Maxwell</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Holiday Inn Express & Suites Livermore by IHG</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (94)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>url_blocked</code></td>
+      <td><code>website</code></td>
+      <td>Website blocks automated checks (403). Manually verify: https://www.ihg.com/holidayinnexpress/hotels/us/en/livermore/lvmre/hoteldetail?cm_mmc=GoogleMaps-_-EX-_-US-_-LVMRE</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Las Positas Vineyards</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span> <span class="meta-fixed">1 auto-fixed</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-fixed">
+      <td><span class="badge badge-fixed">✓ AUTO-FIXED</span></td>
+      <td><code>html_entities</code></td>
+      <td><code>description</code></td>
+      <td>HTML entities found in text (e.g. &mdash; &#8211;). Auto-fixed.<br><small class="fix-detail">Fix: Decoded HTML entities to plain text</small></td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>scraped_navigation_text</code></td>
+      <td><code>description</code></td>
+      <td>Description contains scraped website navigation text (e.g. "Skip to Content", "All Rights Reserved").</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Longevity Wines Inc</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">McGrail Vineyards and Winery</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Mitchell Katz Winery</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Mud Factor East Bay</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Murrieta's Well</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Pinot's Palette</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Poppy Ridge Golf Course</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Reinstein Ranch</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Retzlaff Vineyards</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Rios-Lovell Winery</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Robert Livermore Community Center</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Stony Ridge Winery</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Terra Mia</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">The Purple Orchid Wine Country Resort And Spa</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">The Ranch at Birch Creek</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">University of California Livermore Collaboration Center - UCLCC</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Vineyard View Events</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>scraped_navigation_text</code></td>
+      <td><code>description</code></td>
+      <td>Description contains scraped website navigation text (e.g. "Skip to Content", "All Rights Reserved").</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Wente Family Estate Production</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Wente Family Vineyards Tasting Lounge</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Wente Vineyards</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_photo</code></td>
+      <td><code>primaryPhotoUrl</code></td>
+      <td>No photo. Listings without images perform significantly worse.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  </section></div><div id="pleasanton">
+  <section class="city-section">
+    <div class="city-header">
+      <h2>Pleasanton</h2>
+      <div class="city-stats">
+        <span>14 venues</span>
+        <span class="stat-clean">✅ 8 clean</span>
+        <span class="stat-review">⚠️ 1 review</span>
+        <span class="stat-flagged">🚨 5 flagged</span>
+        <span class="stat-score">avg score: <strong>75</strong></span>
+      </div>
+    </div>
+    
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Inklings Coffee and Tea</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-flagged">🚨 FLAGGED (67)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>not_wedding_venue</code></td>
+      <td><code>name/description</code></td>
+      <td>Venue appears unrelated to weddings. Matched: "cafe"</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Pirates of Emerson Haunted Themed Park</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-flagged">🚨 FLAGGED (27)</span>
+      <span class="venue-meta"><span class="meta-critical">2 critical</span> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>not_wedding_venue</code></td>
+      <td><code>name/description</code></td>
+      <td>Venue appears unrelated to weddings. Matched: "haunted"</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>venue_type_wrong</code></td>
+      <td><code>venueType</code></td>
+      <td>"Pirates of Emerson Haunted Themed Park" is a haunted attraction, not a park/outdoor venue.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Pleasanton Marriott</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-flagged">🚨 FLAGGED (67)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>not_wedding_venue</code></td>
+      <td><code>name/description</code></td>
+      <td>Venue appears unrelated to weddings. Matched: "cafe"</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Pump It Up Pleasanton Kids Birthdays and More</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-flagged">🚨 FLAGGED (57)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>not_wedding_venue</code></td>
+      <td><code>name/description</code></td>
+      <td>Venue appears unrelated to weddings. Matched: "kids birthday", "pump it up"</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Rosewood Commons</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-flagged">🚨 FLAGGED (57)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>url_unreachable</code></td>
+      <td><code>website</code></td>
+      <td>Website unreachable: https://www.rosewoodcommons.com/ (fetch failed)</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-review">
+    <div class="venue-header">
+      <span class="venue-name">Alameda County Fairgrounds</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-review">⚠️ NEEDS REVIEW (74)</span>
+      <span class="venue-meta"> <span class="meta-warning">2 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>venue_type_mismatch</code></td>
+      <td><code>venueType</code></td>
+      <td>venueType is 'Golf Club' but no golf-related terms found</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>venue_type_wrong</code></td>
+      <td><code>venueType</code></td>
+      <td>"Alameda County Fairgrounds" appears to be a fairground, not a Golf Club.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Casa Real at Ruby Hill Winery</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Dolores Bengtson Aquatic Center</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">McKay's Taphouse & Beer Garden</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>wedding_relevance_unclear</code></td>
+      <td><code>description</code></td>
+      <td>No wedding-related keywords found in name, type, or description. Verify this is a legitimate venue.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Muslim Community Center - East Bay (MCC East Bay)</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Palm Event Center in the Vineyard</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-clean">✅ CLEAN (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Rubino Estates Winery</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-clean">✅ CLEAN (97)</span>
+      <span class="venue-meta"></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">The Club at Castlewood</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-clean">✅ CLEAN (84)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>venue_type_mismatch</code></td>
+      <td><code>venueType</code></td>
+      <td>venueType is 'Golf Club' but no golf-related terms found</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">The Club at Ruby Hill</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-clean">✅ CLEAN (84)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>venue_type_mismatch</code></td>
+      <td><code>venueType</code></td>
+      <td>venueType is 'Golf Club' but no golf-related terms found</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: Error: OpenRouter error 404: {"error":{"message":"No endpoints found for google/</td>
+    </tr></tbody>
+    </table>
+  </div>
+  </section></div>
+
+</div>
+<footer>
+  Green Bowtie Audit Engine &nbsp;·&nbsp; Run 2026-03-06 &nbsp;·&nbsp; Internal use only &nbsp;·&nbsp; Not indexed by search engines
+</footer>
+</body>
+</html>

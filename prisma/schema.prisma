@@ -115,6 +115,12 @@ model Venue {
   completenessScore Int?
   isPublished       Boolean  @default(false)
 
+  // Audit
+  lastAuditedAt  DateTime?
+  auditScore     Int?
+  auditStatus    String?   // "unaudited" | "clean" | "needs_review" | "flagged"
+  auditFlags     Json?     // AuditFlag[]
+
   // Description
   description String?
 

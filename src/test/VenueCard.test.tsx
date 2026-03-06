@@ -83,6 +83,10 @@ const baseVenue: Venue = {
   latitude: null,
   longitude: null,
   description: "A beautiful test vineyard in the hills.",
+  lastAuditedAt: null,
+  auditScore: null,
+  auditStatus: null,
+  auditFlags: null,
 };
 
 describe("VenueCard", () => {
