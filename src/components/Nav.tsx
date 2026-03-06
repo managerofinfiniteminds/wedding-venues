@@ -41,8 +41,8 @@ export function Nav({ q }: { q?: string }) {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 whitespace-nowrap flex-shrink-0">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/greenbowtie-logo.svg" alt="Green Bowtie logo" style={{ height: 52, width: "auto" }} />
-          <span className="playfair font-bold leading-none" style={{ color: "#3b6341", fontSize: "1.4rem" }}>Green Bowtie</span>
+          <img src="/greenbowtie-logo.svg" alt="Green Bowtie logo" style={{ height: 52, width: "auto" }} className="block" />
+          <span className="playfair font-bold" style={{ color: "#3b6341", fontSize: "1.4rem", lineHeight: "52px" }}>Green Bowtie</span>
         </Link>
 
         {/* Desktop search — hidden on mobile, shown md+ */}
