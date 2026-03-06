@@ -2,7 +2,7 @@ import { getLiveStates } from "@/lib/states";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Metadata } from "next";
-import { USStateMapClient } from "@/components/USStateMapClient";
+import { USStateMapHomepage } from "@/components/USStateMapClient";
 
 export const metadata: Metadata = {
   title: "Wedding Venues in Every State | Green Bow Tie",
@@ -123,7 +123,7 @@ export default async function VenuesHubPage() {
           </h2>
           <p className="text-gray-500 text-center text-sm mb-8">Click any state to browse venues</p>
           <div className="max-w-4xl mx-auto">
-            <USStateMapClient onStateSelect={() => {}} linkMode />
+            <USStateMapHomepage />
           </div>
         </div>
       </section>

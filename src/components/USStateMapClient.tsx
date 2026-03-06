@@ -14,6 +14,7 @@ const USStateMap = dynamic(
   }
 );
 
-export function USStateMapClient({ onStateSelect, linkMode }: { onStateSelect: (slug: string) => void; linkMode?: boolean }) {
-  return <USStateMap onStateSelect={onStateSelect} linkMode={linkMode} />;
+// No-op version for homepage (linkMode=true navigates via router, onStateSelect unused)
+export function USStateMapHomepage() {
+  return <USStateMap onStateSelect={() => {}} linkMode />;
 }

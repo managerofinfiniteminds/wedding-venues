@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { ComposableMap, Geographies, Geography, Annotation } from "react-simple-maps";
+import { useState, useEffect, useRef } from "react";
+import { feature } from "topojson-client";
+import type { Topology, GeometryCollection } from "topojson-specification";
 import { useRouter } from "next/navigation";
 
 const GEO_URL = "https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json";
 
-// FIPS code → state slug mapping
 const FIPS_TO_SLUG: Record<string, string> = {
   "01": "alabama", "02": "alaska", "04": "arizona", "05": "arkansas",
   "06": "california", "08": "colorado", "09": "connecticut", "10": "delaware",
@@ -23,13 +23,6 @@ const FIPS_TO_SLUG: Record<string, string> = {
   "55": "wisconsin", "56": "wyoming",
 };
 
-// State abbr labels for small states
-const STATE_ABBR: Record<string, string> = {
-  "connecticut": "CT", "delaware": "DE", "maryland": "MD", "massachusetts": "MA",
-  "new-hampshire": "NH", "new-jersey": "NJ", "rhode-island": "RI", "vermont": "VT",
-  "washington-dc": "DC",
-};
-
 interface StateInfo {
   slug: string;
   name: string;
@@ -37,16 +30,49 @@ interface StateInfo {
   count: number;
 }
 
-interface Props {
-  onStateSelect: (slug: string) => void;
-  linkMode?: boolean; // if true, clicking navigates to /venues/[state] instead of calling onStateSelect
+interface GeoFeature {
+  type: string;
+  id: string;
+  properties: Record<string, unknown>;
+  geometry: { type: string; coordinates: unknown[] };
 }
 
+interface Props {
+  onStateSelect: (slug: string) => void;
+  linkMode?: boolean;
+}
+
+// Albers USA projection (simplified — matches us-atlas viewBox 0 0 960 600)
+const WIDTH = 960;
+const HEIGHT = 600;
+
 export function USStateMap({ onStateSelect, linkMode = false }: Props) {
+  const [paths, setPaths] = useState<{ d: string; slug: string }[]>([]);
   const [stateData, setStateData] = useState<Map<string, StateInfo>>(new Map());
   const [hovered, setHovered] = useState<string | null>(null);
+  const [tooltip, setTooltip] = useState<{ x: number; y: number } | null>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   const router = useRouter();
 
+  // Load topojson + convert to SVG paths
+  useEffect(() => {
+    async function load() {
+      const res = await fetch(GEO_URL);
+      const topo = await res.json() as Topology;
+      const { geoPath, geoAlbersUsa } = await import("d3-geo");
+      const projection = geoAlbersUsa().scale(1300).translate([WIDTH / 2, HEIGHT / 2]);
+      const path = geoPath().projection(projection);
+      const geojson = feature(topo, topo.objects.states as GeometryCollection);
+      const generated = (geojson.features as GeoFeature[]).map((f) => ({
+        d: path(f as Parameters<typeof path>[0]) ?? "",
+        slug: FIPS_TO_SLUG[String(f.id).padStart(2, "0")] ?? "",
+      })).filter((p) => p.d && p.slug);
+      setPaths(generated);
+    }
+    load();
+  }, []);
+
+  // Load venue counts per state
   useEffect(() => {
     fetch("/api/states/map")
       .then((r) => r.json())
@@ -56,86 +82,66 @@ export function USStateMap({ onStateSelect, linkMode = false }: Props) {
   }, []);
 
   const handleClick = (slug: string) => {
-    if (linkMode) {
-      router.push(`/venues/${slug}`);
-    } else {
-      onStateSelect(slug);
-    }
+    if (linkMode) router.push(`/venues/${slug}`);
+    else onStateSelect(slug);
   };
 
-  const hoveredState = hovered ? stateData.get(hovered) : null;
+  const hoveredInfo = hovered ? stateData.get(hovered) : null;
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full select-none">
       {/* Tooltip */}
-      {hoveredState && (
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-white border border-gray-200 rounded-xl shadow-lg px-5 py-3 text-center pointer-events-none">
-          <p className="font-semibold text-gray-800 text-sm">{hoveredState.name}</p>
-          <p className="text-[#3b6341] text-xs font-medium">{hoveredState.count.toLocaleString()} venues</p>
-          <p className="text-gray-400 text-xs mt-0.5">{linkMode ? "Click to browse" : "Click to explore on map"}</p>
+      {hoveredInfo && tooltip && (
+        <div
+          className="absolute z-20 bg-white border border-gray-200 rounded-xl shadow-lg px-4 py-2.5 text-center pointer-events-none"
+          style={{ left: tooltip.x, top: tooltip.y, transform: "translate(-50%, -110%)" }}
+        >
+          <p className="font-semibold text-gray-800 text-sm">{hoveredInfo.name}</p>
+          <p className="text-[#3b6341] text-xs font-medium">{hoveredInfo.count.toLocaleString()} venues</p>
+          <p className="text-gray-400 text-xs">{linkMode ? "Click to browse" : "Click to explore"}</p>
         </div>
       )}
 
-      <ComposableMap
-        projection="geoAlbersUsa"
-        style={{ width: "100%", height: "auto" }}
-        projectionConfig={{ scale: 1000 }}
+      <svg
+        ref={svgRef}
+        viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+        className="w-full h-auto"
+        style={{ maxHeight: 480 }}
       >
-        <Geographies geography={GEO_URL}>
-          {({ geographies }) =>
-            geographies.map((geo) => {
-              const fips = geo.id?.toString().padStart(2, "0") ?? "";
-              const slug = FIPS_TO_SLUG[fips];
-              const info = slug ? stateData.get(slug) : undefined;
-              const isHovered = hovered === slug;
-              const hasData = (info?.count ?? 0) > 0;
-
-              return (
-                <Geography
-                  key={geo.rsmKey}
-                  geography={geo}
-                  onClick={() => slug && handleClick(slug)}
-                  onMouseEnter={() => slug && setHovered(slug)}
-                  onMouseLeave={() => setHovered(null)}
-                  style={{
-                    default: {
-                      fill: isHovered
-                        ? "#3b6341"
-                        : hasData
-                        ? "#7aab82"
-                        : "#c8ddc9",
-                      stroke: "#fff",
-                      strokeWidth: 0.5,
-                      outline: "none",
-                      cursor: slug ? "pointer" : "default",
-                      transition: "fill 0.15s ease",
-                    },
-                    hover: {
-                      fill: "#3b6341",
-                      stroke: "#fff",
-                      strokeWidth: 0.5,
-                      outline: "none",
-                      cursor: "pointer",
-                    },
-                    pressed: {
-                      fill: "#2f5035",
-                      outline: "none",
-                    },
-                  }}
-                />
-              );
-            })
-          }
-        </Geographies>
-
-        {/* Abbr labels for small NE states */}
-        {Array.from(stateData.values())
-          .filter((s) => STATE_ABBR[s.slug])
-          .map((s) => null /* handled by tooltip on hover */)}
-      </ComposableMap>
+        {paths.map(({ d, slug }) => {
+          const info = stateData.get(slug);
+          const isHovered = hovered === slug;
+          const hasData = (info?.count ?? 0) > 0;
+          return (
+            <path
+              key={slug}
+              d={d}
+              fill={isHovered ? "#3b6341" : hasData ? "#7aab82" : "#c8ddc9"}
+              stroke="#fff"
+              strokeWidth={0.75}
+              style={{ cursor: "pointer", transition: "fill 0.12s ease" }}
+              onClick={() => handleClick(slug)}
+              onMouseMove={(e) => {
+                const svg = svgRef.current;
+                if (!svg) return;
+                const rect = svg.getBoundingClientRect();
+                const scaleX = rect.width / WIDTH;
+                const scaleY = rect.height / HEIGHT;
+                // Get centroid of bounding box from the event
+                setHovered(slug);
+                setTooltip({
+                  x: e.clientX - rect.left,
+                  y: e.clientY - rect.top,
+                });
+              }}
+              onMouseLeave={() => { setHovered(null); setTooltip(null); }}
+            />
+          );
+        })}
+      </svg>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-6 mt-2 text-xs text-gray-500">
+      <div className="flex items-center justify-center gap-6 mt-3 text-xs text-gray-500">
         <span className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded-sm inline-block" style={{ background: "#7aab82" }} />
           Has venues
