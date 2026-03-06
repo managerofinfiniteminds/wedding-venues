@@ -53,13 +53,9 @@ interface KnotVenueData {
   url: string;
 }
 
-const prismaPath = path.resolve(__dirname, '../../node_modules/.prisma/client/index.js');
-const prismaClientModule = await import(prismaPath);
-const { PrismaClient: RealPrismaClient } = prismaClientModule;
-
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
-const prisma = new RealPrismaClient({ adapter });
+const prisma = new PrismaClient({ adapter } as any);
 
 const PHASE2_STATE_FILE = path.join(__dirname, 'phase2-state.json');
 const PHASE2_PROBLEMS_FILE = path.join(__dirname, 'phase2-problems.jsonl');
@@ -156,36 +152,50 @@ async function run() {
         await page.goto(knotUrl, { waitUntil: 'domcontentloaded' });
         await sleep(1200);
 
-        knotVenues = await page.evaluate(() => {
-          const venues: KnotVenueData[] = [];
-          const links = Array.from(document.querySelectorAll('a[href*="/marketplace/wedding-reception-venues-"]'));
-          for (const link of links) {
-            const href = link.getAttribute('href');
-            if (href && /\/marketplace\/[\w-]+-[a-z]{2}-\d+$/.test(href)) {
-              const nameElement = link.querySelector('h2') || link.querySelector('h3') || link;
-              const name = nameElement ? nameElement.textContent?.trim() || link.textContent?.trim() || '' : '';
-
-              if (!name) continue; // Skip if no name found
-
-              // Attempt to find price and guest range from siblings or nearby elements
-              let price: string | null = null;
-              let guestRange: string | null = null;
-
-              const parent = link.closest('[data-test-id="directory-card"]'); // Assuming a common card structure
-              if (parent) {
-                const priceMatch = parent.textContent?.match(/Starting at (\\$\\d{1,3}(,\\d{3})*)/);
-                if (priceMatch) price = priceMatch[1];
-                const guestMatch = parent.textContent?.match(/Guests: (\\d+ - \\d+)/);
-                if (guestMatch) guestRange = guestMatch[1];
-              }
-
-              if (name) {
-                venues.push({ name, price, guestRange, url: `https://www.theknot.com${href}` });
-              }
+        // Extract unique venue URLs from page
+        const venueUrls: string[] = await page.evaluate(() => {
+          const seen = new Set<string>();
+          const results: string[] = [];
+          document.querySelectorAll<HTMLAnchorElement>('a[href]').forEach(a => {
+            if (/\/marketplace\/[\w-]+-[a-z]{2}-\d+$/.test(a.href) && !seen.has(a.href)) {
+              seen.add(a.href);
+              results.push(a.href);
             }
-          }
-          return venues;
+          });
+          return results;
         });
+
+        // Parse all pricing/name/guest data from innerText (The Knot renders all visible text)
+        const pageText: string = await page.evaluate(() => document.body.innerText);
+
+        // Pattern: "VenueName\nStarting at $X,XXX\nXX-XX Guests•Type"
+        const cardPattern = /^(.+?)\nStarting at \$([\d,]+)\n([\d,+\-\u2013 ]+Guests?)/gm;
+        const nameToPrice = new Map<string, {price: number; guests: string}>();
+        let m: RegExpExecArray | null;
+        while ((m = cardPattern.exec(pageText)) !== null) {
+          const name = m[1].trim();
+          const price = parseInt(m[2].replace(/,/g, ''));
+          const guests = m[3].trim();
+          if (name && price) nameToPrice.set(name.toLowerCase(), { price, guests });
+        }
+
+        // Build venue list from URLs, enrich with pricing from text
+        knotVenues = venueUrls.map(url => {
+          // Derive name from slug: "firehouse-chicago-chicago-il-609137" → "Firehouse Chicago"
+          const slug = url.split('/').pop() || '';
+          const nameParts = slug.replace(/-[a-z]{2}-\d+$/, '').replace(/-/g, ' ');
+          const nameFromSlug = nameParts.replace(/\b\w/g, c => c.toUpperCase());
+          // Try to find exact match in parsed text
+          const matched = [...nameToPrice.entries()].find(([k]) => 
+            k.includes(nameParts.slice(0, 8)) || nameParts.includes(k.slice(0, 8))
+          );
+          return {
+            name: nameFromSlug,
+            price: matched ? `$${matched[1].price.toLocaleString()}` : null,
+            guestRange: matched ? matched[1].guests : null,
+            url,
+          };
+        }).filter(v => v.name.length > 2);
         console.log(`[phase2] Found ${knotVenues.length} potential venues on Knot page.`);
 
       } catch (e: any) {
