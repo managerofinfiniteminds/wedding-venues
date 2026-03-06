@@ -50,9 +50,9 @@ export default async function VenuesHubPage() {
           {/* Logo */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/greenbowtie-round.svg"
-            alt="Green Bow Tie"
-            className="h-32 sm:h-44 md:h-56 w-auto mx-auto mb-6 drop-shadow-xl"
+            src="/greenbowtie-logo.svg"
+            alt="Green Bowtie"
+            className="h-40 sm:h-56 md:h-72 w-auto mx-auto mb-6 drop-shadow-2xl"
           />
           <h1 className="playfair text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight drop-shadow-lg">
             Find Your Perfect<br className="hidden sm:block" /> Wedding Venue
