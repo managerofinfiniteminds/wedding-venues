@@ -5,7 +5,7 @@
 import { AuditFlag } from "./types";
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
-const MODEL = "google/gemini-flash-1.5"; // fast + cheap for bulk
+const MODEL = "google/gemini-2.0-flash-001"; // fast + cheap for bulk
 
 async function callLLM(prompt: string): Promise<string> {
   if (!OPENROUTER_KEY) throw new Error("OPENROUTER_API_KEY not set");

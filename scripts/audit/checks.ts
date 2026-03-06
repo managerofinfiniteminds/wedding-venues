@@ -19,6 +19,12 @@ const CLEARLY_NOT_WEDDING = [
   "tech center", "office space", "university collaboration",
 ];
 
+// Keywords that are only disqualifying if in the NAME (not description/menu text)
+const NAME_ONLY_NEGATIVE = [
+  "bar & grill", "coffee", "cafe", "pizza", "fast food", "sandwich shop",
+  "nail salon", "hair salon", "auto repair", "car wash",
+];
+
 // ── Check 1: Wedding relevance ─────────────────────────────────────────────
 export function checkWeddingRelevance(venue: {
   name: string;
@@ -27,10 +33,20 @@ export function checkWeddingRelevance(venue: {
   website?: string | null;
 }): AuditFlag[] {
   const flags: AuditFlag[] = [];
-  const text = `${venue.name} ${venue.venueType} ${venue.description ?? ""}`.toLowerCase();
+  const fullText = `${venue.name} ${venue.venueType} ${venue.description ?? ""}`.toLowerCase();
+  const nameAndType = `${venue.name} ${venue.venueType}`.toLowerCase();
 
-  const hasPositive = WEDDING_POSITIVE.some((kw) => text.includes(kw));
-  const negativeHits = CLEARLY_NOT_WEDDING.filter((kw) => text.includes(kw));
+  const hasPositive = WEDDING_POSITIVE.some((kw) => fullText.includes(kw));
+
+  // Critical negatives — apply to full text
+  const criticalNegativeHits = CLEARLY_NOT_WEDDING
+    .filter((kw) => !NAME_ONLY_NEGATIVE.includes(kw))
+    .filter((kw) => fullText.includes(kw));
+
+  // Name-only negatives — only flag if in the venue name/type
+  const nameNegativeHits = NAME_ONLY_NEGATIVE.filter((kw) => nameAndType.includes(kw));
+
+  const negativeHits = [...criticalNegativeHits, ...nameNegativeHits];
 
   if (negativeHits.length > 0) {
     flags.push({

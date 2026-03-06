@@ -1,0 +1,205 @@
+{
+  "runAt": "2026-03-06T09:43:04.645Z",
+  "summary": {
+    "totalVenues": 70,
+    "publishedBefore": 33,
+    "publishedAfter": 33,
+    "unpublished": 7,
+    "typeFixed": 1,
+    "keptWithNotes": 10
+  },
+  "changes": [
+    {
+      "id": "cmmbku0rm04dkc21ny9nif6d6",
+      "name": "Pirates of Emerson Haunted Themed Park",
+      "city": "Pleasanton",
+      "action": "unpublish",
+      "reason": "Haunted attraction — not a wedding venue",
+      "before": {
+        "isPublished": false,
+        "auditStatus": "flagged"
+      },
+      "after": {
+        "isPublished": false,
+        "auditStatus": "flagged"
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true WHERE id='cmmbku0rm04dkc21ny9nif6d6'; -- Pirates of Emerson Haunted Themed Park",
+      "timestamp": "2026-03-06T09:43:04.645Z"
+    },
+    {
+      "id": "cmmbku0r304dhc21nxumt956h",
+      "name": "K1 Speed Dublin",
+      "city": "Dublin",
+      "action": "unpublish",
+      "reason": "Indoor go-kart racing — not a wedding venue",
+      "before": {
+        "isPublished": false,
+        "auditStatus": "flagged"
+      },
+      "after": {
+        "isPublished": false,
+        "auditStatus": "flagged"
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true WHERE id='cmmbku0r304dhc21nxumt956h'; -- K1 Speed Dublin",
+      "timestamp": "2026-03-06T09:43:04.645Z"
+    },
+    {
+      "id": "cmmbku0s604dtc21nfk9qlwpf",
+      "name": "Sky Zone Trampoline Park",
+      "city": "Dublin",
+      "action": "unpublish",
+      "reason": "Trampoline park — not a wedding venue",
+      "before": {
+        "isPublished": false,
+        "auditStatus": "flagged"
+      },
+      "after": {
+        "isPublished": false,
+        "auditStatus": "flagged"
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true WHERE id='cmmbku0s604dtc21nfk9qlwpf'; -- Sky Zone Trampoline Park",
+      "timestamp": "2026-03-06T09:43:04.645Z"
+    },
+    {
+      "id": "cmmbku0sj04e2c21nb5zbuyxc",
+      "name": "Club Moto Motocross Track",
+      "city": "Livermore",
+      "action": "unpublish",
+      "reason": "Motocross track — not a wedding venue",
+      "before": {
+        "isPublished": false,
+        "auditStatus": "flagged"
+      },
+      "after": {
+        "isPublished": false,
+        "auditStatus": "flagged"
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true WHERE id='cmmbku0sj04e2c21nb5zbuyxc'; -- Club Moto Motocross Track",
+      "timestamp": "2026-03-06T09:43:04.645Z"
+    },
+    {
+      "id": "cmmbku0sa04dvc21nzp22zkw9",
+      "name": "Pump It Up Pleasanton Kids Birthdays and More",
+      "city": "Pleasanton",
+      "action": "unpublish",
+      "reason": "Kids bounce house — not a wedding venue",
+      "before": {
+        "isPublished": false,
+        "auditStatus": "flagged"
+      },
+      "after": {
+        "isPublished": false,
+        "auditStatus": "flagged"
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true WHERE id='cmmbku0sa04dvc21nzp22zkw9'; -- Pump It Up Pleasanton Kids Birthdays and More",
+      "timestamp": "2026-03-06T09:43:04.645Z"
+    },
+    {
+      "id": "cmmbku0sl04e3c21nlxckrl47",
+      "name": "Stampede Bar & Grill",
+      "city": "Livermore",
+      "action": "unpublish",
+      "reason": "Bar & grill with no wedding evidence",
+      "before": {
+        "isPublished": false,
+        "auditStatus": "flagged"
+      },
+      "after": {
+        "isPublished": false,
+        "auditStatus": "flagged"
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true WHERE id='cmmbku0sl04e3c21nlxckrl47'; -- Stampede Bar & Grill",
+      "timestamp": "2026-03-06T09:43:04.645Z"
+    },
+    {
+      "id": "cmmbku0s404drc21ne2xydxpr",
+      "name": "Inklings Coffee and Tea",
+      "city": "Pleasanton",
+      "action": "unpublish",
+      "reason": "Coffee shop — not a wedding venue",
+      "before": {
+        "isPublished": false,
+        "auditStatus": "flagged"
+      },
+      "after": {
+        "isPublished": false,
+        "auditStatus": "flagged"
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"isPublished\"=true WHERE id='cmmbku0s404drc21ne2xydxpr'; -- Inklings Coffee and Tea",
+      "timestamp": "2026-03-06T09:43:04.645Z"
+    },
+    {
+      "id": "cmmbku0qz04dfc21ne1u5p3qb",
+      "name": "Alameda County Fairgrounds",
+      "city": "Pleasanton",
+      "action": "fix_venue_type",
+      "reason": "Was incorrectly typed as 'Golf Club'",
+      "before": {
+        "venueType": "Golf Club"
+      },
+      "after": {
+        "venueType": "Event Venue"
+      },
+      "reverseSql": "UPDATE \"Venue\" SET \"venueType\"='Golf Club' WHERE id='cmmbku0qz04dfc21ne1u5p3qb'; -- Alameda County Fairgrounds",
+      "timestamp": "2026-03-06T09:43:04.645Z"
+    }
+  ],
+  "keptWithNotes": [
+    {
+      "name": "Garré Vineyard, Restaurant, & Event Center",
+      "city": "Livermore",
+      "reason": "False positive — 'pizza' in menu text; legit winery wedding venue"
+    },
+    {
+      "name": "Pleasanton Marriott",
+      "city": "Pleasanton",
+      "reason": "False positive — 'cafe' in description; hotels host weddings"
+    },
+    {
+      "name": "Wildwood Rustic Rentals and Planning",
+      "city": "Dublin",
+      "reason": "Wedding rentals/planning company — URL dead, keep with flag"
+    },
+    {
+      "name": "Dublin Civic Center",
+      "city": "Dublin",
+      "reason": "Can host weddings — URL changed/dead, keep with flag"
+    },
+    {
+      "name": "Shannon Community Center",
+      "city": "Dublin",
+      "reason": "Community centers host weddings — URL dead, keep with flag"
+    },
+    {
+      "name": "Rosewood Commons",
+      "city": "Pleasanton",
+      "reason": "Event venue — URL temporarily unreachable, keep"
+    },
+    {
+      "name": "Casa de Milagros",
+      "city": "Livermore",
+      "reason": "Published legit venue — needs enrichment, not removal"
+    },
+    {
+      "name": "The Martinelli Event Center",
+      "city": "Livermore",
+      "reason": "Event center — needs description, keep"
+    },
+    {
+      "name": "Tri-Valley Quarter Midget Association",
+      "city": "Livermore",
+      "reason": "Already unpublished — leave as-is"
+    },
+    {
+      "name": "R PLACE MUSIC CLUB",
+      "city": "Livermore",
+      "reason": "Already unpublished — leave as-is"
+    }
+  ],
+  "falsePositivePatternsIdentified": [
+    "pizza",
+    "cafe",
+    "bar & grill (in description, not name)"
+  ],
+  "reverseInstructions": "To reverse any change, run the SQL in entry.reverseSql against your local or Neon DB."
+}
