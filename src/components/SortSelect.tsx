@@ -1,14 +1,15 @@
 "use client";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 export function SortSelect({ current }: { current: string }) {
   const router = useRouter();
   const sp = useSearchParams();
+  const pathname = usePathname(); // preserves /venues/california
 
   function onChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const params = new URLSearchParams(sp.toString());
     params.set("sort", e.target.value);
-    router.push(`/venues?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`);
   }
 
   return (
