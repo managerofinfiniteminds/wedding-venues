@@ -55,13 +55,7 @@ export function Nav({ q }: { q?: string }) {
           <Link href="/venues" className="text-sm text-gray-600 hover:text-[#3b6341] font-medium px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
             Browse States
           </Link>
-          <Link
-            href="/map"
-            className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-lg transition-colors text-[#3b6341] hover:bg-[#3b6341] hover:text-white border border-[#3b6341]"
-          >
-            <PinIcon className="w-4 h-4" />
-            Map
-          </Link>
+
         </div>
 
         {/* Hamburger — mobile only */}
@@ -95,14 +89,6 @@ export function Nav({ q }: { q?: string }) {
             >
               <svg className="w-5 h-5 text-[#3b6341]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" /></svg>
               Browse All States
-            </Link>
-            <Link
-              href="/map"
-              onClick={closeMenu}
-              className="flex items-center gap-3 px-4 py-4 rounded-2xl text-base font-semibold text-[#3b6341] hover:bg-[#f0f4f0] transition-colors"
-            >
-              <PinIcon className="w-5 h-5" />
-              Map View
             </Link>
             <Link
               href="/venues/california"
