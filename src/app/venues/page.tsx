@@ -11,12 +11,12 @@ export const metadata: Metadata = {
 
 // Curated featured states — most popular for weddings
 const FEATURED_STATES = [
-  { slug: "california",  label: "California",  image: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=600&q=85&auto=format&fit=crop" }, // vineyard rows
-  { slug: "new-york",    label: "New York",    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600&q=85&auto=format&fit=crop" }, // Hudson Valley landscape
-  { slug: "texas",       label: "Texas",       image: "https://images.unsplash.com/photo-1523413307857-ef1e6b8c9f44?w=600&q=85&auto=format&fit=crop" }, // Texas hill country winery
-  { slug: "florida",     label: "Florida",     image: "https://images.unsplash.com/photo-1510525009512-ad7fc2a8f5f6?w=600&q=85&auto=format&fit=crop" }, // lush garden estate
-  { slug: "tennessee",   label: "Tennessee",   image: "https://images.unsplash.com/photo-1504196606672-aef5c9cefc92?w=600&q=85&auto=format&fit=crop" }, // rolling green hills
-  { slug: "colorado",    label: "Colorado",    image: "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=600&q=85&auto=format&fit=crop" }, // mountain meadow
+  { slug: "california",  label: "California",  image: "/state-california.jpg" },
+  { slug: "new-york",    label: "New York",    image: "/state-new-york.jpg" },
+  { slug: "texas",       label: "Texas",       image: "/state-texas.jpg" },
+  { slug: "florida",     label: "Florida",     image: "/state-florida.jpg" },
+  { slug: "tennessee",   label: "Tennessee",   image: "/state-tennessee.jpg" },
+  { slug: "colorado",    label: "Colorado",    image: "/state-colorado.jpg" },
 ];
 
 export default async function VenuesHubPage() {
