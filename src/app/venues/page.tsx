@@ -11,12 +11,12 @@ export const metadata: Metadata = {
 
 // Curated featured states — most popular for weddings
 const FEATURED_STATES = [
-  { slug: "california",    label: "California",    emoji: "🍷" },
-  { slug: "new-york",      label: "New York",       emoji: "🗽" },
-  { slug: "texas",         label: "Texas",          emoji: "🤠" },
-  { slug: "florida",       label: "Florida",        emoji: "🌴" },
-  { slug: "tennessee",     label: "Tennessee",      emoji: "🎸" },
-  { slug: "colorado",      label: "Colorado",       emoji: "⛰️" },
+  { slug: "california",  label: "California",  image: "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=600&q=80&auto=format&fit=crop" },
+  { slug: "new-york",    label: "New York",    image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=600&q=80&auto=format&fit=crop" },
+  { slug: "texas",       label: "Texas",       image: "https://images.unsplash.com/photo-1531218150217-54595bc2b934?w=600&q=80&auto=format&fit=crop" },
+  { slug: "florida",     label: "Florida",     image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&q=80&auto=format&fit=crop" },
+  { slug: "tennessee",   label: "Tennessee",   image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&auto=format&fit=crop" },
+  { slug: "colorado",    label: "Colorado",    image: "https://images.unsplash.com/photo-1539802901845-c31e4f3f4091?w=600&q=80&auto=format&fit=crop" },
 ];
 
 export default async function VenuesHubPage() {
@@ -97,17 +97,28 @@ export default async function VenuesHubPage() {
           </h2>
           <p className="text-gray-500 text-center text-sm mb-8">Start with the most sought-after states</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {FEATURED_STATES.map(({ slug, label, emoji }) => {
+            {FEATURED_STATES.map(({ slug, label, image }) => {
               const count = countMap.get(slug) ?? 0;
               return (
                 <Link
                   key={slug}
                   href={`/venues/${slug}`}
-                  className="group flex flex-col items-center text-center bg-[#f8f7f5] hover:bg-[#3b6341] border border-gray-100 hover:border-[#3b6341] rounded-2xl px-4 py-5 transition-all duration-200 shadow-sm hover:shadow-md"
+                  className="group relative overflow-hidden rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 aspect-[3/4]"
                 >
-                  <span className="text-3xl mb-2">{emoji}</span>
-                  <span className="font-semibold text-gray-800 group-hover:text-white text-sm transition-colors">{label}</span>
-                  <span className="text-xs text-gray-400 group-hover:text-white/70 mt-0.5 transition-colors">{count.toLocaleString()} venues</span>
+                  {/* Background image */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={image}
+                    alt={label}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  {/* Text */}
+                  <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
+                    <p className="font-semibold text-sm leading-tight">{label}</p>
+                    <p className="text-white/70 text-xs mt-0.5">{count.toLocaleString()} venues</p>
+                  </div>
                 </Link>
               );
             })}
