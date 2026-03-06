@@ -183,13 +183,7 @@ export default async function StateVenuesPage({
                 </svg>
                 List
               </span>
-              <Link
-                href="/map"
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-600 hover:bg-green-50 hover:text-[#3b6341] transition-colors"
-              >
-                <PinIcon className="w-4 h-4" />
-                Map
-              </Link>
+
             </div>
             <div className="flex items-center gap-2">
               <label htmlFor="sort" className="text-sm text-gray-600 hidden sm:block">Sort:</label>
@@ -284,14 +278,7 @@ export default async function StateVenuesPage({
       </div>
     </div>
 
-    {/* Floating Map button */}
-    <Link
-      href="/map"
-      className="fixed bottom-6 right-6 z-40 flex items-center gap-2 bg-[#3b6341] text-white text-sm font-semibold px-4 py-3 rounded-full shadow-lg hover:bg-[#2f5035] transition-all hover:shadow-xl hover:scale-105 active:scale-95"
-    >
-      <PinIcon className="w-5 h-5" />
-      View Map
-    </Link>
+
     </>
   );
 }

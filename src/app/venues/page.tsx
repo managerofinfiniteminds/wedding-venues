@@ -160,13 +160,7 @@ export default async function VenuesHubPage() {
       <section className="py-16 bg-[#3b6341] text-white text-center">
         <div className="max-w-xl mx-auto px-4">
           <h2 className="playfair text-3xl font-bold mb-3">Your perfect day starts here.</h2>
-          <p className="text-white/80 mb-7 text-sm">Explore venues by map, filter by style, and find the one that feels like you.</p>
-          <Link
-            href="/map"
-            className="inline-flex items-center gap-2 bg-white text-[#3b6341] font-semibold px-8 py-3.5 rounded-full text-sm shadow hover:shadow-lg hover:bg-[#f0f4f0] transition-all"
-          >
-            Explore the Map
-          </Link>
+          <p className="text-white/80 text-sm">Filter by style, browse by state, and find the one that feels like you.</p>
         </div>
       </section>
     </div>
