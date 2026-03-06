@@ -6,21 +6,36 @@
  *   npx tsx@latest scripts/audit/pipeline.ts --cities livermore,dublin,pleasanton
  *   npx tsx@latest scripts/audit/pipeline.ts --all --limit 200
  *   npx tsx@latest scripts/audit/pipeline.ts --cities livermore --dry-run
+ *   npx tsx@latest scripts/audit/pipeline.ts --photos-only --force-photos --cities livermore
  *
  * Steps (in order):
- *   1. Enrich   — web search: fill missing description / website
- *   2. Clean    — fix scraped junk descriptions
- *   3. Re-gate  — re-check published venues for wedding relevance (catches misclassifications)
- *   4. Photo    — vision-score primary photo; swap from Places library if bad
- *   5. Decide   — publish confirmed, unpublish junk, leave uncertain
- *   6. Sync     — push changes to Neon production
- *   7. Report   — regenerate /audit/ HTML
+ *   0. Skip gate  — skip venues processed within --fresh-days (default 30) unless --force
+ *   1. Enrich     — web search: fill missing description / website / photo URL
+ *   2. Clean      — fix scraped junk descriptions
+ *   3. Re-gate    — re-check published venues for wedding relevance
+ *   4. Photo      — vision-score; swap website-first, Places fallback; mirror to R2
+ *   5. Decide     — publish confirmed, unpublish junk
+ *   6. Sync       — push changes to Neon production
+ *   7. Report     — regenerate /audit/ HTML
+ *
+ * Skip logic (cost control):
+ *   - Venues with pipelineProcessedAt within --fresh-days are skipped entirely
+ *   - Photos with photoAuditedAt within 30 days are skipped unless --force-photos
+ *   - Confirmed non-wedding venues never re-processed
+ *   - Use --force to override all skips
+ *
+ * Photo source priority:
+ *   1. Venue website (og:image, gallery pages) → uploaded to R2
+ *   2. Google Places fallback (if website fails) → uploaded to R2
+ *   3. Flag as "needs-manual" if no good photo found
+ *   photoSource column tracks where each photo came from.
  *
  * Rules:
  *   - Never delete records
  *   - COUNT verified before/after every write
- *   - Skip confirmed non-wedding venues (don't re-litigate)
+ *   - Confirmed non-wedding venues never re-litigated
  *   - All changes logged to scripts/audit/runs/YYYY-MM-DD-HHmm.json
+ *   - Pipeline crashes resume safely (pipelineProcessedAt = checkpoint)
  */
 import "dotenv/config";
 import { Pool } from "pg";
@@ -45,16 +60,20 @@ const prisma = new PrismaClient({ adapter });
 
 // ── CLI ───────────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
-const dryRun    = args.includes("--dry-run");
+const dryRun      = args.includes("--dry-run");
 const skipSync    = args.includes("--skip-sync");
 const photosOnly  = args.includes("--photos-only");   // skip enrich/clean/regate, just redo photos
-const forcePhotos = args.includes("--force-photos");  // re-score ALL photos, not just bad ones
-const citiesArg = args[args.indexOf("--cities") + 1];
+const forcePhotos = args.includes("--force-photos");  // re-score ALL photos even if recently audited
+const forceAll    = args.includes("--force");          // override all skip logic
+const citiesArg   = args[args.indexOf("--cities") + 1];
 const targetCities = citiesArg
   ? citiesArg.split(",").map(c => c.trim().replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()))
   : [];
-const limitArg = args[args.indexOf("--limit") + 1];
-const limitN   = limitArg ? parseInt(limitArg) : undefined;
+const limitArg    = args[args.indexOf("--limit") + 1];
+const limitN      = limitArg ? parseInt(limitArg) : undefined;
+const freshDaysArg = args[args.indexOf("--fresh-days") + 1];
+const FRESH_DAYS  = freshDaysArg ? parseInt(freshDaysArg) : 30; // skip venues processed within N days
+const PHOTO_FRESH_DAYS = 30; // skip photo re-score if audited within N days
 
 // ── Models ────────────────────────────────────────────────────────────────
 const MODEL_ENRICH = "x-ai/grok-3-mini:online";
@@ -206,7 +225,7 @@ async function syncToNeon(ids: string[]) {
   try {
     const venues = await prisma.venue.findMany({ where: { id: { in: ids } } });
     for (const v of venues) {
-      const s = (x: string | null) => x ? `'${x.replace(/'/g, "''")}'` : "NULL";
+      const s = (x: string | null | undefined) => x ? `'${x.replace(/'/g, "''")}'` : "NULL";
       const tags = v.styleTags?.length
         ? `ARRAY[${v.styleTags.map(t => `'${t.replace(/'/g,"''")}'`).join(",")}]::text[]`
         : "ARRAY[]::text[]";
@@ -219,7 +238,9 @@ async function syncToNeon(ids: string[]) {
           "hasBridalSuite"=${v.hasBridalSuite},"hasOutdoorSpace"=${v.hasOutdoorSpace},
           "hasIndoorSpace"=${v.hasIndoorSpace},"onSiteCoordinator"=${v.onSiteCoordinator},
           "auditStatus"=${s(v.auditStatus)},"auditScore"=${v.auditScore ?? "NULL"},
-          "lastAuditedAt"=NOW()
+          "photoSource"=${s(v.photoSource)},"lastAuditedAt"=NOW(),
+          "pipelineProcessedAt"=${v.pipelineProcessedAt ? `'${v.pipelineProcessedAt.toISOString()}'` : "NULL"},
+          "photoAuditedAt"=${v.photoAuditedAt ? `'${v.photoAuditedAt.toISOString()}'` : "NULL"}
         WHERE id='${v.id}';`);
     }
     console.log(`  → Synced ${venues.length} to Neon`);
@@ -253,18 +274,40 @@ async function main() {
 
   // Categorize
   const confirmed = venues.filter(v => isConfirmedNonWedding(v.auditFlags));
-  const needsEnrich  = venues.filter(v => !confirmed.includes(v) && (!v.description || v.description.trim().length < 30));
-  const needsClean   = venues.filter(v => !confirmed.includes(v) && v.description && isJunk(v.description));
-  // Re-gate: published venues that haven't been manually confirmed OR whose description looks suspicious
-  const needsReGate  = venues.filter(v => !confirmed.includes(v) && v.isPublished && v.auditStatus !== "flagged" &&
+  const now = new Date();
+  const freshCutoff = new Date(now.getTime() - FRESH_DAYS * 24 * 60 * 60 * 1000);
+  const photoCutoff = new Date(now.getTime() - PHOTO_FRESH_DAYS * 24 * 60 * 60 * 1000);
+
+  // Recently processed = skip (unless --force)
+  const recentlyProcessed = (v: (typeof venues)[0]) =>
+    !forceAll && v.pipelineProcessedAt && new Date(v.pipelineProcessedAt) > freshCutoff;
+
+  const needsEnrich = venues.filter(v =>
+    !confirmed.includes(v) && !recentlyProcessed(v) &&
+    (!v.description || v.description.trim().length < 30));
+
+  const needsClean = venues.filter(v =>
+    !confirmed.includes(v) && !recentlyProcessed(v) &&
+    v.description && isJunk(v.description));
+
+  const needsReGate = venues.filter(v =>
+    !confirmed.includes(v) && !recentlyProcessed(v) &&
+    v.isPublished && v.auditStatus !== "flagged" &&
     v.description && v.description.length >= 30);
-  // Description mismatch: catch venues where description was written about a different venue
-  const descMismatch = venues.filter(v => !confirmed.includes(v) && v.description &&
+
+  const descMismatch = venues.filter(v =>
+    !confirmed.includes(v) && v.description &&
     descriptionMentionsWrongVenue(v.name, v.description));
-  // Photo check: --force-photos rescans ALL published venues; default only scans published ones
-  const needsPhoto = forcePhotos
-    ? venues.filter(v => !confirmed.includes(v) && v.isPublished)
-    : venues.filter(v => !confirmed.includes(v) && v.isPublished);
+
+  // Photo: skip if recently audited unless --force-photos or --force
+  const needsPhoto = venues.filter(v =>
+    !confirmed.includes(v) && v.isPublished && (
+      forceAll || forcePhotos ||
+      !v.photoAuditedAt ||
+      new Date(v.photoAuditedAt) < photoCutoff ||
+      !v.primaryPhotoUrl ||
+      v.photoSource === "places" // always try to upgrade Places photos to website/R2
+    ));
 
   console.log(`📋 Queue: ${needsEnrich.length} enrich  ${needsClean.length} clean  ${needsReGate.length} re-gate  ${needsPhoto.length} photo  ${descMismatch.length} desc-mismatch\n`);
 
@@ -389,32 +432,47 @@ async function main() {
       try {
         const result = await auditAndFixPhoto(fresh, OR_KEY, forcePhotos);
 
-        // After choosing the best photo URL, mirror it to R2 for stability
+        // After choosing best photo, mirror to R2 for stable hosting
         const chosenUrl = result.action === "swapped" ? result.newUrl! : fresh.primaryPhotoUrl;
         let finalUrl = chosenUrl;
-        if (!dryRun && chosenUrl && !chosenUrl.startsWith(process.env.R2_PUBLIC_URL ?? "~~never~~")) {
+        let finalSource = result.source === "website" ? "website" : result.source === "places" ? "places" : (fresh.photoSource ?? "places");
+        const r2PublicUrl = process.env.R2_PUBLIC_URL ?? "";
+        if (!dryRun && chosenUrl && r2PublicUrl && !chosenUrl.startsWith(r2PublicUrl)) {
           const r2Url = await mirrorPhotoToR2(chosenUrl, fresh.slug ?? fresh.id);
-          if (r2Url) finalUrl = r2Url;
+          if (r2Url) { finalUrl = r2Url; finalSource = "r2"; }
+        } else if (chosenUrl?.startsWith(r2PublicUrl)) {
+          finalSource = "r2";
         }
 
+        const photoUpdate = {
+          primaryPhotoUrl: finalUrl!,
+          photoSource: finalSource,
+          photoAuditedAt: new Date(),
+          lastAuditedAt: new Date(),
+        };
+
         if (result.action === "ok") {
-          const r2note = finalUrl !== chosenUrl ? " →R2" : "";
-          console.log(`✓ photo ok (${result.oldScore}/10)${r2note}  ${result.reason.slice(0, 45)}`);
-          if (!dryRun && finalUrl !== fresh.primaryPhotoUrl) {
-            await prisma.venue.update({ where: { id: v.id }, data: { primaryPhotoUrl: finalUrl!, lastAuditedAt: new Date() } });
-            if (!changed.includes(v.id)) changed.push(v.id);
-          }
-          log.push({ name: v.name, city: v.city, action: "photo:ok", changes: [], reason: `${result.oldScore}/10 — ${result.reason}` });
-        } else if (result.action === "swapped") {
-          const r2note = finalUrl !== result.newUrl ? " →R2" : "";
-          console.log(`🔄 photo swapped (${result.oldScore}→${result.newScore}/10)${r2note}  ${result.reason.slice(0, 38)}`);
+          const note = finalSource === "r2" && finalUrl !== fresh.primaryPhotoUrl ? " →R2" : "";
+          console.log(`✓ photo ok (${result.oldScore}/10)${note}  [${finalSource}] ${result.reason.slice(0, 38)}`);
           if (!dryRun) {
-            await prisma.venue.update({ where: { id: v.id }, data: { primaryPhotoUrl: finalUrl!, lastAuditedAt: new Date() } });
+            await prisma.venue.update({ where: { id: v.id }, data: photoUpdate });
             if (!changed.includes(v.id)) changed.push(v.id);
           }
-          log.push({ name: v.name, city: v.city, action: "photo:swapped", changes: ["primaryPhotoUrl"], reason: result.reason });
+          log.push({ name: v.name, city: v.city, action: "photo:ok", changes: [], reason: `${result.oldScore}/10 [${finalSource}] — ${result.reason}` });
+        } else if (result.action === "swapped") {
+          const note = finalSource === "r2" ? " →R2" : "";
+          console.log(`🔄 photo swapped (${result.oldScore}→${result.newScore}/10)${note}  [${finalSource}] ${result.reason.slice(0, 32)}`);
+          if (!dryRun) {
+            await prisma.venue.update({ where: { id: v.id }, data: photoUpdate });
+            if (!changed.includes(v.id)) changed.push(v.id);
+          }
+          log.push({ name: v.name, city: v.city, action: "photo:swapped", changes: ["primaryPhotoUrl"], reason: `[${finalSource}] ${result.reason}` });
         } else if (result.action === "no-good-photo") {
           console.log(`⚠️  no good photo (${result.oldScore}/10)  ${result.reason.slice(0, 45)}`);
+          if (!dryRun) {
+            // Still record that we audited it, even if no improvement
+            await prisma.venue.update({ where: { id: v.id }, data: { photoAuditedAt: new Date(), photoSource: fresh.photoSource ?? "places" } });
+          }
           log.push({ name: v.name, city: v.city, action: "photo:needs-manual", changes: [], reason: result.reason });
         } else {
           console.log(`— ${result.action}`);
@@ -431,6 +489,24 @@ async function main() {
   if (afterTotal !== beforeTotal) {
     console.error(`\n🚨 COUNT MISMATCH: ${beforeTotal} → ${afterTotal}. Aborting sync.`);
     process.exit(1);
+  }
+
+  // ── PIPELINE PROCESSED STAMP ─────────────────────────────────────────────
+  // Mark all processed venues with pipelineProcessedAt = now (checkpoint for --fresh-days skip)
+  if (!dryRun) {
+    const processedIds = [...new Set([
+      ...needsEnrich.map(v => v.id),
+      ...needsClean.map(v => v.id),
+      ...needsReGate.map(v => v.id),
+      ...needsPhoto.map(v => v.id),
+    ])];
+    if (processedIds.length) {
+      await prisma.venue.updateMany({
+        where: { id: { in: processedIds } },
+        data: { pipelineProcessedAt: new Date() },
+      });
+      processedIds.forEach(id => { if (!changed.includes(id)) changed.push(id); });
+    }
   }
 
   // ── SYNC ─────────────────────────────────────────────────────────────────

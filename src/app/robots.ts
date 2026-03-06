@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/_next/", "/audit/"],
+        disallow: ["/api/", "/_next/", "/audit/", "/data/"],
       },
     ],
     sitemap: "https://greenbowtie.com/sitemap.xml",

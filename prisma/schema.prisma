@@ -116,10 +116,13 @@ model Venue {
   isPublished       Boolean  @default(false)
 
   // Audit
-  lastAuditedAt  DateTime?
-  auditScore     Int?
-  auditStatus    String?   // "unaudited" | "clean" | "needs_review" | "flagged"
-  auditFlags     Json?     // AuditFlag[]
+  lastAuditedAt       DateTime?
+  auditScore          Int?
+  auditStatus         String?   // "unaudited" | "clean" | "needs_review" | "flagged"
+  auditFlags          Json?     // AuditFlag[]
+  pipelineProcessedAt DateTime? // last time pipeline fully ran on this venue
+  photoSource         String?   // "r2" | "website" | "places" | "manual"
+  photoAuditedAt      DateTime? // last time photo was vision-scored
 
   // Description
   description String?
