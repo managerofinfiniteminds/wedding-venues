@@ -2,6 +2,7 @@ import { getLiveStates } from "@/lib/states";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Metadata } from "next";
+import { USStateMapClient } from "@/components/USStateMapClient";
 
 export const metadata: Metadata = {
   title: "Wedding Venues in Every State | Green Bow Tie",
@@ -114,14 +115,23 @@ export default async function VenuesHubPage() {
         </div>
       </section>
 
-      {/* ── ALL STATES ── */}
+      {/* ── INTERACTIVE US MAP ── */}
       <section id="browse" className="py-16 bg-[#f8f7f5]">
         <div className="max-w-screen-xl mx-auto px-4">
           <h2 className="playfair text-3xl md:text-4xl font-bold text-gray-800 mb-2 text-center">
             Browse All 50 States
           </h2>
-          <p className="text-gray-500 text-center text-sm mb-10">Every state, every style — find the venue that's yours</p>
+          <p className="text-gray-500 text-center text-sm mb-8">Click any state to browse venues</p>
+          <div className="max-w-4xl mx-auto">
+            <USStateMapClient onStateSelect={() => {}} linkMode />
+          </div>
+        </div>
+      </section>
 
+      {/* ── STATE GRID (fallback / mobile) ── */}
+      <section className="pb-16 bg-[#f8f7f5]">
+        <div className="max-w-screen-xl mx-auto px-4">
+          <p className="text-gray-500 text-center text-sm mb-6">Or pick a state directly</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {liveStates.map((s) => {
               const count = countMap.get(s.slug) ?? 0;
