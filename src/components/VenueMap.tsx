@@ -197,22 +197,18 @@ export function VenueMap({ initialVenues = [], stateSlug }: VenueMapProps) {
       spiderfyOnMaxZoom: true,
       showCoverageOnHover: false,
       zoomToBoundsOnClick: true,
-      iconCreateFunction: (c: any) => {
-        const count = c.getChildCount();
-        const size = count < 10 ? 34 : count < 100 ? 40 : 48;
+      iconCreateFunction: (_c: any) => {
         return L.divIcon({
           html: `<div style="
-            width:${size}px;height:${size}px;
-            background:#3b6341;color:white;
-            border-radius:50%;display:flex;
-            align-items:center;justify-content:center;
-            font-weight:700;font-size:${size < 40 ? 12 : 13}px;
+            width:20px;height:20px;
+            background:#3b6341;
+            border-radius:50%;
             border:3px solid white;
             box-shadow:0 2px 8px rgba(0,0,0,0.3);
-          ">${count}</div>`,
+          "></div>`,
           className: "",
-          iconSize: [size, size],
-          iconAnchor: [size / 2, size / 2],
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
         });
       },
     }) as L.MarkerClusterGroup;
