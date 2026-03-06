@@ -1,0 +1,720 @@
+{
+  "runAt": "2026-03-06T16:23:56.725Z",
+  "cities": [
+    "Livermore",
+    "Dublin",
+    "Pleasanton"
+  ],
+  "dryRun": false,
+  "before": {
+    "total": 70,
+    "published": 38
+  },
+  "after": {
+    "total": 70,
+    "published": 43
+  },
+  "changed": 25,
+  "log": [
+    {
+      "name": "Creative Space Studios",
+      "city": "Dublin",
+      "action": "enriched+published",
+      "changes": [
+        "description",
+        "hasBridalSuite",
+        "hasIndoorSpace"
+      ],
+      "reason": "The studio has been used for bridal showers and offers event spaces with natural light and amenities, suggesting it's suitable for wedding-related events, though it's not explicitly marketed as a primary wedding venue."
+    },
+    {
+      "name": "Dublin Technology Center Workspaces",
+      "city": "Dublin",
+      "action": "enriched+published",
+      "changes": [
+        "description",
+        "maxGuests",
+        "baseRentalMin",
+        "venueType",
+        "hasBridalSuite",
+        "hasOutdoorSpace",
+        "hasIndoorSpace",
+        "onSiteCoordinator"
+      ],
+      "reason": "The web search results consistently describe Dublin Ranch Golf Course as a wedding venue with detailed features for events, despite the query mentioning 'Dublin Technology Center Workspaces', which was not found in the results."
+    },
+    {
+      "name": "Badrinath Hall",
+      "city": "Livermore",
+      "action": "enriched+published",
+      "changes": [
+        "description",
+        "website",
+        "maxGuests",
+        "venueType",
+        "hasIndoorSpace"
+      ],
+      "reason": "The web search results from livermoretemple.org confirm that Badrinath Event Hall is specifically designed and used for weddings and events."
+    },
+    {
+      "name": "Club Moto Motocross Track",
+      "city": "Livermore",
+      "action": "enriched:uncertain",
+      "changes": [],
+      "reason": "The provided search results do not mention Club Moto Motocross Track and focus on golf and country club venues in Livermore, indicating it is unlikely to be a wedding venue."
+    },
+    {
+      "name": "Del Valle Campground Amphitheater",
+      "city": "Livermore",
+      "action": "enriched:uncertain",
+      "changes": [
+        "hasOutdoorSpace"
+      ],
+      "reason": "The web search results primarily describe Del Valle Campground Amphitheater as a camping and event site with an amphitheater for general gatherings, without any specific mention of wedding services or capabilities."
+    },
+    {
+      "name": "R PLACE MUSIC CLUB",
+      "city": "Livermore",
+      "action": "enriched:uncertain",
+      "changes": [
+        "hasOutdoorSpace",
+        "hasIndoorSpace"
+      ],
+      "reason": "The search results describe R Place Music Club as a night club and music venue focused on live entertainment, with no references to wedding services or events."
+    },
+    {
+      "name": "Stampede Bar & Grill",
+      "city": "Livermore",
+      "action": "enriched+published",
+      "changes": [
+        "description",
+        "maxGuests",
+        "hasOutdoorSpace",
+        "hasIndoorSpace"
+      ],
+      "reason": "Although Livermore's Stampede is primarily described for general events like line dancing and community gatherings, its versatile indoor and outdoor spaces suggest it could accommodate weddings, based on similar venues in the search results."
+    },
+    {
+      "name": "Tri-Valley Quarter Midget Association",
+      "city": "Livermore",
+      "action": "enriched:uncertain",
+      "changes": [],
+      "reason": "The web search results did not include any information on 'Tri-Valley Quarter Midget Association' as a wedding venue in Livermore, CA, focusing instead on other local venues like Clubhouse at Las Positas."
+    },
+    {
+      "name": "Dolores Bengtson Aquatic Center",
+      "city": "Pleasanton",
+      "action": "enriched:uncertain",
+      "changes": [
+        "description",
+        "hasOutdoorSpace",
+        "hasIndoorSpace"
+      ],
+      "reason": "The center is listed under the City of Pleasanton's event venues for rentals, suggesting it could host weddings despite being primarily an aquatic facility."
+    },
+    {
+      "name": "Muslim Community Center - East Bay (MCC East Bay)",
+      "city": "Pleasanton",
+      "action": "enriched+published",
+      "changes": [
+        "description",
+        "maxGuests",
+        "baseRentalMin",
+        "venueType",
+        "hasOutdoorSpace",
+        "hasIndoorSpace",
+        "onSiteCoordinator"
+      ],
+      "reason": "The official MCC East Bay website confirms they offer dedicated spaces and services for Nikkah weddings, including room rentals and on-site coordination."
+    },
+    {
+      "name": "Pirates of Emerson Haunted Themed Park",
+      "city": "Pleasanton",
+      "action": "unpublished:not-wedding",
+      "changes": [
+        "hasOutdoorSpace",
+        "hasIndoorSpace"
+      ],
+      "reason": "The search results consistently describe Pirates of Emerson as a haunted theme park and Halloween event at the Alameda County Fairgrounds, with no mention of it being used as a wedding venue."
+    },
+    {
+      "name": "Pump It Up Pleasanton Kids Birthdays and More",
+      "city": "Pleasanton",
+      "action": "unpublished:not-wedding",
+      "changes": [
+        "hasIndoorSpace",
+        "onSiteCoordinator"
+      ],
+      "reason": "Pump It Up Pleasanton is primarily designed for children's birthday parties and indoor play, not weddings, as indicated by its focus in the search results and general venue descriptions."
+    },
+    {
+      "name": "Caldeira Estate",
+      "city": "Livermore",
+      "action": "cleaned",
+      "changes": [
+        "description"
+      ],
+      "reason": "junk description replaced"
+    },
+    {
+      "name": "Fenestra Winery",
+      "city": "Livermore",
+      "action": "cleaned",
+      "changes": [
+        "description"
+      ],
+      "reason": "junk description replaced"
+    },
+    {
+      "name": "Dublin Ranch Golf Course",
+      "city": "Dublin",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions outdoor wedding ceremonies and an indoor ballroom for receptions, indicating it is a wedding venue."
+    },
+    {
+      "name": "Hillview Event Hall",
+      "city": "Dublin",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions it being an ideal setting for weddings with a banquet hall and amenities like a stage and dance floor."
+    },
+    {
+      "name": "Par 5 Golfing",
+      "city": "Dublin",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions weddings, ceremony lawn, and accommodating wedding guests."
+    },
+    {
+      "name": "Peacock Banquet Hall",
+      "city": "Dublin",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions specializing in hosting weddings and events, offering banquet halls suitable for ceremonies and receptions."
+    },
+    {
+      "name": "Shannon Community Center",
+      "city": "Dublin",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions it as a premier wedding venue and details its features suitable for weddings."
+    },
+    {
+      "name": "Almost Famous Wine",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The venue description explicitly mentions a world-class stage and event space, suggesting suitability for wedding receptions or events."
+    },
+    {
+      "name": "Caldeira Estate",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions weddings and hosting special events, indicating it's a wedding venue."
+    },
+    {
+      "name": "Clubhouse",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions the venue as a wedding venue and details ceremony and reception spaces."
+    },
+    {
+      "name": "Clubhouse at Las Positas",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions weddings and special events venue, along with planning and packages."
+    },
+    {
+      "name": "Concannon Vineyard",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions hosting events from intimate gatherings to large-scale celebrations and highlights their experience in bringing events together."
+    },
+    {
+      "name": "Concerts at Wente Vineyards",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "While primarily known for concerts, the description mentions the winery setting, suggesting the possibility of hosting weddings or related events on the grounds."
+    },
+    {
+      "name": "Del Valle Winery",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly states the venue is perfect for weddings and provides a contact for wedding information."
+    },
+    {
+      "name": "Fenestra Winery",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions weddings and special events, highlighting its suitability as a wedding venue."
+    },
+    {
+      "name": "Garré Vineyard, Restaurant, & Event Center",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The venue description explicitly mentions seating capacity for events, a ceremony space, and an elegant dining room, indicating it hosts weddings."
+    },
+    {
+      "name": "Good Morning Maxwell",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions the venue is perfect for micro-weddings and intimate celebrations."
+    },
+    {
+      "name": "Las Positas Vineyards",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions that the venue is ideal for weddings, featuring ceremony spaces and reception areas."
+    },
+    {
+      "name": "Longevity Wines Inc",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions creating customized events, implying wedding hosting."
+    },
+    {
+      "name": "Mitchell Katz Winery",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description mentions a winery with a converted barn, suggesting potential space for events, but doesn't explicitly state it hosts weddings."
+    },
+    {
+      "name": "Murrieta's Well",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions that Murrieta's Well offers a setting for weddings."
+    },
+    {
+      "name": "Poppy Ridge Golf Course",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions weddings, ceremonies, receptions, and a dedicated events director with wedding expertise, indicating it is a wedding venue."
+    },
+    {
+      "name": "Reinstein Ranch",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions weddings and describes the venue as hosting barn-style and outdoor ranch weddings."
+    },
+    {
+      "name": "Retzlaff Vineyards",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions the venue's atmosphere and suitability for guests, indicating it hosts events like weddings."
+    },
+    {
+      "name": "Rios-Lovell Winery",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The venue is a winery with picnic grounds and a concert center, suggesting it can host wedding-related events."
+    },
+    {
+      "name": "Robert Livermore Community Center",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly states that the venue hosts weddings with options for both indoor and outdoor ceremonies."
+    },
+    {
+      "name": "Stony Ridge Winery",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description mentions an elegant tasting room, patio, and garden courtyard, suggesting suitability for wedding events."
+    },
+    {
+      "name": "The Martinelli Event Center",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions the venue is ideal for weddings and describes features suitable for ceremonies and receptions."
+    },
+    {
+      "name": "The Purple Orchid Wine Country Resort And Spa",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions event spaces, ceremonies, receptions, and accommodations for wedding weekends, indicating it caters to weddings."
+    },
+    {
+      "name": "The Ranch at Birch Creek",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions gathering and celebrating, indicating suitability for weddings."
+    },
+    {
+      "name": "Vineyard View Events",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The venue type is Vineyard & Winery and the description mentions 'Exceptional Event Space for Memorable Occasions' indicating it hosts events, likely including weddings."
+    },
+    {
+      "name": "Wente Vineyards",
+      "city": "Livermore",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions hosting weddings since 1883 and describes spaces suitable for wedding ceremonies and receptions."
+    },
+    {
+      "name": "Alameda County Fairgrounds",
+      "city": "Pleasanton",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions the venue hosts wedding ceremonies and receptions, and highlights specific areas suitable for these events."
+    },
+    {
+      "name": "Casa Real at Ruby Hill Winery",
+      "city": "Pleasanton",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions it being an idyllic setting for weddings with various features suitable for ceremonies and receptions."
+    },
+    {
+      "name": "Palm Event Center in the Vineyard",
+      "city": "Pleasanton",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions weddings, indoor and outdoor spaces, and ceremony locations, indicating it is a wedding venue."
+    },
+    {
+      "name": "Pleasanton Marriott",
+      "city": "Pleasanton",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "Hotels and resorts commonly host weddings, and the presence of meeting rooms suggests event hosting capabilities."
+    },
+    {
+      "name": "Rosewood Commons",
+      "city": "Pleasanton",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions that Rosewood Commons provides versatile event spaces suitable for weddings, including a courtyard for outdoor ceremonies and rooms for receptions."
+    },
+    {
+      "name": "Rubino Estates Winery",
+      "city": "Pleasanton",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The venue is a winery with outdoor space and likely hosts events, including weddings."
+    },
+    {
+      "name": "The Club at Castlewood",
+      "city": "Pleasanton",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions weddings, ceremonies, receptions, and guest capacity, indicating it is a wedding venue."
+    },
+    {
+      "name": "The Club at Ruby Hill",
+      "city": "Pleasanton",
+      "action": "confirmed",
+      "changes": [],
+      "reason": "The description explicitly mentions it as a wedding venue and highlights features relevant to weddings, such as ceremony sites and personalized wedding services."
+    },
+    {
+      "name": "Dublin Ranch Golf Course",
+      "city": "Dublin",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "7/10 — The photo shows the golf course grounds and a small building, which could be part of the venue."
+    },
+    {
+      "name": "Hillview Event Hall",
+      "city": "Dublin",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "7/10 — The photo shows an aerial view of the building exterior, parking lot, and playground, which is a good representation of the venue's grounds."
+    },
+    {
+      "name": "Par 5 Golfing",
+      "city": "Dublin",
+      "action": "photo:needs-manual",
+      "changes": [],
+      "reason": "All photos weak. Best available: 3/10. Manual review needed."
+    },
+    {
+      "name": "Peacock Banquet Hall",
+      "city": "Dublin",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "7/10 — The photo shows a decorated event space, likely for a party or celebration, which is relevant to a wedding venue listing."
+    },
+    {
+      "name": "Shannon Community Center",
+      "city": "Dublin",
+      "action": "photo:swapped",
+      "changes": [
+        "primaryPhotoUrl"
+      ],
+      "reason": "Replaced (3→8/10): The photo showcases the venue's interior space, set up for a wedding reception, which is appropriate for a wedding venue directory listing."
+    },
+    {
+      "name": "Almost Famous Wine",
+      "city": "Livermore",
+      "action": "photo:needs-manual",
+      "changes": [],
+      "reason": "All photos weak. Best available: 3/10. Manual review needed."
+    },
+    {
+      "name": "Caldeira Estate",
+      "city": "Livermore",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "8/10 — The photo showcases the outdoor space of the venue, including the pool, patio, and outdoor kitchen area, with a beautiful sunset in the background."
+    },
+    {
+      "name": "Clubhouse",
+      "city": "Livermore",
+      "action": "photo:swapped",
+      "changes": [
+        "primaryPhotoUrl"
+      ],
+      "reason": "Replaced (3→5/10): The photo shows a dessert table at a wedding venue, which is acceptable but not ideal as a primary photo."
+    },
+    {
+      "name": "Clubhouse at Las Positas",
+      "city": "Livermore",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "7/10 — The photo shows an outdoor patio area set up for a wedding reception at the Clubhouse at Las Positas, with a view of the golf course in the background."
+    },
+    {
+      "name": "Concannon Vineyard",
+      "city": "Livermore",
+      "action": "photo:swapped",
+      "changes": [
+        "primaryPhotoUrl"
+      ],
+      "reason": "Replaced (5→9/10): The photo showcases the venue's beautiful building and surrounding vineyard, making it an excellent choice for a primary photo."
+    },
+    {
+      "name": "Concerts at Wente Vineyards",
+      "city": "Livermore",
+      "action": "photo:swapped",
+      "changes": [
+        "primaryPhotoUrl"
+      ],
+      "reason": "Replaced (3→5/10): The photo shows a tunnel with barrels and candelabras, which could be part of the venue, but it's not a typical wedding venue shot."
+    },
+    {
+      "name": "Del Valle Winery",
+      "city": "Livermore",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "7/10 — The photo shows the entrance to the Del Valle Winery, with a wooden gate and arbor, and landscaping."
+    },
+    {
+      "name": "Fenestra Winery",
+      "city": "Livermore",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "7/10 — The photo shows the exterior of Fenestra Winery, which is a good representation of the venue."
+    },
+    {
+      "name": "Garré Vineyard, Restaurant, & Event Center",
+      "city": "Livermore",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "7/10 — The photo shows the exterior of the building and the surrounding grounds, which is a good representation of the venue."
+    },
+    {
+      "name": "Good Morning Maxwell",
+      "city": "Livermore",
+      "action": "photo:swapped",
+      "changes": [
+        "primaryPhotoUrl"
+      ],
+      "reason": "Replaced (5→8/10): The photo showcases the venue's event space, set up for a wedding reception with tables, chairs, and decorations."
+    },
+    {
+      "name": "Las Positas Vineyards",
+      "city": "Livermore",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "8/10 — The photo shows an attractive outdoor patio area with tables and chairs, umbrellas, and a view of the vineyard, making it a good venue shot."
+    },
+    {
+      "name": "Longevity Wines Inc",
+      "city": "Livermore",
+      "action": "photo:swapped",
+      "changes": [
+        "primaryPhotoUrl"
+      ],
+      "reason": "Replaced (5→8/10): The photo shows an attractive event space with a long table, chairs, and a unique stone wall, making it a good venue shot."
+    },
+    {
+      "name": "Mitchell Katz Winery",
+      "city": "Livermore",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "6/10 — The photo shows the winery's sign and a glimpse of the vineyard, which is acceptable but not ideal as a primary photo for a wedding venue listing."
+    },
+    {
+      "name": "Murrieta's Well",
+      "city": "Livermore",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "8/10 — The photo shows the exterior of Murrieta's Well with a vineyard in the foreground, which is a good representation of the venue's setting."
+    },
+    {
+      "name": "Poppy Ridge Golf Course",
+      "city": "Livermore",
+      "action": "photo:swapped",
+      "changes": [
+        "primaryPhotoUrl"
+      ],
+      "reason": "Replaced (5→8/10): The photo shows the exterior of the Poppy Ridge Golf Course building and the surrounding golf course, which is a good representation of the venue."
+    },
+    {
+      "name": "Reinstein Ranch",
+      "city": "Livermore",
+      "action": "photo:swapped",
+      "changes": [
+        "primaryPhotoUrl"
+      ],
+      "reason": "Replaced (5→8/10): The photo shows the exterior of a barn at night, decorated with lights, which is a good representation of a wedding venue."
+    },
+    {
+      "name": "Retzlaff Vineyards",
+      "city": "Livermore",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "7/10 — The photo shows an attractive outdoor space at Retzlaff Vineyards, with a gazebo, seating, and vineyard views, making it a good venue shot."
+    },
+    {
+      "name": "Rios-Lovell Winery",
+      "city": "Livermore",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "7/10 — The photo shows a vineyard, which is a good representation of the Rios-Lovell Winery and could be an attractive event space."
+    },
+    {
+      "name": "Robert Livermore Community Center",
+      "city": "Livermore",
+      "action": "photo:swapped",
+      "changes": [
+        "primaryPhotoUrl"
+      ],
+      "reason": "Replaced (3→9/10): The photo showcases a beautifully decorated ballroom setup for a wedding reception, highlighting the venue's elegance and suitability for such events."
+    },
+    {
+      "name": "Stony Ridge Winery",
+      "city": "Livermore",
+      "action": "photo:swapped",
+      "changes": [
+        "primaryPhotoUrl"
+      ],
+      "reason": "Replaced (3→8/10): The photo shows an attractive event space with wine barrels and tables set up for a wedding reception."
+    },
+    {
+      "name": "The Martinelli Event Center",
+      "city": "Livermore",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "9/10 — The photo showcases a beautifully decorated outdoor reception space at The Martinelli Event Center, highlighting the elegant table settings, floral arrangements, and overall ambiance suitable for a wedding venue listing."
+    },
+    {
+      "name": "The Purple Orchid Wine Country Resort And Spa",
+      "city": "Livermore",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "7/10 — The photo shows the exterior of the building and the grounds, which is a good venue shot."
+    },
+    {
+      "name": "The Ranch at Birch Creek",
+      "city": "Livermore",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "9/10 — The photo showcases a beautifully decorated outdoor reception setup at The Ranch at Birch Creek, highlighting the venue's potential for elegant wedding celebrations."
+    },
+    {
+      "name": "Vineyard View Events",
+      "city": "Livermore",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "9/10 — The photo showcases a beautiful outdoor wedding ceremony setup at a vineyard, making it highly appropriate as the primary photo for a wedding venue listing."
+    },
+    {
+      "name": "Alameda County Fairgrounds",
+      "city": "Pleasanton",
+      "action": "photo:needs-manual",
+      "changes": [],
+      "reason": "All photos weak. Best available: 3/10. Manual review needed."
+    },
+    {
+      "name": "Casa Real at Ruby Hill Winery",
+      "city": "Pleasanton",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "8/10 — This photo shows the exterior of Casa Real at Ruby Hill Winery, including the building, fountain, and landscaping, which is a good representation of the venue."
+    },
+    {
+      "name": "Palm Event Center in the Vineyard",
+      "city": "Pleasanton",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "8/10 — The photo shows the entrance to the Palm Event Center in the Vineyard, with palm trees lining the driveway and flowering trees on either side."
+    },
+    {
+      "name": "Pleasanton Marriott",
+      "city": "Pleasanton",
+      "action": "photo:swapped",
+      "changes": [
+        "primaryPhotoUrl"
+      ],
+      "reason": "Replaced (3→7/10): The photo shows the outdoor pool area of the Pleasanton Marriott, which is a good representation of the venue's grounds and amenities."
+    },
+    {
+      "name": "Rosewood Commons",
+      "city": "Pleasanton",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "7/10 — The photo shows the exterior of a building with trees in bloom, which is a good representation of the venue's grounds."
+    },
+    {
+      "name": "Rubino Estates Winery",
+      "city": "Pleasanton",
+      "action": "photo:ok",
+      "changes": [],
+      "reason": "8/10 — The photo shows the exterior of Rubino Estates Winery, including the building, grounds, and some outdoor seating, making it a good representation of the venue."
+    },
+    {
+      "name": "The Club at Castlewood",
+      "city": "Pleasanton",
+      "action": "photo:swapped",
+      "changes": [
+        "primaryPhotoUrl"
+      ],
+      "reason": "Replaced (5→9/10): The photo showcases a beautifully decorated reception space with elegant floral centerpieces and table settings, making it highly appropriate as a primary photo for a wedding venue listing."
+    },
+    {
+      "name": "The Club at Ruby Hill",
+      "city": "Pleasanton",
+      "action": "photo:swapped",
+      "changes": [
+        "primaryPhotoUrl"
+      ],
+      "reason": "Replaced (5→9/10): The photo showcases a stunning wedding venue space with elegant decorations, a stage, and beautifully arranged tables, making it highly appropriate as the primary photo for a wedding venue listing."
+    }
+  ]
+}

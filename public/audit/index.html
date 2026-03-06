@@ -81,7 +81,7 @@
 <body>
 <header>
   <h1>🌿 Green Bowtie — Venue Audit Report</h1>
-  <p>Run: 2026-03-06 at 07:57 AM PST &nbsp;·&nbsp; Cities: Livermore, Dublin, Pleasanton &nbsp;·&nbsp; 70 venues audited</p>
+  <p>Run: 2026-03-06 at 09:52 AM PST &nbsp;·&nbsp; Cities: Livermore, Dublin, Pleasanton &nbsp;·&nbsp; 70 venues audited</p>
 </header>
 <div class="noindex-notice">🔒 This page is excluded from search engine indexing (noindex, nofollow). Internal use only.</div>
 
@@ -94,15 +94,15 @@
       <div class="label">Venues Audited</div>
     </div>
     <div class="summary-card">
-      <div class="big big-clean">56</div>
+      <div class="big big-clean">53</div>
       <div class="label">Clean</div>
     </div>
     <div class="summary-card">
-      <div class="big big-review">1</div>
+      <div class="big big-review">0</div>
       <div class="label">Needs Review</div>
     </div>
     <div class="summary-card">
-      <div class="big big-flagged">13</div>
+      <div class="big big-flagged">17</div>
       <div class="label">Flagged</div>
     </div>
     <div class="summary-card">
@@ -118,7 +118,7 @@
       <div class="label">Warnings</div>
     </div>
     <div class="summary-card">
-      <div class="big" style="color:#15803d">0</div>
+      <div class="big" style="color:#15803d">2</div>
       <div class="label">Auto-Fixed</div>
     </div>
   </div>
@@ -136,13 +136,45 @@
       <h2>Dublin</h2>
       <div class="city-stats">
         <span>14 venues</span>
-        <span class="stat-clean">✅ 10 clean</span>
+        <span class="stat-clean">✅ 9 clean</span>
         <span class="stat-review">⚠️ 0 review</span>
-        <span class="stat-flagged">🚨 4 flagged</span>
+        <span class="stat-flagged">🚨 5 flagged</span>
         <span class="stat-score">avg score: <strong>80</strong></span>
       </div>
     </div>
     
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Creative Space Studios</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-flagged">🚨 FLAGGED (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span> <span class="meta-fixed">1 auto-fixed</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
+{
+"... is not valid JSON</td>
+    </tr>
+    <tr class="row-fixed">
+      <td><span class="badge badge-fixed">✓ AUTO-FIXED</span></td>
+      <td><code>regate_not_wedding</code></td>
+      <td><code>name</code></td>
+      <td>[studio space] The name suggests a studio for creative activities, not a dedicated wedding venue.</td>
+    </tr></tbody>
+    </table>
+  </div>
   <div class="venue-card venue-flagged">
     <div class="venue-header">
       <span class="venue-name">Dublin Civic Center</span>
@@ -183,19 +215,19 @@
   </div>
   <div class="venue-card venue-flagged">
     <div class="venue-header">
-      <span class="venue-name">K1 Speed Dublin</span>
+      <span class="venue-name">Dublin Technology Center Workspaces</span>
       <span class="venue-city">Dublin</span>
-      <span class="status-flagged">🚨 FLAGGED (67)</span>
-      <span class="venue-meta"><span class="meta-critical">1 critical</span></span>
+      <span class="status-flagged">🚨 FLAGGED (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span> <span class="meta-fixed">1 auto-fixed</span></span>
     </div>
     <table class="flags-table">
       <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
       <tbody>
-    <tr class="row-critical">
-      <td><span class="badge badge-critical">CRITICAL</span></td>
-      <td><code>not_wedding_venue</code></td>
-      <td><code>name/description</code></td>
-      <td>Venue appears unrelated to weddings. Matched: "go-kart", "karting", "indoor racing"</td>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
     </tr>
     <tr class="row-info">
       <td><span class="badge badge-info">INFO</span></td>
@@ -203,7 +235,13 @@
       <td><code>description</code></td>
       <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
 {
-  "is" is not valid JSON</td>
+"... is not valid JSON</td>
+    </tr>
+    <tr class="row-fixed">
+      <td><span class="badge badge-fixed">✓ AUTO-FIXED</span></td>
+      <td><code>regate_not_wedding</code></td>
+      <td><code>name</code></td>
+      <td>[office space] The name suggests a technology-focused workspace rather than a wedding venue.</td>
     </tr></tbody>
     </table>
   </div>
@@ -273,59 +311,7 @@
   </div>
   <div class="venue-card venue-clean">
     <div class="venue-header">
-      <span class="venue-name">Creative Space Studios</span>
-      <span class="venue-city">Dublin</span>
-      <span class="status-clean">✅ CLEAN (87)</span>
-      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
-    </div>
-    <table class="flags-table">
-      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
-      <tbody>
-    <tr class="row-warning">
-      <td><span class="badge badge-warning">WARNING</span></td>
-      <td><code>missing_description</code></td>
-      <td><code>description</code></td>
-      <td>No meaningful description. Brides searching this venue get no context.</td>
-    </tr>
-    <tr class="row-info">
-      <td><span class="badge badge-info">INFO</span></td>
-      <td><code>llm_check_failed</code></td>
-      <td><code>description</code></td>
-      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
-{
-"... is not valid JSON</td>
-    </tr></tbody>
-    </table>
-  </div>
-  <div class="venue-card venue-clean">
-    <div class="venue-header">
       <span class="venue-name">Dublin Ranch Golf Course</span>
-      <span class="venue-city">Dublin</span>
-      <span class="status-clean">✅ CLEAN (87)</span>
-      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
-    </div>
-    <table class="flags-table">
-      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
-      <tbody>
-    <tr class="row-warning">
-      <td><span class="badge badge-warning">WARNING</span></td>
-      <td><code>missing_description</code></td>
-      <td><code>description</code></td>
-      <td>No meaningful description. Brides searching this venue get no context.</td>
-    </tr>
-    <tr class="row-info">
-      <td><span class="badge badge-info">INFO</span></td>
-      <td><code>llm_check_failed</code></td>
-      <td><code>description</code></td>
-      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
-{
-"... is not valid JSON</td>
-    </tr></tbody>
-    </table>
-  </div>
-  <div class="venue-card venue-clean">
-    <div class="venue-header">
-      <span class="venue-name">Dublin Technology Center Workspaces</span>
       <span class="venue-city">Dublin</span>
       <span class="status-clean">✅ CLEAN (87)</span>
       <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
@@ -396,6 +382,32 @@
       <td><code>llm_check_failed</code></td>
       <td><code>description</code></td>
       <td>LLM relevance check could not complete: Error: OpenRouter error 429: {"error":{"message":"Provider returned error","code</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">K1 Speed Dublin</span>
+      <span class="venue-city">Dublin</span>
+      <span class="status-clean">✅ CLEAN (67)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>not_wedding_venue</code></td>
+      <td><code>name/description</code></td>
+      <td>Venue appears unrelated to weddings. Matched: "go-kart", "karting", "indoor racing"</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
+{
+  "is" is not valid JSON</td>
     </tr></tbody>
     </table>
   </div>
@@ -529,9 +541,9 @@
       <h2>Livermore</h2>
       <div class="city-stats">
         <span>42 venues</span>
-        <span class="stat-clean">✅ 35 clean</span>
-        <span class="stat-review">⚠️ 1 review</span>
-        <span class="stat-flagged">🚨 6 flagged</span>
+        <span class="stat-clean">✅ 34 clean</span>
+        <span class="stat-review">⚠️ 0 review</span>
+        <span class="stat-flagged">🚨 8 flagged</span>
         <span class="stat-score">avg score: <strong>88</strong></span>
       </div>
     </div>
@@ -582,26 +594,14 @@
   </div>
   <div class="venue-card venue-flagged">
     <div class="venue-header">
-      <span class="venue-name">Club Moto Motocross Track</span>
+      <span class="venue-name">Concerts at Wente Vineyards</span>
       <span class="venue-city">Livermore</span>
-      <span class="status-flagged">🚨 FLAGGED (57)</span>
-      <span class="venue-meta"><span class="meta-critical">1 critical</span> <span class="meta-warning">1 warnings</span></span>
+      <span class="status-flagged">🚨 FLAGGED (97)</span>
+      <span class="venue-meta"></span>
     </div>
     <table class="flags-table">
       <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
       <tbody>
-    <tr class="row-critical">
-      <td><span class="badge badge-critical">CRITICAL</span></td>
-      <td><code>not_wedding_venue</code></td>
-      <td><code>name/description</code></td>
-      <td>Venue appears unrelated to weddings. Matched: "motocross"</td>
-    </tr>
-    <tr class="row-warning">
-      <td><span class="badge badge-warning">WARNING</span></td>
-      <td><code>missing_description</code></td>
-      <td><code>description</code></td>
-      <td>No meaningful description. Brides searching this venue get no context.</td>
-    </tr>
     <tr class="row-info">
       <td><span class="badge badge-info">INFO</span></td>
       <td><code>llm_check_failed</code></td>
@@ -609,6 +609,32 @@
       <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
 {
 "... is not valid JSON</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">El Charro Mexican Food & Cantina</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-flagged">🚨 FLAGGED (97)</span>
+      <span class="venue-meta"> <span class="meta-fixed">1 auto-fixed</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
+{
+"... is not valid JSON</td>
+    </tr>
+    <tr class="row-fixed">
+      <td><span class="badge badge-fixed">✓ AUTO-FIXED</span></td>
+      <td><code>regate_not_wedding</code></td>
+      <td><code>name</code></td>
+      <td>[Restaurant, Mexican food] The name indicates a restaurant, and it doesn't explicitly mention 'event' or 'banquet' in the name.</td>
     </tr></tbody>
     </table>
   </div>
@@ -680,7 +706,7 @@
       <span class="venue-name">Stampede Bar & Grill</span>
       <span class="venue-city">Livermore</span>
       <span class="status-flagged">🚨 FLAGGED (57)</span>
-      <span class="venue-meta"><span class="meta-critical">1 critical</span> <span class="meta-warning">1 warnings</span></span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span> <span class="meta-warning">1 warnings</span> <span class="meta-fixed">1 auto-fixed</span></span>
     </div>
     <table class="flags-table">
       <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
@@ -696,6 +722,50 @@
       <td><code>missing_description</code></td>
       <td><code>description</code></td>
       <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
+{
+"... is not valid JSON</td>
+    </tr>
+    <tr class="row-fixed">
+      <td><span class="badge badge-fixed">✓ AUTO-FIXED</span></td>
+      <td><code>regate_not_wedding</code></td>
+      <td><code>name</code></td>
+      <td>[bar and grill] The name suggests a restaurant/bar, not a dedicated wedding venue.</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Tri-Valley Quarter Midget Association</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-flagged">🚨 FLAGGED (67)</span>
+      <span class="venue-meta"> <span class="meta-warning">3 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>wedding_relevance_unclear</code></td>
+      <td><code>description</code></td>
+      <td>No wedding-related keywords found in name, type, or description. Verify this is a legitimate venue.</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_website</code></td>
+      <td><code>website</code></td>
+      <td>No website URL. Brides can't learn more or book.</td>
     </tr>
     <tr class="row-info">
       <td><span class="badge badge-info">INFO</span></td>
@@ -736,44 +806,6 @@
       <td><code>web_search_not_wedding</code></td>
       <td><code>name</code></td>
       <td>The UCLCC is designed for professional collaborations, research events, and UC system partnerships, with no evidence or mention of hosting weddings in the available information.<br><small class="fix-detail">Fix: Web search confirmed not a wedding venue (high confidence)</small></td>
-    </tr></tbody>
-    </table>
-  </div>
-  <div class="venue-card venue-review">
-    <div class="venue-header">
-      <span class="venue-name">Tri-Valley Quarter Midget Association</span>
-      <span class="venue-city">Livermore</span>
-      <span class="status-review">⚠️ NEEDS REVIEW (67)</span>
-      <span class="venue-meta"> <span class="meta-warning">3 warnings</span></span>
-    </div>
-    <table class="flags-table">
-      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
-      <tbody>
-    <tr class="row-warning">
-      <td><span class="badge badge-warning">WARNING</span></td>
-      <td><code>wedding_relevance_unclear</code></td>
-      <td><code>description</code></td>
-      <td>No wedding-related keywords found in name, type, or description. Verify this is a legitimate venue.</td>
-    </tr>
-    <tr class="row-warning">
-      <td><span class="badge badge-warning">WARNING</span></td>
-      <td><code>missing_description</code></td>
-      <td><code>description</code></td>
-      <td>No meaningful description. Brides searching this venue get no context.</td>
-    </tr>
-    <tr class="row-warning">
-      <td><span class="badge badge-warning">WARNING</span></td>
-      <td><code>missing_website</code></td>
-      <td><code>website</code></td>
-      <td>No website URL. Brides can't learn more or book.</td>
-    </tr>
-    <tr class="row-info">
-      <td><span class="badge badge-info">INFO</span></td>
-      <td><code>llm_check_failed</code></td>
-      <td><code>description</code></td>
-      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
-{
-"... is not valid JSON</td>
     </tr></tbody>
     </table>
   </div>
@@ -883,6 +915,38 @@
   </div>
   <div class="venue-card venue-clean">
     <div class="venue-header">
+      <span class="venue-name">Club Moto Motocross Track</span>
+      <span class="venue-city">Livermore</span>
+      <span class="status-clean">✅ CLEAN (57)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>not_wedding_venue</code></td>
+      <td><code>name/description</code></td>
+      <td>Venue appears unrelated to weddings. Matched: "motocross"</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
+{
+"... is not valid JSON</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
       <span class="venue-name">Clubhouse</span>
       <span class="venue-city">Livermore</span>
       <span class="status-clean">✅ CLEAN (77)</span>
@@ -961,26 +1025,6 @@
   </div>
   <div class="venue-card venue-clean">
     <div class="venue-header">
-      <span class="venue-name">Concerts at Wente Vineyards</span>
-      <span class="venue-city">Livermore</span>
-      <span class="status-clean">✅ CLEAN (97)</span>
-      <span class="venue-meta"></span>
-    </div>
-    <table class="flags-table">
-      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
-      <tbody>
-    <tr class="row-info">
-      <td><span class="badge badge-info">INFO</span></td>
-      <td><code>llm_check_failed</code></td>
-      <td><code>description</code></td>
-      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
-{
-"... is not valid JSON</td>
-    </tr></tbody>
-    </table>
-  </div>
-  <div class="venue-card venue-clean">
-    <div class="venue-header">
       <span class="venue-name">Del Valle Campground Amphitheater</span>
       <span class="venue-city">Livermore</span>
       <span class="status-clean">✅ CLEAN (87)</span>
@@ -1008,26 +1052,6 @@
   <div class="venue-card venue-clean">
     <div class="venue-header">
       <span class="venue-name">Del Valle Winery</span>
-      <span class="venue-city">Livermore</span>
-      <span class="status-clean">✅ CLEAN (97)</span>
-      <span class="venue-meta"></span>
-    </div>
-    <table class="flags-table">
-      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
-      <tbody>
-    <tr class="row-info">
-      <td><span class="badge badge-info">INFO</span></td>
-      <td><code>llm_check_failed</code></td>
-      <td><code>description</code></td>
-      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
-{
-"... is not valid JSON</td>
-    </tr></tbody>
-    </table>
-  </div>
-  <div class="venue-card venue-clean">
-    <div class="venue-header">
-      <span class="venue-name">El Charro Mexican Food & Cantina</span>
       <span class="venue-city">Livermore</span>
       <span class="status-clean">✅ CLEAN (97)</span>
       <span class="venue-meta"></span>
@@ -1613,13 +1637,45 @@
       <h2>Pleasanton</h2>
       <div class="city-stats">
         <span>14 venues</span>
-        <span class="stat-clean">✅ 11 clean</span>
+        <span class="stat-clean">✅ 10 clean</span>
         <span class="stat-review">⚠️ 0 review</span>
-        <span class="stat-flagged">🚨 3 flagged</span>
+        <span class="stat-flagged">🚨 4 flagged</span>
         <span class="stat-score">avg score: <strong>78</strong></span>
       </div>
     </div>
     
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Alameda County Fairgrounds</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-flagged">🚨 FLAGGED (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span> <span class="meta-fixed">1 auto-fixed</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
+{
+"... is not valid JSON</td>
+    </tr>
+    <tr class="row-fixed">
+      <td><span class="badge badge-fixed">✓ AUTO-FIXED</span></td>
+      <td><code>regate_not_wedding</code></td>
+      <td><code>name</code></td>
+      <td>[fairgrounds event space] Fairgrounds are typically multi-purpose event spaces and not exclusively wedding venues.</td>
+    </tr></tbody>
+    </table>
+  </div>
   <div class="venue-card venue-flagged">
     <div class="venue-header">
       <span class="venue-name">Inklings Coffee and Tea</span>
@@ -1643,6 +1699,38 @@
       <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
 {
 "... is not valid JSON</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-flagged">
+    <div class="venue-header">
+      <span class="venue-name">Muslim Community Center - East Bay (MCC East Bay)</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-flagged">🚨 FLAGGED (87)</span>
+      <span class="venue-meta"> <span class="meta-warning">1 warnings</span> <span class="meta-fixed">1 auto-fixed</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
+{
+"... is not valid JSON</td>
+    </tr>
+    <tr class="row-fixed">
+      <td><span class="badge badge-fixed">✓ AUTO-FIXED</span></td>
+      <td><code>regate_not_wedding</code></td>
+      <td><code>name</code></td>
+      <td>[community center] The name suggests a community center, not a dedicated wedding venue, even if they host weddings.</td>
     </tr></tbody>
     </table>
   </div>
@@ -1673,64 +1761,6 @@
       <td><code>venue_type_wrong</code></td>
       <td><code>venueType</code></td>
       <td>"Pirates of Emerson Haunted Themed Park" is a haunted attraction, not a park/outdoor venue.</td>
-    </tr>
-    <tr class="row-info">
-      <td><span class="badge badge-info">INFO</span></td>
-      <td><code>llm_check_failed</code></td>
-      <td><code>description</code></td>
-      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
-{
-"... is not valid JSON</td>
-    </tr></tbody>
-    </table>
-  </div>
-  <div class="venue-card venue-flagged">
-    <div class="venue-header">
-      <span class="venue-name">Pump It Up Pleasanton Kids Birthdays and More</span>
-      <span class="venue-city">Pleasanton</span>
-      <span class="status-flagged">🚨 FLAGGED (57)</span>
-      <span class="venue-meta"><span class="meta-critical">1 critical</span> <span class="meta-warning">1 warnings</span></span>
-    </div>
-    <table class="flags-table">
-      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
-      <tbody>
-    <tr class="row-critical">
-      <td><span class="badge badge-critical">CRITICAL</span></td>
-      <td><code>not_wedding_venue</code></td>
-      <td><code>name/description</code></td>
-      <td>Venue appears unrelated to weddings. Matched: "kids birthday", "pump it up"</td>
-    </tr>
-    <tr class="row-warning">
-      <td><span class="badge badge-warning">WARNING</span></td>
-      <td><code>missing_description</code></td>
-      <td><code>description</code></td>
-      <td>No meaningful description. Brides searching this venue get no context.</td>
-    </tr>
-    <tr class="row-info">
-      <td><span class="badge badge-info">INFO</span></td>
-      <td><code>llm_check_failed</code></td>
-      <td><code>description</code></td>
-      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
-{
-"... is not valid JSON</td>
-    </tr></tbody>
-    </table>
-  </div>
-  <div class="venue-card venue-clean">
-    <div class="venue-header">
-      <span class="venue-name">Alameda County Fairgrounds</span>
-      <span class="venue-city">Pleasanton</span>
-      <span class="status-clean">✅ CLEAN (87)</span>
-      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
-    </div>
-    <table class="flags-table">
-      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
-      <tbody>
-    <tr class="row-warning">
-      <td><span class="badge badge-warning">WARNING</span></td>
-      <td><code>missing_description</code></td>
-      <td><code>description</code></td>
-      <td>No meaningful description. Brides searching this venue get no context.</td>
     </tr>
     <tr class="row-info">
       <td><span class="badge badge-info">INFO</span></td>
@@ -1822,32 +1852,6 @@
   </div>
   <div class="venue-card venue-clean">
     <div class="venue-header">
-      <span class="venue-name">Muslim Community Center - East Bay (MCC East Bay)</span>
-      <span class="venue-city">Pleasanton</span>
-      <span class="status-clean">✅ CLEAN (87)</span>
-      <span class="venue-meta"> <span class="meta-warning">1 warnings</span></span>
-    </div>
-    <table class="flags-table">
-      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
-      <tbody>
-    <tr class="row-warning">
-      <td><span class="badge badge-warning">WARNING</span></td>
-      <td><code>missing_description</code></td>
-      <td><code>description</code></td>
-      <td>No meaningful description. Brides searching this venue get no context.</td>
-    </tr>
-    <tr class="row-info">
-      <td><span class="badge badge-info">INFO</span></td>
-      <td><code>llm_check_failed</code></td>
-      <td><code>description</code></td>
-      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
-{
-"... is not valid JSON</td>
-    </tr></tbody>
-    </table>
-  </div>
-  <div class="venue-card venue-clean">
-    <div class="venue-header">
       <span class="venue-name">Palm Event Center in the Vineyard</span>
       <span class="venue-city">Pleasanton</span>
       <span class="status-clean">✅ CLEAN (87)</span>
@@ -1882,6 +1886,38 @@
     <table class="flags-table">
       <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
       <tbody>
+    <tr class="row-info">
+      <td><span class="badge badge-info">INFO</span></td>
+      <td><code>llm_check_failed</code></td>
+      <td><code>description</code></td>
+      <td>LLM relevance check could not complete: SyntaxError: Unexpected token '`', "```json
+{
+"... is not valid JSON</td>
+    </tr></tbody>
+    </table>
+  </div>
+  <div class="venue-card venue-clean">
+    <div class="venue-header">
+      <span class="venue-name">Pump It Up Pleasanton Kids Birthdays and More</span>
+      <span class="venue-city">Pleasanton</span>
+      <span class="status-clean">✅ CLEAN (57)</span>
+      <span class="venue-meta"><span class="meta-critical">1 critical</span> <span class="meta-warning">1 warnings</span></span>
+    </div>
+    <table class="flags-table">
+      <thead><tr><th>Severity</th><th>Type</th><th>Field</th><th>Detail</th></tr></thead>
+      <tbody>
+    <tr class="row-critical">
+      <td><span class="badge badge-critical">CRITICAL</span></td>
+      <td><code>not_wedding_venue</code></td>
+      <td><code>name/description</code></td>
+      <td>Venue appears unrelated to weddings. Matched: "kids birthday", "pump it up"</td>
+    </tr>
+    <tr class="row-warning">
+      <td><span class="badge badge-warning">WARNING</span></td>
+      <td><code>missing_description</code></td>
+      <td><code>description</code></td>
+      <td>No meaningful description. Brides searching this venue get no context.</td>
+    </tr>
     <tr class="row-info">
       <td><span class="badge badge-info">INFO</span></td>
       <td><code>llm_check_failed</code></td>

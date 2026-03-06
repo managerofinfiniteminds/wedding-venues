@@ -2,28 +2,25 @@
 /**
  * Green Bowtie Venue Pipeline
  * ─────────────────────────────────────────────────────────────────
- * One command to enrich, clean, gate, publish, sync, and report.
- *
  * Usage:
  *   npx tsx@latest scripts/audit/pipeline.ts --cities livermore,dublin,pleasanton
- *   npx tsx@latest scripts/audit/pipeline.ts --cities livermore,dublin,pleasanton --dry-run
  *   npx tsx@latest scripts/audit/pipeline.ts --all --limit 200
+ *   npx tsx@latest scripts/audit/pipeline.ts --cities livermore --dry-run
  *
- * What it does (in order):
- *   1. Backup  — count snapshot, abort if counts look wrong
- *   2. Enrich  — web search for venues missing description/website
- *   3. Clean   — fix scraped junk descriptions (nav text, HTML, etc.)
- *   4. Gate    — LLM confirms wedding venue relevance
- *   5. Decide  — publish confirmed, unpublish junk, leave uncertain
- *   6. Sync    — push to Neon production
- *   7. Report  — regenerate /audit/ HTML
+ * Steps (in order):
+ *   1. Enrich   — web search: fill missing description / website
+ *   2. Clean    — fix scraped junk descriptions
+ *   3. Re-gate  — re-check published venues for wedding relevance (catches misclassifications)
+ *   4. Photo    — vision-score primary photo; swap from Places library if bad
+ *   5. Decide   — publish confirmed, unpublish junk, leave uncertain
+ *   6. Sync     — push changes to Neon production
+ *   7. Report   — regenerate /audit/ HTML
  *
  * Rules:
  *   - Never delete records
- *   - COUNT verified before/after every batch write
- *   - Skip venues already clean (has description + published + auditStatus=clean)
- *   - Skip confirmed non-wedding venues (don't re-litigate decisions)
- *   - All changes logged to scripts/audit/runs/YYYY-MM-DD-HH.json
+ *   - COUNT verified before/after every write
+ *   - Skip confirmed non-wedding venues (don't re-litigate)
+ *   - All changes logged to scripts/audit/runs/YYYY-MM-DD-HHmm.json
  */
 import "dotenv/config";
 import { Pool } from "pg";
@@ -32,12 +29,14 @@ import { PrismaClient, Prisma } from "@prisma/client";
 import fs from "fs";
 import path from "path";
 import { generateReport } from "./report";
+import { auditAndFixPhoto } from "./photo-check";
 import type { AuditRunSummary, VenueAuditResult } from "./types";
 
 if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL required");
 if (!process.env.OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY required");
 
 const NEON_URL = "postgresql://neondb_owner:npg_o3XHSjZF9Pcd@ep-rough-sea-ai8thyl8.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+const OR_KEY = process.env.OPENROUTER_API_KEY!;
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -45,496 +44,426 @@ const prisma = new PrismaClient({ adapter });
 
 // ── CLI ───────────────────────────────────────────────────────────────────
 const args = process.argv.slice(2);
-const dryRun = args.includes("--dry-run");
+const dryRun    = args.includes("--dry-run");
+const skipSync  = args.includes("--skip-sync");
 const citiesArg = args[args.indexOf("--cities") + 1];
 const targetCities = citiesArg
   ? citiesArg.split(",").map(c => c.trim().replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()))
   : [];
 const limitArg = args[args.indexOf("--limit") + 1];
-const limitN = limitArg ? parseInt(limitArg) : undefined;
-const skipSync = args.includes("--skip-sync");
+const limitN   = limitArg ? parseInt(limitArg) : undefined;
 
 // ── Models ────────────────────────────────────────────────────────────────
-const MODEL_ENRICH = "x-ai/grok-3-mini:online";   // web search
-const MODEL_CLEAN  = "google/gemini-2.0-flash-001"; // fast text cleanup
-const MODEL_GATE   = "google/gemini-2.0-flash-001"; // relevance gate
+const MODEL_ENRICH = "x-ai/grok-3-mini:online";
+const MODEL_FAST   = "google/gemini-2.0-flash-001";
 
-// ── LLM call ─────────────────────────────────────────────────────────────
+// ── LLM ──────────────────────────────────────────────────────────────────
 async function llm(model: string, prompt: string, maxTokens = 500): Promise<string> {
   const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      Authorization: `Bearer ${OR_KEY}`,
       "Content-Type": "application/json",
       "HTTP-Referer": "https://greenbowtie.com",
       "X-Title": "Green Bowtie Pipeline",
     },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: maxTokens,
-      temperature: 0,
-    }),
+    body: JSON.stringify({ model, messages: [{ role: "user", content: prompt }], max_tokens: maxTokens, temperature: 0 }),
   });
-  if (!resp.ok) throw new Error(`LLM ${resp.status}: ${(await resp.text()).slice(0, 150)}`);
-  const data = await resp.json();
+  if (!resp.ok) throw new Error(`LLM ${resp.status}: ${(await resp.text()).slice(0, 120)}`);
+  const data = await resp.json() as { choices?: Array<{ message: { content: string } }> };
   return (data.choices?.[0]?.message?.content ?? "").replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 }
 
-function parseJSON<T>(raw: string): T | null {
-  try { return JSON.parse(raw) as T; }
-  catch { return null; }
+function j<T>(raw: string): T | null {
+  try { return JSON.parse(raw) as T; } catch { return null; }
 }
 
-// ── Step 2: Enrich — web search for missing description/website ───────────
-async function stepEnrich(venue: Awaited<ReturnType<typeof getVenues>>[0]): Promise<Partial<Prisma.VenueUpdateInput> & { _reason: string; _isWedding: boolean | null }> {
-  const result = parseJSON<{
-    isWeddingVenue: boolean;
-    confidence: string;
-    description: string | null;
-    website: string | null;
-    phone: string | null;
-    maxGuests: number | null;
-    startingPrice: number | null;
-    venueType: string | null;
-    styleTags: string[];
-    hasBridalSuite: boolean;
-    hasOutdoorSpace: boolean;
-    hasIndoorSpace: boolean;
-    onSiteCoordinator: boolean;
-    reasoning: string;
-  }>(await llm(MODEL_ENRICH, `You are researching wedding venues for a directory called Green Bowtie.
+// ── Venue helpers ─────────────────────────────────────────────────────────
+const JUNK_RE = [/skip to content/i, /instagram\.com/i, /^-->/, /&#\d+;/, /&[a-z]+;/, /\b0 skip\b/i];
+const isJunk  = (d: string) => d.length < 30 || JUNK_RE.some(r => r.test(d));
 
-Search the web NOW for: "${venue.name}" ${venue.city} ${venue.state}
+const isConfirmedNonWedding = (flags: unknown) => {
+  if (!Array.isArray(flags)) return false;
+  return (flags as Array<{type:string}>).some(f =>
+    f.type === "manually_unpublished" || f.type === "web_search_not_wedding"
+  );
+};
 
-Is this a wedding venue? Extract all available details.
+// ── Step 1: Enrich ────────────────────────────────────────────────────────
+type EnrichResult = Partial<Prisma.VenueUpdateInput> & { _wedding: boolean | null; _reason: string };
+
+async function stepEnrich(v: { name: string; city: string; state: string; website: string | null; phone: string | null; maxGuests: number | null; baseRentalMin: number | null; styleTags: string[]; venueType: string }): Promise<EnrichResult> {
+  type R = { isWeddingVenue: boolean; confidence: string; sourceIsThisVenue: boolean; description: string | null; website: string | null; phone: string | null; maxGuests: number | null; startingPrice: number | null; venueType: string | null; styleTags: string[]; hasBridalSuite: boolean; hasOutdoorSpace: boolean; hasIndoorSpace: boolean; onSiteCoordinator: boolean; reasoning: string };
+  const raw = await llm(MODEL_ENRICH, `Research this for a wedding venue directory.
+Search NOW: "${v.name}" wedding ${v.city} ${v.state}
+
+CRITICAL: Only use information that is SPECIFICALLY about "${v.name}" — not a nearby venue with a similar name.
+If search results are about a different venue, set sourceIsThisVenue=false and isWeddingVenue=false.
 
 Return ONLY JSON:
-{
-  "isWeddingVenue": true|false,
-  "confidence": "high"|"medium"|"low",
-  "description": "2-3 sentence wedding-focused description, or null",
-  "website": "their website URL or null",
-  "phone": "phone number or null",
-  "maxGuests": integer or null,
-  "startingPrice": integer (site fee USD) or null,
-  "venueType": "one of: Vineyard & Winery|Barn / Ranch|Ballroom|Hotel & Resort|Golf Club|Garden|Historic Estate|Museum & Gallery|Event Venue|Resort|Outdoor / Park" or null,
-  "styleTags": ["from: Rustic|Romantic|Modern|Industrial|Garden|Elegant|Intimate|Grand|Outdoor|Indoor|Historic|Waterfront|Mountain|Wine Country|Country Club"],
-  "hasBridalSuite": true|false,
-  "hasOutdoorSpace": true|false,
-  "hasIndoorSpace": true|false,
-  "onSiteCoordinator": true|false,
-  "reasoning": "one sentence"
-}`, 600));
-
-  if (!result) return { _reason: "parse error", _isWedding: null };
-
-  const update: Partial<Prisma.VenueUpdateInput> & { _reason: string; _isWedding: boolean | null } = {
-    _reason: result.reasoning,
-    _isWedding: result.confidence === "low" ? null : result.isWeddingVenue,
+{"isWeddingVenue":true/false,"confidence":"high/medium/low","sourceIsThisVenue":true/false,"description":"2-3 sentence wedding description about THIS specific venue or null","website":"URL or null","phone":"or null","maxGuests":int/null,"startingPrice":int/null,"venueType":"Vineyard & Winery|Barn / Ranch|Ballroom|Hotel & Resort|Golf Club|Garden|Historic Estate|Museum & Gallery|Event Venue|Resort|Outdoor / Park or null","styleTags":[],"hasBridalSuite":bool,"hasOutdoorSpace":bool,"hasIndoorSpace":bool,"onSiteCoordinator":bool,"reasoning":"one sentence"}`, 600);
+  const r = j<R>(raw);
+  if (!r) return { _wedding: null, _reason: "parse error" };
+  // If the model found info about a different venue, treat as uncertain — don't write bad data
+  if (r.sourceIsThisVenue === false) {
+    return { _wedding: null, _reason: `source mismatch — found data for a different venue, not "${v.name}"` };
+  }
+  const out: EnrichResult = {
+    _wedding: r.confidence === "low" ? null : r.isWeddingVenue,
+    _reason: r.reasoning,
   };
-
-  if (result.description?.length > 20) update.description = result.description;
-  if (result.website && !venue.website) update.website = result.website;
-  if (result.phone && !venue.phone) update.phone = result.phone;
-  if (result.maxGuests && !venue.maxGuests) update.maxGuests = result.maxGuests;
-  if (result.startingPrice && !venue.baseRentalMin) update.baseRentalMin = result.startingPrice;
-  if (result.venueType && result.confidence === "high" && result.venueType !== venue.venueType) update.venueType = result.venueType;
-  if (result.styleTags?.length && !venue.styleTags?.length) update.styleTags = result.styleTags;
-  if (result.hasBridalSuite) update.hasBridalSuite = true;
-  if (result.hasOutdoorSpace) update.hasOutdoorSpace = true;
-  if (result.hasIndoorSpace) update.hasIndoorSpace = true;
-  if (result.onSiteCoordinator) update.onSiteCoordinator = true;
-
-  return update;
+  if (r.description?.length > 20) out.description = r.description;
+  if (r.website && !v.website) out.website = r.website;
+  if (r.phone && !v.phone) out.phone = r.phone;
+  if (r.maxGuests && !v.maxGuests) out.maxGuests = r.maxGuests;
+  if (r.startingPrice && !v.baseRentalMin) out.baseRentalMin = r.startingPrice;
+  if (r.venueType && r.confidence === "high") out.venueType = r.venueType;
+  if (r.styleTags?.length && !v.styleTags?.length) out.styleTags = r.styleTags;
+  if (r.hasBridalSuite) out.hasBridalSuite = true;
+  if (r.hasOutdoorSpace) out.hasOutdoorSpace = true;
+  if (r.hasIndoorSpace) out.hasIndoorSpace = true;
+  if (r.onSiteCoordinator) out.onSiteCoordinator = true;
+  return out;
 }
 
-// ── Step 3: Clean — fix scraped/junk descriptions ─────────────────────────
-const JUNK_PATTERNS = [
-  /skip to content/i, /instagram\.com/i, /^-->/, /&#\d+;/, /&mdash;/, /&nbsp;/,
-  /^[\w\s]+ \| [\w\s]+ \|/, // "Venue | Section | Section" nav pattern
-  /\b0 skip to\b/i, /book now home properties/i,
-];
-
-function isJunkDescription(desc: string): boolean {
-  return desc.length < 30 || JUNK_PATTERNS.some(p => p.test(desc));
-}
-
-async function stepClean(venue: { name: string; description: string }): Promise<{ description: string | null; wasFixed: boolean }> {
-  const result = parseJSON<{ quality: string; rewritten: string | null }>(
-    await llm(MODEL_CLEAN, `You are cleaning a wedding venue directory listing.
-
-Venue: ${venue.name}
-Current description: "${venue.description.slice(0, 400)}"
-
-This description may contain scraped website navigation, HTML artifacts, Instagram handles, or other junk.
-
-Return ONLY JSON:
-{
-  "quality": "good"|"junk",
-  "rewritten": "clean 2-3 sentence wedding-focused description if junk, else null"
-}`, 300)
+// ── Step 2: Clean ─────────────────────────────────────────────────────────
+async function stepClean(name: string, desc: string): Promise<string | null> {
+  const r = j<{ quality: string; rewritten: string | null }>(
+    await llm(MODEL_FAST, `Fix this wedding venue description if it contains scraped junk (nav text, HTML, Instagram handles, etc).
+Venue: ${name}
+Description: "${desc.slice(0, 400)}"
+Return ONLY JSON: {"quality":"good/junk","rewritten":"clean 2-3 sentence wedding description if junk, else null"}`, 250)
   );
-
-  if (!result || result.quality === "good") return { description: null, wasFixed: false };
-  return { description: result.rewritten, wasFixed: true };
+  return r?.quality === "junk" ? (r.rewritten ?? null) : null;
 }
 
-// ── Step 4: Gate — confirm wedding relevance for borderline venues ─────────
-async function stepGate(venue: { name: string; venueType: string; description?: string | null }): Promise<{ isWedding: boolean; confidence: string; reason: string }> {
-  const result = parseJSON<{ isWeddingVenue: boolean; confidence: string; reason: string }>(
-    await llm(MODEL_GATE, `Wedding venue directory quality gate.
+// ── Step 2.5: Description consistency check ───────────────────────────────
+// Catches descriptions that were written about a DIFFERENT venue (e.g. Par 5 got Dublin Ranch's description)
+function descriptionMentionsWrongVenue(venueName: string, description: string): boolean {
+  if (!description || description.length < 10) return false;
+  // Extract key words from venue name (3+ chars, skip common words)
+  const stopWords = new Set(["the","and","at","of","in","for","a","an","&","club","center","hall","room","house"]);
+  const nameWords = venueName.toLowerCase().split(/\s+/).filter(w => w.length >= 3 && !stopWords.has(w));
+  const descLower = description.toLowerCase();
+  // If description contains 0 of the venue's key name words, it's suspicious
+  const matches = nameWords.filter(w => descLower.includes(w));
+  if (nameWords.length >= 2 && matches.length === 0) return true;
+  return false;
+}
 
-Venue: ${venue.name}
-Type: ${venue.venueType}
-Description: ${(venue.description ?? "none").slice(0, 300)}
+// ── Step 3: Re-gate (published venues) ────────────────────────────────────
+async function stepReGate(v: { name: string; venueType: string; description: string | null }): Promise<{ isWedding: boolean; confidence: string; reason: string }> {
+  // If description mentions a different venue name, ignore it for gating — only use venue name + type
+  const descMismatch = v.description ? descriptionMentionsWrongVenue(v.name, v.description) : false;
+  const descForGate = descMismatch ? "(description appears to be from a different venue — ignore it)" : (v.description ?? "none");
 
-Should this be listed in a wedding venue directory?
+  const r = j<{ isWeddingVenue: boolean; nameSignal: string; confidence: string; reason: string }>(
+    await llm(MODEL_FAST, `Wedding venue directory quality gate.
 
-Return ONLY JSON:
-{
-  "isWeddingVenue": true|false,
-  "confidence": "high"|"medium"|"low",
-  "reason": "one sentence"
-}`, 200)
+Venue name: "${v.name}"
+Type: ${v.venueType}
+Description: ${descForGate.slice(0, 300)}
+
+Rules — judge on NAME FIRST, description second:
+1. "Technology Center Workspaces", "Office Park", "Coworking" = office space → NO
+2. "Concerts at X" = concert venue → NO
+3. "Haunted Park", "Trampoline Park", "Motocross Track", "Kids Birthdays" = entertainment → NO
+4. "Golfing" (retail/simulator store) = NO. "Golf Course" or "Country Club" = YES
+5. Hotels, wineries, vineyards, event halls, ballrooms, estates, ranches = YES
+6. Restaurants and bars: only YES if name explicitly says "event" or "banquet"
+7. If the description contradicts the name entirely, trust the name
+
+Return ONLY JSON: {"isWeddingVenue":true/false,"nameSignal":"what the name signals (3-5 words)","confidence":"high/medium/low","reason":"one sentence"}`, 200)
   );
-
-  if (!result) return { isWedding: true, confidence: "low", reason: "gate check failed" };
-  return { isWedding: result.isWeddingVenue, confidence: result.confidence, reason: result.reason };
+  return r ? { isWedding: r.isWeddingVenue, confidence: r.confidence, reason: `[${r.nameSignal}] ${r.reason}` }
+           : { isWedding: true, confidence: "low", reason: "gate failed" };
 }
 
-// ── Venue query ───────────────────────────────────────────────────────────
+// ── Venue fetch ───────────────────────────────────────────────────────────
 async function getVenues() {
   const where: Prisma.VenueWhereInput = {
     stateSlug: "california",
-    // NOT already confirmed non-wedding with high confidence
-    NOT: {
-      auditFlags: {
-        // venues with manually_unpublished or web_search_not_wedding critical flags are done
-        path: ["$[*].type"],
-        array_contains: "manually_unpublished",
-      }
-    },
     ...(targetCities.length ? { city: { in: targetCities } } : {}),
   };
-
-  return prisma.venue.findMany({
-    where,
-    orderBy: [{ city: "asc" }, { name: "asc" }],
-  });
+  const all = await prisma.venue.findMany({ where, orderBy: [{ city: "asc" }, { name: "asc" }] });
+  return limitN ? all.slice(0, limitN) : all;
 }
 
 // ── Neon sync ─────────────────────────────────────────────────────────────
 async function syncToNeon(ids: string[]) {
   if (!ids.length) return;
-
   const neonPool = new Pool({ connectionString: NEON_URL });
-
   try {
-    // Get current state for these venues from local
-    const venues = await prisma.venue.findMany({
-      where: { id: { in: ids } },
-    });
-
+    const venues = await prisma.venue.findMany({ where: { id: { in: ids } } });
     for (const v of venues) {
-      const esc = (s: string | null) => s ? `'${s.replace(/'/g, "''")}'` : "NULL";
-      const tags = v.styleTags?.length ? `ARRAY[${v.styleTags.map(t => `'${t.replace(/'/g,"''")}'`).join(",")}]::text[]` : "ARRAY[]::text[]";
-      const sql = `
+      const s = (x: string | null) => x ? `'${x.replace(/'/g, "''")}'` : "NULL";
+      const tags = v.styleTags?.length
+        ? `ARRAY[${v.styleTags.map(t => `'${t.replace(/'/g,"''")}'`).join(",")}]::text[]`
+        : "ARRAY[]::text[]";
+      await neonPool.query(`
         UPDATE "Venue" SET
-          "isPublished"=${v.isPublished},
-          "description"=${esc(v.description)},
-          "website"=${esc(v.website)},
-          "phone"=${esc(v.phone)},
-          "venueType"=${esc(v.venueType)},
-          "maxGuests"=${v.maxGuests ?? "NULL"},
-          "baseRentalMin"=${v.baseRentalMin ?? "NULL"},
-          "styleTags"=${tags},
-          "hasBridalSuite"=${v.hasBridalSuite},
-          "hasOutdoorSpace"=${v.hasOutdoorSpace},
-          "hasIndoorSpace"=${v.hasIndoorSpace},
-          "onSiteCoordinator"=${v.onSiteCoordinator},
-          "auditStatus"=${esc(v.auditStatus)},
-          "auditScore"=${v.auditScore ?? "NULL"},
+          "isPublished"=${v.isPublished},"description"=${s(v.description)},
+          "website"=${s(v.website)},"phone"=${s(v.phone)},"venueType"=${s(v.venueType)},
+          "primaryPhotoUrl"=${s(v.primaryPhotoUrl)},"styleTags"=${tags},
+          "maxGuests"=${v.maxGuests ?? "NULL"},"baseRentalMin"=${v.baseRentalMin ?? "NULL"},
+          "hasBridalSuite"=${v.hasBridalSuite},"hasOutdoorSpace"=${v.hasOutdoorSpace},
+          "hasIndoorSpace"=${v.hasIndoorSpace},"onSiteCoordinator"=${v.onSiteCoordinator},
+          "auditStatus"=${s(v.auditStatus)},"auditScore"=${v.auditScore ?? "NULL"},
           "lastAuditedAt"=NOW()
-        WHERE id='${v.id}';`;
-
-      await neonPool.query(sql);
+        WHERE id='${v.id}';`);
     }
-
-    console.log(`  → Synced ${venues.length} venues to Neon`);
+    console.log(`  → Synced ${venues.length} to Neon`);
   } finally {
     await neonPool.end();
   }
 }
 
 // ── Log entry ─────────────────────────────────────────────────────────────
-interface LogEntry {
-  name: string;
-  city: string;
-  action: string;
-  changes: string[];
-  reason: string;
-}
+interface LogEntry { name: string; city: string; action: string; changes: string[]; reason: string }
 
 // ── Main ──────────────────────────────────────────────────────────────────
 async function main() {
-  const runAt = new Date();
-  const runId = runAt.toISOString().slice(0, 16).replace("T", "-").replace(":", "");
+  const runAt  = new Date();
+  const runId  = runAt.toISOString().slice(0, 16).replace("T", "-").replace(":", "");
   const log: LogEntry[] = [];
-  const changedIds: string[] = [];
+  const changed: string[] = [];
 
   console.log(`\n🌿 Green Bowtie Pipeline  ${runAt.toLocaleString("en-US", { timeZone: "America/Los_Angeles" })}`);
   console.log(`   ${dryRun ? "DRY RUN  " : "LIVE     "}  Cities: ${targetCities.join(", ") || "all"}\n`);
 
-  // ── 1. BACKUP ────────────────────────────────────────────────────────────
-  const scopeWhere = targetCities.length
-    ? { city: { in: targetCities }, stateSlug: "california" }
-    : { stateSlug: "california" };
-
+  const scopeWhere: Prisma.VenueWhereInput = {
+    stateSlug: "california",
+    ...(targetCities.length ? { city: { in: targetCities } } : {}),
+  };
   const beforeTotal = await prisma.venue.count({ where: scopeWhere });
   const beforePub   = await prisma.venue.count({ where: { ...scopeWhere, isPublished: true } });
-  console.log(`📊 Scope: ${beforeTotal} venues  (${beforePub} published)\n`);
+  console.log(`📊 Scope: ${beforeTotal} venues (${beforePub} published)\n`);
 
-  // ── 2. GET VENUES ─────────────────────────────────────────────────────────
-  const allVenues = await getVenues();
-  const venues = limitN ? allVenues.slice(0, limitN) : allVenues;
+  const venues = await getVenues();
 
-  // Categorize up-front so we skip genuinely done ones
-  const needsEnrich  = venues.filter(v => !v.description || v.description.trim().length < 30);
-  const needsClean   = venues.filter(v => v.description && isJunkDescription(v.description));
-  const needsGate    = venues.filter(v =>
-    v.description && v.description.trim().length >= 30 && !isJunkDescription(v.description) &&
-    v.auditStatus !== "clean"
-  );
+  // Categorize
+  const confirmed = venues.filter(v => isConfirmedNonWedding(v.auditFlags));
+  const needsEnrich  = venues.filter(v => !confirmed.includes(v) && (!v.description || v.description.trim().length < 30));
+  const needsClean   = venues.filter(v => !confirmed.includes(v) && v.description && isJunk(v.description));
+  // Re-gate: published venues that haven't been manually confirmed OR whose description looks suspicious
+  const needsReGate  = venues.filter(v => !confirmed.includes(v) && v.isPublished && v.auditStatus !== "flagged" &&
+    v.description && v.description.length >= 30);
+  // Description mismatch: catch venues where description was written about a different venue
+  const descMismatch = venues.filter(v => !confirmed.includes(v) && v.description &&
+    descriptionMentionsWrongVenue(v.name, v.description));
+  // Photo check: all published venues with a photo
+  const needsPhoto   = venues.filter(v => !confirmed.includes(v) && v.isPublished && v.primaryPhotoUrl);
 
-  console.log(`📋 Work queue:`);
-  console.log(`   ${needsEnrich.length} need web enrichment`);
-  console.log(`   ${needsClean.length} have junk descriptions to clean`);
-  console.log(`   ${needsGate.length} need relevance gate\n`);
+  console.log(`📋 Queue: ${needsEnrich.length} enrich  ${needsClean.length} clean  ${needsReGate.length} re-gate  ${needsPhoto.length} photo  ${descMismatch.length} desc-mismatch\n`);
 
-  // ── 3. ENRICH ─────────────────────────────────────────────────────────────
+  // ── STEP 0: DESCRIPTION MISMATCH ─────────────────────────────────────────
+  // Clear descriptions that appear to be about a DIFFERENT venue (e.g. Par 5 got Dublin Ranch's text).
+  // We ONLY clear the description — we do NOT unpublish, since the venue itself may be legitimate.
+  // Cleared venues get re-queued into needsEnrich to get a fresh description next.
+  if (descMismatch.length) {
+    console.log("⚠️  Step 0 — Description mismatch (clearing wrong-venue text, will re-enrich)");
+    for (const v of descMismatch) {
+      console.log(`   ${v.name.slice(0, 48).padEnd(48)} 🗑  clearing mismatched description`);
+      if (!dryRun) {
+        await prisma.venue.update({ where: { id: v.id }, data: {
+          description: null, lastAuditedAt: new Date(),
+        }});
+        // Add to needsEnrich so they get a fresh description this same run
+        if (!needsEnrich.find(e => e.id === v.id)) needsEnrich.push(v);
+      }
+      log.push({ name: v.name, city: v.city, action: "desc-mismatch:cleared", changes: ["description"], reason: "description appears to describe a different venue — re-queued for enrichment" });
+    }
+    console.log();
+  }
+
+  // ── STEP 1: ENRICH ───────────────────────────────────────────────────────
   if (needsEnrich.length) {
-    console.log("🌐 Step 1/3 — Web Enrich");
-    for (const venue of needsEnrich) {
-      process.stdout.write(`   ${venue.name.slice(0, 48).padEnd(48)} `);
+    console.log("🌐 Step 1 — Enrich (web search)");
+    for (const v of needsEnrich) {
+      process.stdout.write(`   ${v.name.slice(0, 48).padEnd(48)} `);
       try {
-        const enriched = await stepEnrich(venue);
-        const { _reason, _isWedding, ...updateFields } = enriched;
-
-        const changes: string[] = [];
-        if (updateFields.description) changes.push("description");
-        if (updateFields.website) changes.push("website");
-        if (updateFields.phone) changes.push("phone");
-        if (updateFields.maxGuests) changes.push("maxGuests");
-        if (updateFields.baseRentalMin) changes.push("price");
-        if (updateFields.venueType) changes.push(`type→${updateFields.venueType}`);
-        if (updateFields.styleTags) changes.push("styleTags");
-
+        const e = await stepEnrich(v);
+        const { _wedding, _reason, ...fields } = e;
+        const updates: string[] = Object.keys(fields).filter(k => k !== "_wedding" && k !== "_reason");
         let action = "enriched";
-        let publish: boolean | undefined;
+        let pub: boolean | undefined;
+        if (_wedding === false) { action = "unpublished:not-wedding"; pub = false; }
+        else if (_wedding === true && fields.description) { action = "enriched+published"; pub = true; }
+        else if (_wedding === null) { action = "enriched:uncertain"; }
 
-        if (_isWedding === false) {
-          action = "unpublished:not-wedding";
-          publish = false;
-        } else if (_isWedding === true && updateFields.description) {
-          action = "enriched+published";
-          publish = true;
-        } else if (_isWedding === null) {
-          action = "enriched:uncertain";
+        const sym = pub === false ? "🚫" : pub === true ? "✅" : "📝";
+        console.log(`${sym} ${action}  ${_reason.slice(0, 55)}`);
+
+        if (!dryRun && (updates.length || pub !== undefined)) {
+          await prisma.venue.update({ where: { id: v.id }, data: {
+            ...fields,
+            ...(pub !== undefined ? { isPublished: pub } : {}),
+            auditStatus: pub === false ? "flagged" : "clean",
+            lastAuditedAt: new Date(),
+          }});
+          changed.push(v.id);
         }
-
-        const symbol = action.includes("not-wedding") ? "🚫" : action.includes("published") ? "✅" : "📝";
-        console.log(`${symbol} ${action}  ${_reason.slice(0, 55)}`);
-
-        if (!dryRun && (Object.keys(updateFields).length > 0 || publish !== undefined)) {
-          await prisma.venue.update({
-            where: { id: venue.id },
-            data: {
-              ...updateFields,
-              ...(publish !== undefined ? { isPublished: publish } : {}),
-              auditStatus: action === "unpublished:not-wedding" ? "flagged" : "clean",
-              lastAuditedAt: new Date(),
-            },
-          });
-          changedIds.push(venue.id);
-        }
-
-        log.push({ name: venue.name, city: venue.city, action, changes, reason: _reason });
+        log.push({ name: v.name, city: v.city, action, changes: updates, reason: _reason });
       } catch (err) {
         console.log(`❌ ${String(err).slice(0, 70)}`);
-        log.push({ name: venue.name, city: venue.city, action: "error", changes: [], reason: String(err).slice(0, 100) });
+        log.push({ name: v.name, city: v.city, action: "error", changes: [], reason: String(err).slice(0, 100) });
       }
       await new Promise(r => setTimeout(r, 800));
     }
   }
 
-  // ── 4. CLEAN ──────────────────────────────────────────────────────────────
+  // ── STEP 2: CLEAN ────────────────────────────────────────────────────────
   if (needsClean.length) {
-    console.log("\n🧹 Step 2/3 — Clean descriptions");
-    for (const venue of needsClean) {
-      process.stdout.write(`   ${venue.name.slice(0, 48).padEnd(48)} `);
+    console.log("\n🧹 Step 2 — Clean descriptions");
+    for (const v of needsClean) {
+      process.stdout.write(`   ${v.name.slice(0, 48).padEnd(48)} `);
       try {
-        const { description, wasFixed } = await stepClean({ name: venue.name, description: venue.description! });
-        if (wasFixed && description) {
-          console.log(`✓ cleaned`);
+        const fixed = await stepClean(v.name, v.description!);
+        if (fixed) {
+          console.log(`✓ fixed`);
           if (!dryRun) {
-            await prisma.venue.update({
-              where: { id: venue.id },
-              data: { description, lastAuditedAt: new Date() },
-            });
-            if (!changedIds.includes(venue.id)) changedIds.push(venue.id);
+            await prisma.venue.update({ where: { id: v.id }, data: { description: fixed, lastAuditedAt: new Date() } });
+            if (!changed.includes(v.id)) changed.push(v.id);
           }
-          log.push({ name: venue.name, city: venue.city, action: "description-cleaned", changes: ["description"], reason: "junk description replaced" });
+          log.push({ name: v.name, city: v.city, action: "cleaned", changes: ["description"], reason: "junk description replaced" });
         } else {
-          console.log(`— already ok`);
+          console.log(`— ok`);
         }
-      } catch (err) {
-        console.log(`❌ ${String(err).slice(0, 70)}`);
-      }
-      await new Promise(r => setTimeout(r, 400));
+      } catch (err) { console.log(`❌ ${String(err).slice(0, 70)}`); }
+      await new Promise(r => setTimeout(r, 300));
     }
   }
 
-  // ── 5. GATE ───────────────────────────────────────────────────────────────
-  if (needsGate.length) {
-    console.log("\n🔍 Step 3/3 — Relevance gate");
-    for (const venue of needsGate) {
-      process.stdout.write(`   ${venue.name.slice(0, 48).padEnd(48)} `);
+  // ── STEP 3: RE-GATE (published venues) ────────────────────────────────
+  if (needsReGate.length) {
+    console.log("\n🔍 Step 3 — Re-gate published venues");
+    for (const v of needsReGate) {
+      // Re-fetch in case description was just updated
+      const fresh = await prisma.venue.findUnique({ where: { id: v.id } });
+      const target = fresh ?? v;
+      process.stdout.write(`   ${target.name.slice(0, 48).padEnd(48)} `);
       try {
-        // Re-fetch in case description was just updated
-        const fresh = await prisma.venue.findUnique({ where: { id: venue.id } });
-        const { isWedding, confidence, reason } = await stepGate(fresh ?? venue);
-
-        let action: string;
-        let newPublished: boolean | undefined;
-
+        const { isWedding, confidence, reason } = await stepReGate(target);
         if (!isWedding && confidence !== "low") {
-          action = "unpublished:not-wedding";
-          newPublished = false;
-        } else if (isWedding && fresh?.description) {
-          action = "published";
-          newPublished = true;
+          console.log(`🚫 unpublished:not-wedding  ${reason.slice(0, 55)}`);
+          if (!dryRun) {
+            await prisma.venue.update({ where: { id: v.id }, data: {
+              isPublished: false, auditStatus: "flagged", lastAuditedAt: new Date(),
+              auditFlags: [
+                ...(Array.isArray(target.auditFlags) ? target.auditFlags as object[] : []),
+                { type: "regate_not_wedding", severity: "critical", field: "name", detail: reason, autoFixed: true }
+              ]
+            }});
+            if (!changed.includes(v.id)) changed.push(v.id);
+          }
+          log.push({ name: v.name, city: v.city, action: "unpublished:not-wedding", changes: ["isPublished"], reason });
         } else {
-          action = "kept:uncertain";
+          console.log(`✅ confirmed  ${reason.slice(0, 55)}`);
+          log.push({ name: v.name, city: v.city, action: "confirmed", changes: [], reason });
         }
+      } catch (err) { console.log(`❌ ${String(err).slice(0, 70)}`); }
+      await new Promise(r => setTimeout(r, 300));
+    }
+  }
 
-        const symbol = action === "published" ? "✅" : action.includes("not-wedding") ? "🚫" : "⚠️ ";
-        console.log(`${symbol} ${action}  ${reason.slice(0, 55)}`);
-
-        if (!dryRun && newPublished !== undefined) {
-          await prisma.venue.update({
-            where: { id: venue.id },
-            data: {
-              isPublished: newPublished,
-              auditStatus: newPublished ? "clean" : "flagged",
-              lastAuditedAt: new Date(),
-            },
-          });
-          if (!changedIds.includes(venue.id)) changedIds.push(venue.id);
+  // ── STEP 4: PHOTO ────────────────────────────────────────────────────────
+  if (needsPhoto.length) {
+    console.log("\n📸 Step 4 — Photo audit + swap");
+    for (const v of needsPhoto) {
+      // Re-fetch in case publish status changed
+      const fresh = await prisma.venue.findUnique({ where: { id: v.id } });
+      if (!fresh?.isPublished || !fresh.primaryPhotoUrl) continue;
+      process.stdout.write(`   ${fresh.name.slice(0, 48).padEnd(48)} `);
+      try {
+        const result = await auditAndFixPhoto(fresh, OR_KEY, dryRun);
+        if (result.action === "ok") {
+          console.log(`✓ photo ok (${result.oldScore}/10)  ${result.reason.slice(0, 50)}`);
+          log.push({ name: v.name, city: v.city, action: "photo:ok", changes: [], reason: `${result.oldScore}/10 — ${result.reason}` });
+        } else if (result.action === "swapped") {
+          console.log(`🔄 photo swapped (${result.oldScore}→${result.newScore}/10)  ${result.reason.slice(0, 45)}`);
+          if (!dryRun) {
+            await prisma.venue.update({ where: { id: v.id }, data: { primaryPhotoUrl: result.newUrl!, lastAuditedAt: new Date() } });
+            if (!changed.includes(v.id)) changed.push(v.id);
+          }
+          log.push({ name: v.name, city: v.city, action: "photo:swapped", changes: ["primaryPhotoUrl"], reason: result.reason });
+        } else if (result.action === "no-good-photo") {
+          console.log(`⚠️  no good photo (${result.oldScore}/10)  ${result.reason.slice(0, 45)}`);
+          log.push({ name: v.name, city: v.city, action: "photo:needs-manual", changes: [], reason: result.reason });
+        } else {
+          console.log(`— ${result.action}`);
+          log.push({ name: v.name, city: v.city, action: `photo:${result.action}`, changes: [], reason: result.reason });
         }
-
-        log.push({ name: venue.name, city: venue.city, action, changes: newPublished !== undefined ? ["isPublished"] : [], reason });
-      } catch (err) {
-        console.log(`❌ ${String(err).slice(0, 70)}`);
-      }
+      } catch (err) { console.log(`❌ ${String(err).slice(0, 70)}`); }
       await new Promise(r => setTimeout(r, 400));
     }
   }
 
-  // ── 6. COUNT VERIFY ───────────────────────────────────────────────────────
+  // ── COUNT VERIFY ──────────────────────────────────────────────────────────
   const afterTotal = await prisma.venue.count({ where: scopeWhere });
   const afterPub   = await prisma.venue.count({ where: { ...scopeWhere, isPublished: true } });
-
   if (afterTotal !== beforeTotal) {
-    console.error(`\n🚨 SAFETY: Count changed ${beforeTotal} → ${afterTotal}. Aborting sync.`);
+    console.error(`\n🚨 COUNT MISMATCH: ${beforeTotal} → ${afterTotal}. Aborting sync.`);
     process.exit(1);
   }
 
-  const pubDelta = afterPub - beforePub;
-  console.log(`\n📊 Result: ${afterTotal} venues  (${afterPub} published  ${pubDelta >= 0 ? "+" : ""}${pubDelta})`);
-
-  // ── 7. NEON SYNC ──────────────────────────────────────────────────────────
-  if (!dryRun && !skipSync && changedIds.length) {
-    console.log(`\n🔄 Syncing ${changedIds.length} changed venues to Neon...`);
-    await syncToNeon(changedIds);
+  // ── SYNC ─────────────────────────────────────────────────────────────────
+  if (!dryRun && !skipSync && changed.length) {
+    console.log(`\n🔄 Syncing ${changed.length} venues to Neon...`);
+    await syncToNeon(changed);
   }
 
-  // ── 8. AUDIT REPORT ───────────────────────────────────────────────────────
-  console.log("\n📄 Regenerating audit report...");
-
-  // Build a lightweight summary for the report
-  const allAudited = await prisma.venue.findMany({
-    where: scopeWhere,
-    orderBy: [{ city: "asc" }, { name: "asc" }],
-  });
-
-  const reportResults: VenueAuditResult[] = allAudited.map(v => ({
-    id: v.id,
-    name: v.name,
-    city: v.city,
+  // ── REPORT ───────────────────────────────────────────────────────────────
+  console.log("\n📄 Generating report...");
+  const all = await prisma.venue.findMany({ where: scopeWhere, orderBy: [{ city: "asc" }, { name: "asc" }] });
+  const reportResults: VenueAuditResult[] = all.map(v => ({
+    id: v.id, name: v.name, city: v.city,
     auditScore: v.auditScore ?? 0,
     auditStatus: (v.auditStatus ?? "unaudited") as VenueAuditResult["auditStatus"],
     flags: Array.isArray(v.auditFlags) ? v.auditFlags as VenueAuditResult["flags"] : [],
-    autoFixesApplied: 0,
-    wasPublished: v.isPublished,
-    isPublished: v.isPublished,
+    autoFixesApplied: 0, wasPublished: v.isPublished, isPublished: v.isPublished,
   }));
-
-  const summary: AuditRunSummary = {
-    runAt: runAt.toISOString(),
-    cities: targetCities,
-    totalVenues: reportResults.length,
+  const reportSummary: AuditRunSummary = {
+    runAt: runAt.toISOString(), cities: targetCities, totalVenues: reportResults.length,
     clean: reportResults.filter(r => r.auditStatus === "clean").length,
     needsReview: reportResults.filter(r => r.auditStatus === "needs_review").length,
     flagged: reportResults.filter(r => r.auditStatus === "flagged").length,
     totalFlags: reportResults.reduce((s, r) => s + r.flags.length, 0),
     criticalFlags: reportResults.reduce((s, r) => s + r.flags.filter(f => f.severity === "critical" && !f.autoFixed).length, 0),
     warningFlags: reportResults.reduce((s, r) => s + r.flags.filter(f => f.severity === "warning" && !f.autoFixed).length, 0),
-    autoFixesApplied: log.filter(e => e.action.includes("cleaned") || e.action.includes("enriched")).length,
+    autoFixesApplied: log.filter(e => ["enriched+published","cleaned","photo:swapped"].includes(e.action)).length,
     results: reportResults,
   };
+  const reportPath = await generateReport(reportSummary);
 
-  const reportPath = await generateReport(summary);
-
-  // ── 9. WRITE RUN LOG ──────────────────────────────────────────────────────
+  // ── LOG ───────────────────────────────────────────────────────────────────
   const runsDir = path.resolve(__dirname, "runs");
   fs.mkdirSync(runsDir, { recursive: true });
-  const logPath = path.join(runsDir, `${runId}.json`);
-  fs.writeFileSync(logPath, JSON.stringify({
-    runAt: runAt.toISOString(),
-    cities: targetCities,
-    dryRun,
+  fs.writeFileSync(path.join(runsDir, `${runId}.json`), JSON.stringify({
+    runAt: runAt.toISOString(), cities: targetCities, dryRun,
     before: { total: beforeTotal, published: beforePub },
     after: { total: afterTotal, published: afterPub },
-    changed: changedIds.length,
-    log,
+    changed: changed.length, log,
   }, null, 2));
 
   // ── SUMMARY ───────────────────────────────────────────────────────────────
-  const enriched   = log.filter(e => e.action.includes("enriched")).length;
-  const cleaned    = log.filter(e => e.action === "description-cleaned").length;
-  const published  = log.filter(e => e.action.includes("published") && !e.action.includes("un")).length;
-  const unpublished= log.filter(e => e.action.includes("unpublished")).length;
-  const uncertain  = log.filter(e => e.action.includes("uncertain")).length;
-  const errors     = log.filter(e => e.action === "error").length;
-
+  const pubDelta = afterPub - beforePub;
+  const cnt = (a: string) => log.filter(e => e.action === a).length;
   console.log(`
-┌─────────────────────────────┐
-│  Pipeline Complete           │
-├─────────────────────────────┤
-│  Enriched       ${String(enriched).padStart(4)}          │
-│  Cleaned        ${String(cleaned).padStart(4)}          │
-│  Published  +${String(published).padStart(4)}          │
-│  Unpublished   -${String(unpublished).padStart(3)}          │
-│  Uncertain      ${String(uncertain).padStart(4)}          │
-│  Errors         ${String(errors).padStart(4)}          │
-├─────────────────────────────┤
-│  Total   ${afterTotal} venues (${afterPub} pub)  │
-└─────────────────────────────┘`);
+┌──────────────────────────────────────┐
+│  Pipeline Complete                    │
+├──────────────────────────────────────┤
+│  Enriched        ${String(log.filter(e=>e.action.startsWith("enrich")).length).padStart(4)}                │
+│  Cleaned         ${String(cnt("cleaned")).padStart(4)}                │
+│  Re-gated        ${String(log.filter(e=>e.action.startsWith("confirmed")||e.action.startsWith("unpub")).length).padStart(4)}                │
+│  Photos swapped  ${String(cnt("photo:swapped")).padStart(4)}                │
+│  Photos flagged  ${String(cnt("photo:needs-manual")).padStart(4)}                │
+│  Published    ${pubDelta >= 0 ? "+" : ""}${String(pubDelta).padStart(4)}                │
+├──────────────────────────────────────┤
+│  Total  ${afterTotal} venues  (${afterPub} published)     │
+└──────────────────────────────────────┘`);
 
   if (dryRun) console.log("\n⚠️  DRY RUN — nothing written");
-  console.log(`📋 Log: ${logPath}`);
-  console.log(`📄 Report: ${reportPath}\n`);
+  console.log(`📄 ${reportPath}\n`);
 
   await prisma.$disconnect();
   await pool.end();
