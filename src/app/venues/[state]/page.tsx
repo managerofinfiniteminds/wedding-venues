@@ -183,7 +183,13 @@ export default async function StateVenuesPage({
                 </svg>
                 List
               </span>
-
+              <Link
+                href="/map"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-600 hover:bg-green-50 hover:text-[#3b6341] transition-colors"
+              >
+                <PinIcon className="w-4 h-4" />
+                Map
+              </Link>
             </div>
             <div className="flex items-center gap-2">
               <label htmlFor="sort" className="text-sm text-gray-600 hidden sm:block">Sort:</label>
