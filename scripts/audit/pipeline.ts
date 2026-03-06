@@ -282,9 +282,16 @@ async function main() {
   const recentlyProcessed = (v: (typeof venues)[0]) =>
     !forceAll && v.pipelineProcessedAt && new Date(v.pipelineProcessedAt) > freshCutoff;
 
+  // Count prior uncertain enrichment attempts from auditFlags
+  const uncertainAttempts = (v: (typeof venues)[0]): number => {
+    if (!Array.isArray(v.auditFlags)) return 0;
+    return (v.auditFlags as Array<{type:string}>).filter(f => f.type === "enrich_uncertain").length;
+  };
+
   const needsEnrich = venues.filter(v =>
     !confirmed.includes(v) && !recentlyProcessed(v) &&
-    (!v.description || v.description.trim().length < 30));
+    (!v.description || v.description.trim().length < 30) &&
+    uncertainAttempts(v) < 2); // stop after 2 uncertain attempts — flag for manual review
 
   const needsClean = venues.filter(v =>
     !confirmed.includes(v) && !recentlyProcessed(v) &&
@@ -324,7 +331,8 @@ async function main() {
           description: null, lastAuditedAt: new Date(),
         }});
         // Add to needsEnrich so they get a fresh description this same run
-        if (!needsEnrich.find(e => e.id === v.id)) needsEnrich.push(v);
+        // BUT only if they haven't hit the uncertain limit already
+        if (!needsEnrich.find(e => e.id === v.id) && uncertainAttempts(v) < 2) needsEnrich.push(v);
       }
       log.push({ name: v.name, city: v.city, action: "desc-mismatch:cleared", changes: ["description"], reason: "description appears to describe a different venue — re-queued for enrichment" });
     }
@@ -349,14 +357,24 @@ async function main() {
         const sym = pub === false ? "🚫" : pub === true ? "✅" : "📝";
         console.log(`${sym} ${action}  ${_reason.slice(0, 55)}`);
 
-        if (!dryRun && (updates.length || pub !== undefined)) {
-          await prisma.venue.update({ where: { id: v.id }, data: {
-            ...fields,
-            ...(pub !== undefined ? { isPublished: pub } : {}),
-            auditStatus: pub === false ? "flagged" : "clean",
-            lastAuditedAt: new Date(),
-          }});
-          changed.push(v.id);
+        if (!dryRun) {
+          const existingFlags = Array.isArray(v.auditFlags) ? v.auditFlags as object[] : [];
+          const newFlags = action === "enriched:uncertain"
+            ? [...existingFlags, { type: "enrich_uncertain", severity: "info", detail: _reason, ts: new Date().toISOString() }]
+            : existingFlags;
+          // If hit uncertain limit, flag for manual review
+          const hitUncertainLimit = action === "enriched:uncertain" && newFlags.filter((f: {type?:string}) => f.type === "enrich_uncertain").length >= 2;
+          if (updates.length || pub !== undefined || action === "enriched:uncertain") {
+            await prisma.venue.update({ where: { id: v.id }, data: {
+              ...fields,
+              ...(pub !== undefined ? { isPublished: pub } : {}),
+              auditStatus: pub === false ? "flagged" : hitUncertainLimit ? "needs_review" : "clean",
+              auditFlags: newFlags,
+              lastAuditedAt: new Date(),
+            }});
+            changed.push(v.id);
+          }
+          if (hitUncertainLimit) console.log(`   ⚠️  ${v.name.slice(0,40)} hit uncertain limit — flagged for manual review`);
         }
         log.push({ name: v.name, city: v.city, action, changes: updates, reason: _reason });
       } catch (err) {
@@ -566,8 +584,27 @@ async function main() {
 └──────────────────────────────────────┘`);
 
   if (dryRun) console.log("\n⚠️  DRY RUN — nothing written");
-  console.log(`📄 ${reportPath}\n`);
+  console.log(`📄 ${reportPath}`);
 
+  // ── POST-RUN WARNINGS ──────────────────────────────────────────────────────
+  // Item 3: surface Places-sourced photos that still need R2 upgrade
+  const placesPhotos = all.filter(v => v.isPublished && v.photoSource === "places");
+  if (placesPhotos.length) {
+    console.log(`\n⚠️  ${placesPhotos.length} published venue(s) still using Google Places photos (URLs will expire):`);
+    placesPhotos.forEach(v => console.log(`   • ${v.name} (${v.city}) — set up R2 to auto-upgrade`));
+  }
+
+  // Item 4: surface venues stuck as uncertain after multiple attempts
+  const stuckUncertain = all.filter(v =>
+    !v.isPublished && !v.description && Array.isArray(v.auditFlags) &&
+    (v.auditFlags as Array<{type:string}>).filter(f => f.type === "enrich_uncertain").length >= 2
+  );
+  if (stuckUncertain.length) {
+    console.log(`\n🔍 ${stuckUncertain.length} venue(s) need manual review (uncertain after 2 enrichment attempts):`);
+    stuckUncertain.forEach(v => console.log(`   • ${v.name} (${v.city})`));
+  }
+
+  console.log();
   await prisma.$disconnect();
   await pool.end();
 }

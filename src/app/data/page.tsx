@@ -217,12 +217,31 @@ npx tsx@latest scripts/audit/pipeline.ts --cities livermore --dry-run`}</Pre>
           <li><strong>Expired URLs</strong> — Places photos auto-upgraded to R2</li>
         </ul>
 
-        <h3 style={{ fontSize: 17, fontWeight: 600, marginTop: 24, marginBottom: 8 }}>Known limitations</h3>
-        <ul>
-          <li><strong>React/SPA venue websites</strong> — about 30% of venue websites render client-side (Squarespace, Wix, React). Our scraper gets empty results; these fall back to Places photos. The <Code>photoSource</Code> column flags these.</li>
-          <li><strong>Data quality thins outside wine country</strong> — Bay Area venues are well-documented on the web. Smaller markets (Fresno, Bakersfield) return fewer web results per venue, leading to more <Code>uncertain</Code> classifications.</li>
-          <li><strong>Re-gate trusts descriptions</strong> — if a description mentions weddings for a venue that doesn't actually host them, the re-gate may pass it. The description mismatch detector helps but isn't perfect.</li>
-        </ul>
+        <h3 style={{ fontSize: 17, fontWeight: 600, marginTop: 24, marginBottom: 8 }}>Known limitations + mitigations</h3>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+          <thead>
+            <tr style={{ background: "#f9fafb", borderBottom: "2px solid #e5e7eb" }}>
+              {["Issue", "Impact", "Mitigation"].map(h => (
+                <th key={h} style={{ textAlign: "left", padding: "8px 12px" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              ["React/SPA venue websites", "~30% of sites don't serve images in HTML; scraper gets nothing, falls back to Places URLs", "photoSource='places' flags these; post-run warning lists them; R2 upgrade auto-retried each run"],
+              ["Data quality thins outside wine country", "Bay Area is well-documented; smaller markets (Fresno, Bakersfield) return fewer results → more uncertain", "uncertain attempts tracked in auditFlags; 2 failed attempts → needs_review, manual required"],
+              ["Grok :online loop on mismatch", "Description cleared → re-enriched → Grok pays again. Could loop indefinitely", "enrich_uncertain flag counted; after 2 attempts venue is locked out of enrich, flagged for manual"],
+              ["Re-gate trusts descriptions", "If description has wedding language for a non-wedding venue, gate may pass it", "Name-first logic + description mismatch detector; name always overrides description"],
+              ["Places photo URLs expire", "Token-signed URLs become 404s; photos break silently", "photoSource tracks origin; Places photos always re-queued for R2 upgrade on next run"],
+            ].map(([issue, impact, mitigation]) => (
+              <tr key={issue} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                <td style={{ padding: "8px 12px", fontWeight: 600, verticalAlign: "top" }}>{issue}</td>
+                <td style={{ padding: "8px 12px", color: "#dc2626", fontSize: 13, verticalAlign: "top" }}>{impact}</td>
+                <td style={{ padding: "8px 12px", color: "#16a34a", fontSize: 13, verticalAlign: "top" }}>{mitigation}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </Section>
 
       {/* ── R2 SETUP ── */}
