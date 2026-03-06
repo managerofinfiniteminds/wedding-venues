@@ -73,7 +73,8 @@ const limitArg    = args[args.indexOf("--limit") + 1];
 const limitN      = limitArg ? parseInt(limitArg) : undefined;
 const freshDaysArg = args[args.indexOf("--fresh-days") + 1];
 const FRESH_DAYS  = freshDaysArg ? parseInt(freshDaysArg) : 30; // skip venues processed within N days
-const PHOTO_FRESH_DAYS = 30; // skip photo re-score if audited within N days
+const PHOTO_FRESH_DAYS = 30;     // skip photo re-score if audited within N days
+const MIN_DESC_LENGTH  = 150;    // minimum chars for a publishable description
 
 // ── Models ────────────────────────────────────────────────────────────────
 const MODEL_ENRICH = "x-ai/grok-3-mini:online";
@@ -278,9 +279,19 @@ async function main() {
   const freshCutoff = new Date(now.getTime() - FRESH_DAYS * 24 * 60 * 60 * 1000);
   const photoCutoff = new Date(now.getTime() - PHOTO_FRESH_DAYS * 24 * 60 * 60 * 1000);
 
-  // Recently processed = skip (unless --force)
+  // Recently processed = skip ONLY if the venue is actually complete
+  // Never skip: no description, short description, no photo, Places photo (expiring)
+  const isComplete = (v: (typeof venues)[0]) =>
+    v.description && v.description.length >= MIN_DESC_LENGTH &&
+    v.primaryPhotoUrl &&
+    v.photoSource !== "places" &&
+    v.auditStatus !== "needs_review";
+
   const recentlyProcessed = (v: (typeof venues)[0]) =>
-    !forceAll && v.pipelineProcessedAt && new Date(v.pipelineProcessedAt) > freshCutoff;
+    !forceAll &&
+    isComplete(v) &&
+    v.pipelineProcessedAt &&
+    new Date(v.pipelineProcessedAt) > freshCutoff;
 
   // Count prior uncertain enrichment attempts from auditFlags
   const uncertainAttempts = (v: (typeof venues)[0]): number => {
@@ -290,7 +301,7 @@ async function main() {
 
   const needsEnrich = venues.filter(v =>
     !confirmed.includes(v) && !recentlyProcessed(v) &&
-    (!v.description || v.description.trim().length < 30) &&
+    (!v.description || v.description.trim().length < MIN_DESC_LENGTH) &&
     uncertainAttempts(v) < 2); // stop after 2 uncertain attempts — flag for manual review
 
   const needsClean = venues.filter(v =>
@@ -351,8 +362,11 @@ async function main() {
         let action = "enriched";
         let pub: boolean | undefined;
         if (_wedding === false) { action = "unpublished:not-wedding"; pub = false; }
-        else if (_wedding === true && fields.description) { action = "enriched+published"; pub = true; }
-        else if (_wedding === null) { action = "enriched:uncertain"; }
+        else if (_wedding === true && fields.description && String(fields.description).length >= MIN_DESC_LENGTH) {
+          action = "enriched+published"; pub = true;
+        } else if (_wedding === true && fields.description) {
+          action = "enriched:desc-too-short"; // has description but below quality floor — don't publish yet
+        } else if (_wedding === null) { action = "enriched:uncertain"; }
 
         const sym = pub === false ? "🚫" : pub === true ? "✅" : "📝";
         console.log(`${sym} ${action}  ${_reason.slice(0, 55)}`);
@@ -375,6 +389,8 @@ async function main() {
             changed.push(v.id);
           }
           if (hitUncertainLimit) console.log(`   ⚠️  ${v.name.slice(0,40)} hit uncertain limit — flagged for manual review`);
+          // Newly published venue → queue for photo audit this same run
+          if (pub === true && !needsPhoto.find(p => p.id === v.id)) needsPhoto.push(v);
         }
         log.push({ name: v.name, city: v.city, action, changes: updates, reason: _reason });
       } catch (err) {

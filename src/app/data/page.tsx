@@ -284,6 +284,46 @@ R2_PUBLIC_URL=https://photos.greenbowtie.com`}</Pre>
         </div>
       </Section>
 
+      {/* ── BACKLOG ── */}
+      <Section title="Backlog &amp; Checklist">
+        <p style={{ fontSize: 13, color: "#6b7280", marginBottom: 16 }}>Track progress here. Update manually as tasks complete.</p>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+          <thead>
+            <tr style={{ background: "#f9fafb", borderBottom: "2px solid #e5e7eb" }}>
+              {["Status", "Task", "Notes"].map(h => (
+                <th key={h} style={{ textAlign: "left", padding: "8px 12px" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {[
+              ["✅", "3-city pilot (Livermore, Dublin, Pleasanton)", "Complete — 39 venues, all photos on R2"],
+              ["✅", "Pipeline skip logic — pipelineProcessedAt", "Venues processed within 30 days skipped"],
+              ["✅", "Photo R2 migration", "All 39 photos stable on Cloudflare R2"],
+              ["✅", "Fix skip logic gap — never skip incomplete venues", "isComplete() check — no desc/short desc/Places photo always re-processed"],
+              ["✅", "Description quality floor — 150 char minimum", "Replaces 30-char floor; thin Knot descriptions re-enriched"],
+              ["✅", "Photo audit on newly published venues in same pass", "Enrich → publish → photo in single pipeline run"],
+              ["✅", "Grok loop protection — enrich_uncertain flag", "Max 2 attempts; then needs_review"],
+              ["✅", "Places photo warning + tracking", "photoSource column; post-run warning surfaces Places-sourced photos"],
+              ["⏳", "California-wide pipeline run", "~2,000 venues, ~$6 — in progress"],
+              ["⏳", "Switch R2 to photos.greenbowtie.com custom domain", "Before national rollout — see R2 Setup section"],
+              ["⏳", "Resume The Knot scraping (cooldown)", "When cooldown lifts — run Knot for California first, then --force pipeline refresh"],
+              ["⏳", "Post-Knot pipeline refresh", "Run pipeline --force on California after each Knot batch to re-enrich newly populated fields"],
+              ["⏳", "Texas / New York pilot (validate new state quality)", "After California pass is reviewed"],
+              ["⏳", "National rollout", "After custom domain + 2 state validation"],
+              ["⏳", "Venue detail pages — SEO optimization", "Individual venue pages with full content"],
+              ["⏳", "Search / filter improvements", "User-facing features"],
+            ].map(([status, task, notes]) => (
+              <tr key={task} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                <td style={{ padding: "8px 12px", fontSize: 18 }}>{status}</td>
+                <td style={{ padding: "8px 12px", fontWeight: status === "✅" ? 400 : 600, color: status === "✅" ? "#6b7280" : "#111" }}>{task}</td>
+                <td style={{ padding: "8px 12px", color: "#6b7280", fontSize: 13 }}>{notes}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Section>
+
       {/* ── ROLLOUT PLAN ── */}
       <Section title="Rollout Plan">
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
