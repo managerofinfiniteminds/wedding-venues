@@ -52,9 +52,9 @@ export function Nav({ q }: { q?: string }) {
 
         {/* Desktop nav links */}
         <div className="ml-auto hidden md:flex items-center gap-1">
-          <Link href="/venues" className="text-sm text-gray-600 hover:text-[#3b6341] font-medium px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+          <a href="/venues#browse" className="text-sm text-gray-600 hover:text-[#3b6341] font-medium px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
             Browse States
-          </Link>
+          </a>
 
         </div>
 
