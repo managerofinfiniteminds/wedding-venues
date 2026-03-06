@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { VenueCard } from "@/components/VenueCard";
 import type { Venue } from "@prisma/client";
 
@@ -159,20 +159,15 @@ describe("VenueCard", () => {
     expect(screen.queryByText(/Bridal Suite/)).not.toBeInTheDocument();
   });
 
-  it("is clickable and expandable (no nav link — inline expand)", () => {
+  it("renders as a link to the venue detail page", () => {
     render(<VenueCard venue={baseVenue} />);
-    // Card renders as a div, not a link — just verify the name is present and clickable
-    expect(screen.getByText("Test Vineyard")).toBeInTheDocument();
+    const links = screen.getAllByRole("link");
+    const cardLink = links.find(l => l.getAttribute("href") === "/venues/california/test-vineyard");
+    expect(cardLink).toBeInTheDocument();
   });
 
-  it("renders View full details link in expanded panel pointing to correct URL", () => {
-    const { getByText } = render(<VenueCard venue={baseVenue} />);
-    // Click to expand
-    const card = getByText("Test Vineyard").closest("[class*='rounded-2xl']") as HTMLElement;
-    fireEvent.click(card);
-    // After expand, link should be present
-    const link = screen.getByText(/View full details/);
-    expect(link).toBeInTheDocument();
-    expect(link.closest("a")).toHaveAttribute("href", "/venues/california/test-vineyard");
+  it("renders View details button", () => {
+    render(<VenueCard venue={baseVenue} />);
+    expect(screen.getByText(/View details/)).toBeInTheDocument();
   });
 });

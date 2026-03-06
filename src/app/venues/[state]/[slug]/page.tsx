@@ -121,6 +121,47 @@ export default async function VenueDetailPage({
             </section>
           )}
 
+          {/* Ratings & Directions */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="bg-stone-50 rounded-2xl border border-gray-200 p-6">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Google Rating</p>
+              {venue.googleRating ? (
+                <>
+                  <div className="flex items-baseline gap-2 mb-2">
+                    <span className="text-yellow-400 text-lg">★</span>
+                    <span className="text-2xl font-bold text-gray-800">{venue.googleRating}</span>
+                    <span className="text-sm text-gray-500">({venue.googleReviews?.toLocaleString()} reviews)</span>
+                  </div>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${venue.name} ${venue.city} wedding venue`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-pink-700 hover:underline font-medium"
+                  >
+                    Read Google Reviews →
+                  </a>
+                </>
+              ) : (
+                <p className="text-sm text-gray-400">No rating available yet.</p>
+              )}
+            </div>
+            <div className="bg-stone-50 rounded-2xl border border-gray-200 p-6">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Location</p>
+              <p className="text-sm text-gray-700 mb-3 flex items-start gap-1.5">
+                <span className="mt-0.5">📍</span>
+                <span>{[venue.street, venue.city, venue.state, venue.zip].filter(Boolean).join(", ")}</span>
+              </p>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${venue.name} ${venue.street ?? ""} ${venue.city} ${venue.state}`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-pink-700 hover:underline font-medium"
+              >
+                Get Directions →
+              </a>
+            </div>
+          </div>
+
           {/* Amenities */}
           <section className="bg-white rounded-2xl border border-gray-200 p-6">
             <h2 className="playfair text-2xl font-semibold text-gray-800 mb-4">Amenities</h2>
