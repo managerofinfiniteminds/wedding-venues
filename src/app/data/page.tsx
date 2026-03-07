@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function DataPage() {
   return (
-    <main style={{ maxWidth: 900, margin: "0 auto", padding: "48px 24px", fontFamily: "system-ui, sans-serif", color: "#1a1a1a", lineHeight: 1.7 }}>
+    <main style={{ maxWidth: 900, margin: "0 auto", padding: "48px 24px", fontFamily: "'Nunito Sans', sans-serif", color: "#1a1a1a", lineHeight: 1.7 }}>
 
       <div style={{ background: "#fef3c7", border: "1px solid #f59e0b", borderRadius: 8, padding: "12px 16px", marginBottom: 32, fontSize: 13 }}>
         🔒 Internal page — not indexed by search engines. Do not share publicly.
@@ -319,14 +319,25 @@ R2_PUBLIC_URL=https://photos.greenbowtie.com`}</Pre>
               ["✅", "Photo audit on newly published venues in same pass", "Enrich → publish → photo in single pipeline run"],
               ["✅", "Grok loop protection — enrich_uncertain flag", "Max 2 attempts; then needs_review"],
               ["✅", "Places photo warning + tracking", "photoSource column; post-run warning surfaces Places-sourced photos"],
-              ["⏳", "California-wide pipeline run", "~2,000 venues, ~$6 — in progress"],
+              ["✅", "New logo — greenbowtie-logo.svg", "Replaced old round SVG everywhere (nav, hero, footer). Colors matched to #3b6341."],
+              ["✅", "Font upgrade — Tenor Sans + Nunito Sans", "Replaced Playfair Display + Inter. Locked March 2026."],
+              ["✅", "Browse States nav link fixed", "Was linking to /venues (same page). Now /venues#browse."],
+              ["✅", "California hero image updated", "New pexels photo replacing placeholder."],
+              ["✅", "Sort bug fix — SortSelect base URL", "Was hardcoding /venues?. Now uses usePathname(). Regression test added."],
+              ["✅", "Multi-city chip search", "Select multiple cities as chips. Same-state → /venues/ca?city=X&city=Y. Cross-state → /venues?q=..."],
+              ["✅", "/monetize strategy page", "9 revenue streams, blended revenue model, 4-phase roadmap. Internal, noindex."],
+              ["✅", "/architecture updated to v3.0", "228 tests, AI pipeline, R2, new logo/fonts, 2898 venues."],
+              ["⏳", "California-wide pipeline run", "Batch 1 (20 biggest cities, 1,417 venues) running now — session cool-summit"],
               ["⏳", "Switch R2 to photos.greenbowtie.com custom domain", "Before national rollout — see R2 Setup section"],
-              ["⏳", "Resume The Knot scraping (cooldown)", "When cooldown lifts — run Knot for California first, then --force pipeline refresh"],
-              ["⏳", "Post-Knot pipeline refresh", "Run pipeline --force on California after each Knot batch to re-enrich newly populated fields"],
+              ["⏳", "Resume The Knot scraping (cooldown expires 2026-03-07)", "Run with --resume flag, delay=5s, ~4,353 checkpoint"],
+              ["⏳", "Post-Knot pipeline refresh", "Run pipeline --force on California after Knot batch completes"],
               ["⏳", "Texas / New York pilot (validate new state quality)", "After California pass is reviewed"],
               ["⏳", "National rollout", "After custom domain + 2 state validation"],
               ["⏳", "Venue detail pages — SEO optimization", "Individual venue pages with full content"],
               ["⏳", "Search / filter improvements", "User-facing features"],
+              ["⏳", "Featured listing system (monetization)", "DB isFeatured flag + Stripe billing — Phase 1 revenue stream"],
+              ["⏳", "Inquiry/contact form on venue pages", "Lead gen — Phase 2 revenue stream"],
+              ["⏳", "Email capture on venue pages", "Lead magnet (checklist) → drip sequence"],
             ].map(([status, task, notes]) => (
               <tr key={task} style={{ borderBottom: "1px solid #f3f4f6" }}>
                 <td style={{ padding: "8px 12px", fontSize: 18 }}>{status}</td>
@@ -352,7 +363,7 @@ R2_PUBLIC_URL=https://photos.greenbowtie.com`}</Pre>
             {[
               ["1 — Pilot", "Livermore, Dublin, Pleasanton", "--cities livermore,dublin,pleasanton", "~$0.21", "✅ Complete"],
               ["2 — Bay Area", "All Bay Area cities", "--cities san-jose,oakland,... (batch 10)", "~$1.50", "⏳ Ready"],
-              ["3 — California", "All CA cities (batches of 200)", "--all --limit 200", "~$6", "⏳ Pending"],
+              ["3 — California", "All CA cities (batches of 20)", "--cities batch1,batch2,...", "~$6", "🔄 In Progress"],
               ["4 — Texas / NY", "Validate new state quality", "--all --limit 200", "~$4.50 each", "⏳ Pending"],
               ["5 — National", "All 50 states", "Run state by state", "~$60 total", "⏳ Future"],
             ].map(([phase, scope, cmd, cost, status]) => (
