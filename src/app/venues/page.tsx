@@ -33,6 +33,11 @@ export default async function VenuesHubPage() {
   return (
     <div className="min-h-screen bg-[#f8f7f5]">
 
+      {/* ── WELCOME BANNER ── */}
+      <div className="bg-[#3b6341] text-white text-center py-3 px-4 text-sm font-medium tracking-wide">
+        🌿 Welcome, Rebecca! We&apos;re so glad you&apos;re here.
+      </div>
+
       {/* ── HERO ── */}
       <section className="relative h-[85vh] min-h-[560px] max-h-[900px] flex items-center justify-center overflow-hidden">
         {/* Background image */}

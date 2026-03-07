@@ -108,7 +108,32 @@ async function run() {
     page = await context.newPage(); // Single shared page
 
     const citiesInDb: CityStats[] = await prisma.$queryRaw<CityStats[]>`
-      SELECT city, state, COUNT(*) as cnt FROM "Venue" WHERE "isPublished"=true GROUP BY city, state ORDER BY cnt DESC;
+      SELECT city, 
+        CASE state 
+          WHEN 'CA' THEN 'California'
+          WHEN 'TX' THEN 'Texas'
+          WHEN 'NY' THEN 'New York'
+          WHEN 'FL' THEN 'Florida'
+          WHEN 'NC' THEN 'North Carolina'
+          WHEN 'GA' THEN 'Georgia'
+          WHEN 'IL' THEN 'Illinois'
+          WHEN 'WA' THEN 'Washington'
+          WHEN 'TN' THEN 'Tennessee'
+          WHEN 'CO' THEN 'Colorado'
+          WHEN 'AZ' THEN 'Arizona'
+          WHEN 'MI' THEN 'Michigan'
+          WHEN 'PA' THEN 'Pennsylvania'
+          WHEN 'MO' THEN 'Missouri'
+          WHEN 'VA' THEN 'Virginia'
+          WHEN 'OH' THEN 'Ohio'
+          WHEN 'NJ' THEN 'New Jersey'
+          WHEN 'MN' THEN 'Minnesota'
+          WHEN 'WI' THEN 'Wisconsin'
+          WHEN 'MD' THEN 'Maryland'
+          ELSE state
+        END as state,
+        COUNT(*) as cnt 
+      FROM "Venue" WHERE "isPublished"=true GROUP BY city, state ORDER BY cnt DESC;
     `;
 
     console.log(`[phase2] Found ${citiesInDb.length} distinct cities in DB.`);
@@ -131,12 +156,14 @@ async function run() {
         continue;
       }
 
-      if (processedCities.has(cityStateKey) && resume) {
-        console.log(`[phase2] Skipping city ${cityStat.city}, ${cityStat.state} (already processed and --resume active).`);
-        continue;
-      } else if (processedCities.has(cityStateKey) && !resume) {
-        console.log(`[phase2] Skipping city ${cityStat.city}, ${cityStat.state} (already processed). Use --resume to re-process.`);
-        continue;
+      if (processedCities.has(cityStateKey)) {
+        if (resume) {
+          // --resume = skip already-done cities, continue from where we left off
+          continue;
+        } else {
+          console.log(`[phase2] Skipping city ${cityStat.city}, ${cityStat.state} (already processed). Use --resume to skip done cities.`);
+          continue;
+        }
       }
 
 
@@ -147,10 +174,51 @@ async function run() {
       console.log(`[phase2] Processing city ${cityCount}/${citiesInDb.length} | ${cityStat.city}, ${cityStat.state} (${cityStateKey}) | URL: ${knotUrl}`);
 
       let knotVenues: KnotVenueData[] = [];
+      let cloudflareBlocked = false;
       try {
         if (!page) throw new Error("Playwright page not initialized.");
-        await page.goto(knotUrl, { waitUntil: 'domcontentloaded' });
-        await sleep(1200);
+
+        // Navigate with timeout — don't hang forever
+        await page.goto(knotUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+        // Random human-like pause: 1.5–3.5s after page load
+        await sleep(1500 + Math.floor(Math.random() * 2000));
+
+        // ── Cloudflare block detection ──────────────────────────────────
+        const pageTitle = await page.title();
+        const pageUrl = page.url();
+        const bodyText = await page.evaluate(() => document.body.innerText.slice(0, 500));
+
+        const cfBlocked =
+          pageTitle.includes('Just a moment') ||
+          pageTitle.includes('Attention Required') ||
+          bodyText.includes('Checking your browser') ||
+          bodyText.includes('Enable JavaScript and cookies') ||
+          bodyText.includes('cf-browser-verification') ||
+          pageUrl.includes('challenge') ||
+          pageUrl.includes('captcha');
+
+        if (cfBlocked) {
+          cloudflareBlocked = true;
+          console.warn(`[phase2] ⚠️  CLOUDFLARE BLOCK detected on ${cityStat.city} — title: "${pageTitle}"`);
+          console.warn(`[phase2] Backing off 5 minutes before continuing...`);
+          await appendProblemCity(cityStat.city, cityStat.state, `Cloudflare block: ${pageTitle}`);
+          // Do NOT mark as processed — we want to retry this city
+          await sleep(5 * 60 * 1000); // 5 minute backoff
+          // Try once more after backoff
+          await page.goto(knotUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+          await sleep(3000);
+          const retryTitle = await page.title();
+          if (retryTitle.includes('Just a moment') || retryTitle.includes('Attention Required')) {
+            console.error(`[phase2] Still blocked after backoff — skipping city and continuing`);
+            processedCities.add(cityStateKey);
+            await saveProcessedCities(processedCities);
+            await sleep(15000);
+            continue;
+          }
+          console.log(`[phase2] Unblocked after backoff — continuing`);
+          cloudflareBlocked = false;
+        }
 
         // Extract unique venue URLs from page
         const venueUrls: string[] = await page.evaluate(() => {
@@ -165,7 +233,7 @@ async function run() {
           return results;
         });
 
-        // Parse all pricing/name/guest data from innerText (The Knot renders all visible text)
+        // Parse all pricing/name/guest data from innerText
         const pageText: string = await page.evaluate(() => document.body.innerText);
 
         // Pattern: "VenueName\nStarting at $X,XXX\nXX-XX Guests•Type"
@@ -181,12 +249,10 @@ async function run() {
 
         // Build venue list from URLs, enrich with pricing from text
         knotVenues = venueUrls.map(url => {
-          // Derive name from slug: "firehouse-chicago-chicago-il-609137" → "Firehouse Chicago"
           const slug = url.split('/').pop() || '';
           const nameParts = slug.replace(/-[a-z]{2}-\d+$/, '').replace(/-/g, ' ');
           const nameFromSlug = nameParts.replace(/\b\w/g, c => c.toUpperCase());
-          // Try to find exact match in parsed text
-          const matched = [...nameToPrice.entries()].find(([k]) => 
+          const matched = [...nameToPrice.entries()].find(([k]) =>
             k.includes(nameParts.slice(0, 8)) || nameParts.includes(k.slice(0, 8))
           );
           return {
@@ -204,7 +270,7 @@ async function run() {
         processedCities.add(cityStateKey);
         currentProcessedBatch.add(cityStateKey);
         await saveProcessedCities(processedCities);
-        await sleep(5000);
+        await sleep(15000);
         continue;
       }
 
@@ -214,13 +280,15 @@ async function run() {
         processedCities.add(cityStateKey);
         currentProcessedBatch.add(cityStateKey);
         await saveProcessedCities(processedCities);
-        await sleep(5000);
+        await sleep(15000);
         continue;
       }
 
+      // Note: cityStat.state is the full name (e.g. "California") after CASE translation for Knot URL building.
+      // DB stores abbreviations (e.g. "CA"), so query by city only — unique enough for matching.
       const dbVenues = await prisma.venue.findMany({
-        where: { city: cityStat.city, state: cityStat.state, isPublished: true },
-        select: { id: true, name: true, baseRentalMin: true, completenessScore: true }
+        where: { city: cityStat.city, isPublished: true },
+        select: { id: true, name: true, baseRentalMin: true, completenessScore: true, knotRating: true, knotReviews: true }
       });
 
       let matchedCount = 0;
@@ -233,16 +301,30 @@ async function run() {
             let needsUpdate = false;
             const updateData: any = {};
 
+            // Write price if we don't have it yet
             if (knotVenue.price && dbVenue.baseRentalMin === null) {
               const priceValue = parseInt(knotVenue.price.replace(/[^0-9]/g, ''), 10);
-              if (!isNaN(priceValue)) {
+              if (!isNaN(priceValue) && priceValue > 0) {
                 updateData.baseRentalMin = priceValue;
                 needsUpdate = true;
               }
             }
 
-            // Always update completenessScore to the maximum
-            const newCompletenessScore = Math.max(dbVenue.completenessScore || 0, 10); // Example: give 10 points for finding on Knot
+            // Write max guests from guest range (e.g. "50-250 Guests" → 250, "300+ Guests" → 300)
+            if (knotVenue.guestRange && !dbVenue.completenessScore) {
+              const guestMatch = knotVenue.guestRange.match(/(\d+)\+?\s*Guests?$/) ||
+                                 knotVenue.guestRange.match(/\d+[\-\u2013](\d+)\s*Guests?/);
+              if (guestMatch) {
+                const maxG = parseInt(guestMatch[1]);
+                if (!isNaN(maxG) && maxG > 0) {
+                  updateData.maxGuests = maxG;
+                  needsUpdate = true;
+                }
+              }
+            }
+
+            // Bump completeness score for finding venue on The Knot
+            const newCompletenessScore = Math.max(dbVenue.completenessScore || 0, 10);
             if (newCompletenessScore > (dbVenue.completenessScore || 0)) {
               updateData.completenessScore = newCompletenessScore;
               needsUpdate = true;
@@ -264,7 +346,8 @@ async function run() {
       processedCities.add(cityStateKey);
       currentProcessedBatch.add(cityStateKey);
       await saveProcessedCities(processedCities); // Save state after each city
-      await sleep(5000); // Polite delay — 5s to avoid Cloudflare rate limiting
+      // Random 12–20s delay between cities — jitter makes it less bot-like
+      await sleep(12000 + Math.floor(Math.random() * 8000));
     }
   } catch (error: any) {
     console.error('[phase2] Fatal error:', error);

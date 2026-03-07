@@ -7,6 +7,8 @@
  *   npx tsx@latest scripts/audit/pipeline.ts --all --limit 200
  *   npx tsx@latest scripts/audit/pipeline.ts --cities livermore --dry-run
  *   npx tsx@latest scripts/audit/pipeline.ts --photos-only --force-photos --cities livermore
+ *   npx tsx@latest scripts/audit/pipeline.ts --cities "los angeles" --resume   # skip already-stamped, continue from crash
+ *   npx tsx@latest scripts/audit/pipeline.ts --cities "los angeles" --force    # reprocess everything
  *
  * Steps (in order):
  *   0. Skip gate  — skip venues processed within --fresh-days (default 30) unless --force
@@ -65,6 +67,7 @@ const skipSync    = args.includes("--skip-sync");
 const photosOnly  = args.includes("--photos-only");   // skip enrich/clean/regate, just redo photos
 const forcePhotos = args.includes("--force-photos");  // re-score ALL photos even if recently audited
 const forceAll    = args.includes("--force");          // override all skip logic
+const resumeMode  = args.includes("--resume");         // skip venues with pipelineProcessedAt already set
 const citiesArg   = args[args.indexOf("--cities") + 1];
 const targetCities = citiesArg
   ? citiesArg.split(",").map(c => c.trim().replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()))
@@ -321,19 +324,22 @@ async function main() {
   const freshCutoff = new Date(now.getTime() - FRESH_DAYS * 24 * 60 * 60 * 1000);
   const photoCutoff = new Date(now.getTime() - PHOTO_FRESH_DAYS * 24 * 60 * 60 * 1000);
 
-  // Recently processed = skip ONLY if the venue is actually complete
-  // Never skip: no description, short description, no photo, Places photo (expiring)
+  // --resume: skip any venue that already has pipelineProcessedAt set (crash-safe resume)
+  // --force: override all skip logic
+  // Default (no flags): skip only recently processed COMPLETE venues (quality gate)
   const isComplete = (v: (typeof venues)[0]) =>
     v.description && v.description.length >= MIN_DESC_LENGTH &&
     v.primaryPhotoUrl &&
     v.photoSource !== "places" &&
     v.auditStatus !== "needs_review";
 
-  const recentlyProcessed = (v: (typeof venues)[0]) =>
-    !forceAll &&
-    isComplete(v) &&
-    v.pipelineProcessedAt &&
-    new Date(v.pipelineProcessedAt) > freshCutoff;
+  const recentlyProcessed = (v: (typeof venues)[0]) => {
+    if (forceAll) return false;
+    // --resume: hard skip on pipelineProcessedAt regardless of completeness
+    if (resumeMode && v.pipelineProcessedAt) return true;
+    // Default: skip only if complete AND processed within fresh window
+    return isComplete(v) && !!v.pipelineProcessedAt && new Date(v.pipelineProcessedAt) > freshCutoff;
+  };
 
   // Count prior uncertain enrichment attempts from auditFlags
   const uncertainAttempts = (v: (typeof venues)[0]): number => {
@@ -510,6 +516,7 @@ async function main() {
               auditStatus: pub === false ? "flagged" : hitUncertainLimit ? "needs_review" : "clean",
               auditFlags: newFlags,
               lastAuditedAt: new Date(),
+              pipelineProcessedAt: new Date(), // ✅ per-venue stamp — crash-safe resume
             }});
             changed.push(v.id);
           }
@@ -650,21 +657,23 @@ async function main() {
     process.exit(1);
   }
 
-  // ── PIPELINE PROCESSED STAMP ─────────────────────────────────────────────
-  // Mark all processed venues with pipelineProcessedAt = now (checkpoint for --fresh-days skip)
+  // ── PIPELINE PROCESSED STAMP (end-of-run safety net) ────────────────────
+  // Per-venue stamping already happens inline during enrich (crash-safe).
+  // This end-of-run pass catches venues that went through clean/regate/photo
+  // steps only (no enrich), ensuring they're also stamped for --resume logic.
   if (!dryRun) {
     const processedIds = [...new Set([
-      ...needsEnrich.map(v => v.id),
       ...needsClean.map(v => v.id),
       ...needsReGate.map(v => v.id),
       ...needsPhoto.map(v => v.id),
-    ])];
+    ])].filter(id => !changed.includes(id)); // skip already-stamped from enrich step
     if (processedIds.length) {
       await prisma.venue.updateMany({
         where: { id: { in: processedIds } },
         data: { pipelineProcessedAt: new Date() },
       });
       processedIds.forEach(id => { if (!changed.includes(id)) changed.push(id); });
+      console.log(`  ✓ Stamped ${processedIds.length} additional venues (clean/regate/photo only)`);
     }
   }
 
