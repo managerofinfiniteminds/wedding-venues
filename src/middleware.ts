@@ -8,7 +8,10 @@ export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const hostname = req.headers.get("host") ?? "";
 
-  const isInternalHost = hostname === INTERNAL_HOST || hostname.startsWith("internal.");
+  // Cloudflare may pass the original host via x-forwarded-host
+  const forwardedHost = req.headers.get("x-forwarded-host") ?? "";
+  const effectiveHost = forwardedHost || hostname;
+  const isInternalHost = effectiveHost === INTERNAL_HOST || effectiveHost.startsWith("internal.") || hostname === INTERNAL_HOST || hostname.startsWith("internal.");
   const isLocalDev = hostname.includes("localhost") || hostname.includes("vercel.app");
   const isInternalPath = INTERNAL_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
