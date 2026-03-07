@@ -34,50 +34,28 @@ export default async function VenuesHubPage() {
     <div className="min-h-screen bg-[#f8f7f5]">
 
       {/* ── HERO ── */}
-      <section className="relative h-[85vh] min-h-[560px] max-h-[900px] flex items-center justify-center overflow-hidden">
-        {/* Background image */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/hero-wedding.jpg"
-          alt="Beautiful wedding venue"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
-        {/* Light warm overlay — keeps it airy, not dark */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/55" />
-
-        {/* Hero content */}
-        <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
-          {/* Logo */}
+      <section className="flex items-center justify-center py-16 bg-[#f8f7f5]">
+        <div className="text-center px-4 max-w-3xl mx-auto">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/greenbowtie-logo.svg"
             alt="Green Bowtie"
-            className="h-60 sm:h-84 md:h-[27rem] w-auto mx-auto mb-6 drop-shadow-2xl"
+            className="h-[22.5rem] sm:h-[31.5rem] md:h-[40.5rem] w-auto mx-auto mb-8"
           />
-          <h1 className="playfair text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight drop-shadow-lg">
+          <h1 className="playfair text-4xl sm:text-5xl md:text-6xl font-bold text-gray-800 leading-tight">
             Find Your Perfect<br className="hidden sm:block" /> Wedding Venue
           </h1>
-          <p className="mt-4 text-base sm:text-lg text-white/90 drop-shadow">
+          <p className="mt-4 text-base sm:text-lg text-gray-500">
             {totalVenues.toLocaleString()} venues across all 50 states
           </p>
-
-          {/* CTA buttons */}
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <a
               href="#browse"
-              className="inline-flex items-center justify-center gap-2 bg-white text-[#3b6341] font-semibold px-7 py-3.5 rounded-full text-sm shadow-lg hover:shadow-xl hover:bg-[#f0f4f0] transition-all"
+              className="inline-flex items-center justify-center gap-2 bg-[#3b6341] text-white font-semibold px-7 py-3.5 rounded-full text-sm shadow-lg hover:bg-[#2e4f33] transition-all"
             >
               Browse by State
             </a>
-
           </div>
-        </div>
-
-        {/* Scroll cue */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/60 animate-bounce">
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
         </div>
       </section>
 
