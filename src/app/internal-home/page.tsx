@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "Green Bowtie Ops",
@@ -127,7 +127,7 @@ export default async function InternalHomePage() {
               href={c.href}
               style={{ textDecoration: "none", color: "inherit" }}
             >
-              <div style={{
+              <div className="internal-card" style={{
                 background: "#fff",
                 borderRadius: 16,
                 border: "1px solid #e5e7eb",
@@ -135,18 +135,8 @@ export default async function InternalHomePage() {
                 display: "flex",
                 flexDirection: "column",
                 gap: 8,
-                transition: "box-shadow 0.15s, transform 0.15s",
                 cursor: "pointer",
-              }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLDivElement).style.boxShadow = "0 8px 24px rgba(0,0,0,0.10)";
-                  (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
-                  (e.currentTarget as HTMLDivElement).style.transform = "none";
-                }}
-              >
+              }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ fontSize: 22 }}>{c.icon}</span>

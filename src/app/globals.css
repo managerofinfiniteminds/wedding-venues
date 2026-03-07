@@ -24,3 +24,13 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+
+/* Internal dashboard cards */
+.internal-card {
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+.internal-card:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+  transform: translateY(-2px);
+}
