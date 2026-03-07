@@ -127,9 +127,100 @@ model Venue {
   // Description
   description String?
 
+  // Monetization
+  isFeatured    Boolean   @default(false)
+  featuredUntil DateTime?
+
+  // Relations
+  inquiries   Inquiry[]
+  owner       VenueOwner?
+  claimTokens ClaimToken[]
+
   @@index([city])
   @@index([venueType])
   @@index([priceTier])
   @@index([isPublished])
   @@index([stateSlug])
+  @@index([isFeatured])
+}
+
+model Inquiry {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  venueId     String
+  venue       Venue    @relation(fields: [venueId], references: [id])
+
+  // Couple
+  coupleName  String
+  partnerName String?
+  coupleEmail String
+  couplePhone String?
+
+  // Wedding details
+  weddingDate         DateTime?
+  weddingDateFlexible Boolean   @default(false)
+  guestCount          Int?
+  budgetMin           Int?
+  budgetMax           Int?
+
+  // Message
+  message          String
+  preferredContact String @default("email") // email | phone | either
+
+  // Status
+  status          String  @default("new") // new | viewed | responded | booked | lost
+  venueNotified   Boolean @default(false)
+  coupleConfirmed Boolean @default(false)
+
+  // Tracking
+  source String?
+
+  @@index([venueId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model VenueOwner {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  venueId String @unique
+  venue   Venue  @relation(fields: [venueId], references: [id])
+
+  email String @unique
+  name  String?
+  phone String?
+
+  verified   Boolean   @default(false)
+  verifiedAt DateTime?
+
+  // Plan
+  plan             String    @default("free") // free | featured | pro
+  planStartedAt    DateTime?
+  planExpiresAt    DateTime?
+  stripeCustomerId String?
+  stripeSubId      String?
+
+  // Session (magic link)
+  sessionToken   String?   @unique
+  sessionExpires DateTime?
+  lastLoginAt    DateTime?
+}
+
+model ClaimToken {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  venueId String
+  venue   Venue  @relation(fields: [venueId], references: [id])
+
+  email     String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  @@index([token])
 }

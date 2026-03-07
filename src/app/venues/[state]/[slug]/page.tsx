@@ -2,6 +2,7 @@
 import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
+import { InquiryForm } from "@/components/InquiryForm";
 import { getState } from "@/lib/states";
 import { Metadata } from "next";
 
@@ -253,34 +254,36 @@ export default async function VenueDetailPage({
           </section>
         </div>
 
-        {/* Sidebar — Contact */}
+        {/* Sidebar */}
         <div className="space-y-4">
-          <div className="bg-pink-50 border border-pink-200 rounded-2xl p-6 sticky top-24">
-            <h3 className="playfair text-xl font-semibold text-gray-800 mb-1">Contact this Venue</h3>
-            <p className="text-gray-500 text-sm mb-4">Reach out directly to ask about availability and pricing.</p>
-            <div className="space-y-3 text-sm text-gray-700">
-              {venue.phone && (
-                <a href={`tel:${venue.phone}`} className="flex items-center gap-2 hover:text-pink-700 transition-colors">
-                  <span>📞</span>
-                  <span>{venue.phone}</span>
-                </a>
-              )}
-              {venue.email && (
-                <a href={`mailto:${venue.email}`} className="flex items-center gap-2 hover:text-pink-700 transition-colors">
-                  <span>✉️</span>
-                  <span>{venue.email}</span>
-                </a>
-              )}
-              {venue.website && (
-                <a href={venue.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-pink-600 hover:text-pink-800 hover:underline transition-colors">
-                  <span>🌐</span>
-                  <span>Visit website</span>
-                </a>
-              )}
-              {!venue.phone && !venue.email && !venue.website && (
-                <p className="text-gray-400 italic">Contact details coming soon.</p>
-              )}
+
+          {/* Quick contact links */}
+          {(venue.phone || venue.email || venue.website) && (
+            <div className="bg-stone-50 border border-gray-200 rounded-2xl p-4">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Quick Contact</p>
+              <div className="space-y-2.5 text-sm text-gray-700">
+                {venue.phone && (
+                  <a href={`tel:${venue.phone}`} className="flex items-center gap-2 hover:text-[#3b6341] transition-colors">
+                    <span>📞</span><span>{venue.phone}</span>
+                  </a>
+                )}
+                {venue.email && (
+                  <a href={`mailto:${venue.email}`} className="flex items-center gap-2 hover:text-[#3b6341] transition-colors">
+                    <span>✉️</span><span>{venue.email}</span>
+                  </a>
+                )}
+                {venue.website && (
+                  <a href={venue.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#3b6341] hover:underline transition-colors">
+                    <span>🌐</span><span>Visit website</span>
+                  </a>
+                )}
+              </div>
             </div>
+          )}
+
+          {/* Inquiry form */}
+          <div className="sticky top-24">
+            <InquiryForm venueId={venue.id} venueName={venue.name} />
           </div>
 
           {venue.completenessScore && venue.completenessScore < 70 && (

@@ -19,12 +19,17 @@ export function VenueCard({ venue }: { venue: Venue }) {
   return (
     <Link
       href={`/venues/${venue.stateSlug}/${venue.slug}`}
-      className="block bg-white rounded-2xl border border-gray-100 transition-all duration-200 hover:shadow-md hover:border-pink-100 overflow-hidden"
+      className={`block bg-white rounded-2xl border transition-all duration-200 hover:shadow-md overflow-hidden ${venue.isFeatured ? "border-[#3b6341] ring-1 ring-[#3b6341]/20 hover:border-[#3b6341]" : "border-gray-100 hover:border-pink-100"}`}
       onClick={() => sessionStorage.setItem("venueListScroll", window.scrollY.toString())}
     >
       <div className="flex flex-col sm:flex-row gap-4 p-4 sm:p-5">
         {/* Photo */}
-        <div className="flex-shrink-0 w-full h-48 sm:w-52 sm:h-40 overflow-hidden rounded-xl bg-gray-100">
+        <div className="flex-shrink-0 w-full h-48 sm:w-52 sm:h-40 overflow-hidden rounded-xl bg-gray-100 relative">
+          {venue.isFeatured && (
+            <span className="absolute top-2 left-2 z-10 bg-[#3b6341] text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+              ⭐ Featured
+            </span>
+          )}
           {venue.primaryPhotoUrl ? (
             <img
               src={venue.primaryPhotoUrl}
