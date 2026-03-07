@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { InquiryForm } from "@/components/InquiryForm";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { getState } from "@/lib/states";
 import { Metadata } from "next";
 
@@ -59,7 +60,10 @@ export default async function VenueDetailPage({
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/20" />
         <div className="relative text-white px-6 pb-8 max-w-screen-xl mx-auto w-full">
-          <h1 className="playfair text-4xl md:text-5xl font-bold mb-2">{venue.name}</h1>
+          <div className="flex flex-wrap items-center gap-3 mb-2">
+            <h1 className="playfair text-4xl md:text-5xl font-bold">{venue.name}</h1>
+            <FavoriteButton venueId={venue.id} venueName={venue.name} size="md" />
+          </div>
           <div className="flex flex-wrap items-center gap-3">
             <span className="bg-white text-pink-700 text-sm px-3 py-1 rounded-full font-medium">
               {venue.city}, {stateConfig.abbr}

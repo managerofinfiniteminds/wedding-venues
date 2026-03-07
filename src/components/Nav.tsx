@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { CitySearch } from "./CitySearch";
+import { useFavorites } from "@/hooks/useFavorites";
 
 export function PinIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
@@ -15,6 +16,7 @@ export function PinIcon({ className = "w-5 h-5" }: { className?: string }) {
 
 export function Nav({ q }: { q?: string }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { count: favCount } = useFavorites();
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -55,7 +57,18 @@ export function Nav({ q }: { q?: string }) {
           <a href="/venues#browse" className="text-sm text-gray-600 hover:text-[#3b6341] font-medium px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors">
             Browse States
           </a>
-
+          <Link
+            href="/favorites"
+            className="relative flex items-center gap-1.5 text-sm text-gray-600 hover:text-pink-600 font-medium px-3 py-2 rounded-lg hover:bg-pink-50 transition-colors"
+          >
+            <span>♥</span>
+            <span>Saved</span>
+            {favCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-pink-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">
+                {favCount > 9 ? "9+" : favCount}
+              </span>
+            )}
+          </Link>
         </div>
 
         {/* Hamburger — mobile only */}
@@ -113,6 +126,21 @@ export function Nav({ q }: { q?: string }) {
             >
               <span className="text-lg">🤠</span>
               Browse Texas
+            </Link>
+            <Link
+              href="/favorites"
+              onClick={closeMenu}
+              className="flex items-center justify-between px-4 py-4 rounded-2xl text-base font-semibold text-gray-800 hover:bg-pink-50 hover:text-pink-700 transition-colors"
+            >
+              <span className="flex items-center gap-3">
+                <span className="text-lg">♥</span>
+                Saved Venues
+              </span>
+              {favCount > 0 && (
+                <span className="bg-pink-100 text-pink-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                  {favCount}
+                </span>
+              )}
             </Link>
           </div>
         </div>

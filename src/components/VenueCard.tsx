@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { Venue } from "@prisma/client";
+import { FavoriteButton } from "./FavoriteButton";
 
 function stripDomain(url: string) {
   return url.replace(/^(https?:\/\/)?(www\.)?/, "").split("/")[0];
@@ -30,6 +31,9 @@ export function VenueCard({ venue }: { venue: Venue }) {
               ⭐ Featured
             </span>
           )}
+          <div className="absolute top-2 right-2 z-10">
+            <FavoriteButton venueId={venue.id} venueName={venue.name} size="sm" />
+          </div>
           {venue.primaryPhotoUrl ? (
             <img
               src={venue.primaryPhotoUrl}
