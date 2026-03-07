@@ -2,18 +2,44 @@
 /**
  * Green Bowtie — Deep Enrichment Pipeline
  * ─────────────────────────────────────────────────────────────────
- * Upgrades ALL venue descriptions by synthesizing from multiple sources:
+ * Extracts and writes ALL fields visible on venue detail pages:
+ *
+ *   Description fields:
+ *   - description (4-5 sentence, humanized, source-grounded)
+ *
+ *   Venue classification:
+ *   - venueType (refines "Event Venue" → specific type)
+ *   - styleTags (aesthetic tags)
+ *
+ *   Capacity & pricing:
+ *   - maxGuests, minGuests, seatedMax
+ *   - baseRentalMin, baseRentalMax
+ *   - perHeadMin, perHeadMax
+ *   - priceTier (budget/moderate/luxury — inferred even without exact price)
+ *
+ *   Amenity booleans (all 13):
+ *   - hasBridalSuite, hasGroomSuite
+ *   - hasOutdoorSpace, hasIndoorSpace
+ *   - onSiteCoordinator
+ *   - cateringKitchen, barSetup
+ *   - tablesChairsIncluded, linensIncluded
+ *   - avIncluded, lightingIncluded
+ *   - adaCompliant, nearbyLodging
+ *
+ * Data sources (all optional, graceful degradation):
  *   1. Venue website (weddings/events/pricing/packages/gallery pages)
- *   2. Yelp (review excerpts via existing Playwright scraper — parallel, non-blocking)
- *   3. Google Places reviews (top 3–5 high-rating via Places API)
+ *   2. Yelp (review excerpts via Playwright CDP — parallel, 10s timeout)
+ *   3. Google Places reviews (top 3-5 high-rating via Places API)
  *   4. Knot data already in DB (price, capacity)
  *   5. Structured DB fields (rating, type, tags, amenities, social)
- *   6. Gemini Flash synthesis — 4–5 sentence wedding description
- *   7. Humanizer pass — strips AI writing patterns per humanizer skill
+ *   6. Gemini Flash synthesis → description + structured fields JSON
+ *   7. Humanizer pass → strip AI writing patterns
  *
- * SAFETY: Every original description is backed up to deep-enrich-backup.jsonl
- *         before being overwritten. Fully recoverable at any time.
- *         Per-venue checkpoint in deep-enrich-state.json — crash-safe resume.
+ * SAFETY:
+ *   - Every original description backed up to deep-enrich-backup.jsonl BEFORE overwrite
+ *   - Per-venue checkpoint in deep-enrich-state.json — crash at venue 500 = resume from 501
+ *   - COUNT verified before/after run
+ *   - Never modifies isPublished or auditStatus
  *
  * Usage:
  *   DATABASE_URL=... npx tsx@latest scripts/enrichment/deep-enrich.ts --cities "napa" --dry-run
@@ -22,7 +48,7 @@
  *   DATABASE_URL=... npx tsx@latest scripts/enrichment/deep-enrich.ts --all --resume
  *   DATABASE_URL=... npx tsx@latest scripts/enrichment/deep-enrich.ts --all --force
  *
- * Cost: ~$0.0002/venue (2 Gemini Flash calls — synthesis + humanizer, no web search)
+ * Cost: ~$0.0002/venue (2 Gemini Flash calls — synthesis + humanizer)
  * CA total: ~$0.63 for all 3,134 published venues
  */
 
@@ -72,14 +98,14 @@ function saveState(done: Set<string>) {
   fs.writeFileSync(STATE_FILE, JSON.stringify([...done], null, 2));
 }
 
-// ── Backup — append original description before any overwrite ─────────────
-function backupDescription(id: string, name: string, city: string, original: string | null) {
-  const entry = JSON.stringify({ id, name, city, original, ts: new Date().toISOString() });
+// ── Backup — always before overwrite ─────────────────────────────────────
+function backupVenue(v: { id: string; name: string; city: string; description: string | null }) {
+  const entry = JSON.stringify({ id: v.id, name: v.name, city: v.city, description: v.description, ts: new Date().toISOString() });
   fs.appendFileSync(BACKUP_FILE, entry + "\n");
 }
 
-// ── LLM — 3 retries, 429 backoff ─────────────────────────────────────────
-async function llm(prompt: string, maxTokens = 600): Promise<string> {
+// ── LLM — 4 retries, 429 backoff ─────────────────────────────────────────
+async function llm(prompt: string, maxTokens = 900): Promise<string> {
   for (let attempt = 1; attempt <= 4; attempt++) {
     try {
       const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -94,11 +120,11 @@ async function llm(prompt: string, maxTokens = 600): Promise<string> {
           model: MODEL,
           messages: [{ role: "user", content: prompt }],
           max_tokens: maxTokens,
-          temperature: 0.4,
+          temperature: 0.35,
         }),
       });
       if (resp.status === 429) {
-        const wait = attempt * 20000; // 20s, 40s, 60s
+        const wait = attempt * 20000;
         console.log(`\n   ⏳ Rate limited — waiting ${wait / 1000}s...`);
         await new Promise(r => setTimeout(r, wait));
         continue;
@@ -112,6 +138,14 @@ async function llm(prompt: string, maxTokens = 600): Promise<string> {
     }
   }
   return "";
+}
+
+function parseJSON<T>(raw: string): T | null {
+  try {
+    // Strip markdown code fences if present
+    const clean = raw.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
+    return JSON.parse(clean) as T;
+  } catch { return null; }
 }
 
 // ── Website scrape — multiple pages, junk detection ───────────────────────
@@ -141,32 +175,26 @@ async function fetchWebsiteText(website: string | null): Promise<string | null> 
         .replace(/<[^>]+>/g, " ")
         .replace(/\s+/g, " ")
         .trim();
-      // Discard JS-only pages or near-empty results
       if (text.length < 200) continue;
       if (/enable javascript|please enable|noscript/i.test(text.slice(0, 300))) continue;
-      // Got useful content — return first 1500 chars
-      return text.slice(0, 1500);
+      return text.slice(0, 2000); // More context for field extraction
     } catch { continue; }
   }
   return null;
 }
 
-// ── Yelp — parallel, 10s total timeout, non-blocking ─────────────────────
+// ── Yelp — parallel, 10s timeout, non-blocking ───────────────────────────
 async function fetchYelpReviews(name: string, city: string): Promise<string[]> {
   try {
-    // Yelp scraper uses Playwright CDP — wrap in a timeout race
     const { getYelpData } = await import("./scrape-yelp.js").catch(() => ({ getYelpData: null }));
     if (!getYelpData) return [];
-
     const result = await Promise.race([
       getYelpData(name, city, "CA"),
       new Promise<null>(r => setTimeout(() => r(null), 10000)),
     ]);
     if (!result) return [];
     return (result.reviewHighlights ?? []).slice(0, 3).map((r: string) => r.slice(0, 200));
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 }
 
 // ── Google Places reviews ─────────────────────────────────────────────────
@@ -188,110 +216,167 @@ async function fetchGoogleReviews(name: string, city: string): Promise<string[]>
       .filter(r => r.rating >= 4)
       .slice(0, 3)
       .map(r => r.text.slice(0, 200));
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 }
 
-// ── Description sanitizer ─────────────────────────────────────────────────
-function sanitize(text: string): string {
-  return text
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")  // strip markdown links → keep text
-    .replace(/https?:\/\/\S+/g, "")           // strip raw URLs
-    .replace(/^(I |As an AI|As a language model)/i, "") // strip AI voice leakage
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-// ── Synthesis prompt ──────────────────────────────────────────────────────
-function buildPrompt(v: {
+// ── Main synthesis prompt — description + ALL structured fields ───────────
+function buildSynthesisPrompt(v: {
   name: string; city: string; venueType: string; styleTags: string[];
   googleRating: number | null; googleReviews: number | null;
-  baseRentalMin: number | null; maxGuests: number | null;
-  hasBridalSuite: boolean; hasOutdoorSpace: boolean; hasIndoorSpace: boolean;
-  onSiteCoordinator: boolean; allInclusive: boolean; cateringKitchen: boolean;
+  baseRentalMin: number | null; maxGuests: number | null; minGuests: number | null;
+  hasBridalSuite: boolean; hasGroomSuite: boolean;
+  hasOutdoorSpace: boolean; hasIndoorSpace: boolean;
+  onSiteCoordinator: boolean; allInclusive: boolean;
+  cateringKitchen: boolean; barSetup: boolean;
+  tablesChairsIncluded: boolean; linensIncluded: boolean;
+  avIncluded: boolean; lightingIncluded: boolean;
+  adaCompliant: boolean; nearbyLodging: boolean;
   instagram: string | null; facebook: string | null;
   websiteText: string | null; googleReviewExcerpts: string[]; yelpReviewExcerpts: string[];
 }): string {
-  const amenities = [
-    v.hasBridalSuite && "bridal suite",
-    v.hasOutdoorSpace && "outdoor space",
-    v.hasIndoorSpace && "indoor space",
-    v.onSiteCoordinator && "on-site coordinator",
-    v.allInclusive && "all-inclusive packages",
-    v.cateringKitchen && "catering kitchen",
-  ].filter(Boolean).join(", ");
-
   const allReviews = [...v.googleReviewExcerpts, ...v.yelpReviewExcerpts];
   const reviewBlock = allReviews.length
     ? `\nReal couple/guest reviews:\n${allReviews.map(r => `- "${r}"`).join("\n")}`
     : "";
-
-  const websiteBlock = v.websiteText
-    ? `\nFrom their website:\n${v.websiteText.slice(0, 900)}`
-    : "";
-
+  const websiteBlock = v.websiteText ? `\nFrom their website:\n${v.websiteText.slice(0, 1200)}` : "";
   const socialBlock = (v.instagram || v.facebook)
-    ? `\nActive social media: ${[v.instagram && "Instagram", v.facebook && "Facebook"].filter(Boolean).join(", ")}`
+    ? `\nSocial: ${[v.instagram && "Instagram", v.facebook && "Facebook"].filter(Boolean).join(", ")}`
     : "";
+  const knownData = [
+    v.baseRentalMin && `Starting price: $${v.baseRentalMin.toLocaleString()}`,
+    v.maxGuests && `Max guests: ${v.maxGuests}`,
+    v.minGuests && `Min guests: ${v.minGuests}`,
+    v.googleRating && `Google: ${v.googleRating}/5 (${v.googleReviews?.toLocaleString()} reviews)`,
+  ].filter(Boolean).join(" | ");
 
-  return `Write a wedding venue description for a directory listing. 4–5 sentences. Present tense.
+  return `You are researching a wedding venue for a directory. Extract ALL available information and write a description.
 
 Venue: ${v.name}
 Location: ${v.city}, California
-Type: ${v.venueType}
-Style: ${v.styleTags.join(", ") || "not specified"}
-Google rating: ${v.googleRating ? `${v.googleRating}/5 (${v.googleReviews?.toLocaleString()} reviews)` : "not available"}
-Starting price: ${v.baseRentalMin ? `$${v.baseRentalMin.toLocaleString()}` : "not listed"}
-Max guests: ${v.maxGuests ?? "not listed"}
-Amenities: ${amenities || "not specified"}
+Current type: ${v.venueType}
+Style tags: ${v.styleTags.join(", ") || "none"}
+Known data: ${knownData || "minimal"}
 ${socialBlock}${websiteBlock}${reviewBlock}
 
-WRITING RULES — follow every one:
-- Write like a knowledgeable local, not a brochure or press release
-- Use specific concrete details — if you have them, use them; if not, describe the type and vibe
-- Open with the venue's single most distinctive feature — not its location or city name
-- Hard banned words/phrases: nestled, boasts, stunning, breathtaking, vibrant, testament, tapestry, perfect backdrop, ideal, seamless, picturesque, enchanting, magical, making it suitable for, making it ideal for, good choice for, perfect for couples, whether you, a good option
-- No em dashes (—) — use commas or periods instead
+Return a JSON object with ALL of these fields. Use null for anything you genuinely cannot determine.
+
+{
+  "description": "4-5 sentence wedding venue description. Rules below.",
+  "venueType": "one of: Vineyard & Winery | Barn / Ranch | Ballroom | Hotel & Resort | Golf Club | Garden | Historic Estate | Museum & Gallery | Event Venue | Resort | Outdoor / Park | Restaurant | Rooftop",
+  "styleTags": ["array", "of", "style", "tags"],
+  "maxGuests": integer or null,
+  "minGuests": integer or null,
+  "seatedMax": integer or null,
+  "baseRentalMin": integer or null,
+  "baseRentalMax": integer or null,
+  "perHeadMin": integer or null,
+  "perHeadMax": integer or null,
+  "priceTier": "budget | moderate | luxury | null — infer from context even without exact price",
+  "hasBridalSuite": true/false,
+  "hasGroomSuite": true/false,
+  "hasOutdoorSpace": true/false,
+  "hasIndoorSpace": true/false,
+  "onSiteCoordinator": true/false,
+  "cateringKitchen": true/false,
+  "barSetup": true/false,
+  "tablesChairsIncluded": true/false,
+  "linensIncluded": true/false,
+  "avIncluded": true/false,
+  "lightingIncluded": true/false,
+  "adaCompliant": true/false,
+  "nearbyLodging": true/false
+}
+
+DESCRIPTION RULES — follow every one:
+- Open with the venue's single most distinctive physical feature — not its city or location
+- Use specific concrete details — if you have them from reviews/website, use them
+- Hard banned: nestled, boasts, stunning, breathtaking, vibrant, testament, tapestry, perfect backdrop, ideal, seamless, picturesque, enchanting, magical, making it suitable for, making it ideal for, good choice for, whether you, conveniently located
+- No em dashes (—) — use commas or periods
 - No rule of three ("elegant, intimate, and memorable")
 - No "not just X, it's Y" constructions
-- No generic positive closer ("a perfect choice", "your dream wedding", "memories to last", "a truly special")
-- Vary sentence length — mix short and long naturally
-- If review quotes exist, reference ONE specific detail couples actually mentioned
-- Include price or capacity if known — real numbers build trust
-- Don't repeat the city name more than once
-- No markdown, no URLs, no bullet points — plain prose only
-- Write the description text only. No intro, no preamble.`;
+- No generic positive closer ("perfect for couples", "your dream wedding", "memories to last")
+- Vary sentence length — mix short and long
+- Include ONE specific detail from reviews if available
+- Include price or capacity if known — real numbers matter
+- Do NOT repeat the city name more than once
+
+AMENITY RULES:
+- Default to false unless you find clear evidence it exists
+- "hasOutdoorSpace" = venue has outdoor ceremony or reception area
+- "hasIndoorSpace" = venue has indoor reception/event space
+- "nearbyLodging" = hotel or accommodation within reasonable distance
+- "priceTier": budget = under $3k, moderate = $3k-$8k, luxury = over $8k site fee. Infer from venue type + rating if no price found.
+
+Return ONLY the JSON object. No preamble, no markdown outside the JSON.`;
 }
 
 // ── Humanizer prompt ──────────────────────────────────────────────────────
 function buildHumanizerPrompt(text: string, name: string): string {
-  return `Edit this wedding venue description to remove any remaining AI writing patterns.
+  return `Edit this wedding venue description to remove AI writing patterns. Return ONLY the cleaned description text — nothing else, no quotes.
 
 Venue: ${name}
-Description:
-"${text}"
+Description: "${text}"
 
-Check for and fix:
-- Any banned words/phrases still present: nestled, boasts, stunning, breathtaking, vibrant, testament, perfect, ideal, enchanting, magical, picturesque, making it suitable for, making it ideal for, good choice for, whether you, a good option, conveniently located
-- Em dashes (—) — replace with commas or periods
-- Rule-of-three lists — break them up
-- Vague praise without specifics — cut it, don't replace
-- All sentences the same length — vary rhythm
-- "serves as" / "stands as" — replace with "is"
-- Generic positive endings — cut entirely
-- Any markdown links or raw URLs — strip them
-- Any first-person AI voice ("I", "As an AI") — remove
+Fix if present:
+- Banned words: nestled, boasts, stunning, breathtaking, vibrant, testament, perfect, ideal, enchanting, magical, picturesque, making it suitable for, making it ideal for, good choice for, whether you, conveniently located, serves as, stands as
+- Em dashes (—) → commas or periods
+- Rule-of-three lists → break them up
+- Vague praise without specifics → cut it
+- All same-length sentences → vary rhythm
+- Generic positive endings → cut entirely
+- Markdown links or raw URLs → strip
+- First-person AI voice ("I", "As an AI") → remove
 
-If the description is already clean, return it unchanged.
-Return ONLY the final description. Nothing else. No quotes around it.`;
+If already clean, return unchanged.`;
+}
+
+// ── Sanitize output text ──────────────────────────────────────────────────
+function sanitize(text: string): string {
+  return text
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/https?:\/\/\S+/g, "")
+    .replace(/^(I |As an AI|As a language model)/i, "")
+    .replace(/^["']|["']$/g, "") // strip surrounding quotes
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// ── Price tier inference ──────────────────────────────────────────────────
+// Falls back to heuristics when no exact price is available
+function inferPriceTier(
+  basePrice: number | null | undefined,
+  googleRating: number | null | undefined,
+  venueType: string | null | undefined
+): "budget" | "moderate" | "luxury" | null {
+  // If we have an exact price, use it
+  if (basePrice) {
+    if (basePrice < 3000) return "budget";
+    if (basePrice < 8000) return "moderate";
+    return "luxury";
+  }
+  // Infer from venue type
+  const luxuryTypes = ["Hotel & Resort", "Historic Estate", "Resort", "Vineyard & Winery"];
+  const budgetTypes = ["Outdoor / Park", "Garden", "Community"];
+  if (venueType && luxuryTypes.some(t => venueType.includes(t.split(" ")[0]))) {
+    return googleRating && googleRating >= 4.5 ? "luxury" : "moderate";
+  }
+  if (venueType && budgetTypes.some(t => venueType.includes(t.split(" ")[0]))) {
+    return "budget";
+  }
+  // Infer from Google rating as last resort
+  if (googleRating) {
+    if (googleRating >= 4.7) return "luxury";
+    if (googleRating >= 4.3) return "moderate";
+    return "budget";
+  }
+  return null;
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────
 async function main() {
   const done = loadState();
 
-  console.log(`\n🌿 Green Bowtie Deep Enrichment`);
+  console.log(`\n🌿 Green Bowtie Deep Enrichment — Full Field Pass`);
   console.log(`   ${new Date().toLocaleString("en-US", { timeZone: "America/Los_Angeles" })}`);
   console.log(`   Model: ${MODEL}`);
   console.log(`   Dry run: ${dryRun} | Resume: ${resumeMode} | Force: ${forceAll}`);
@@ -309,9 +394,14 @@ async function main() {
     select: {
       id: true, name: true, city: true, slug: true, website: true,
       venueType: true, styleTags: true, googleRating: true, googleReviews: true,
-      baseRentalMin: true, maxGuests: true, description: true,
-      hasBridalSuite: true, hasOutdoorSpace: true, hasIndoorSpace: true,
-      onSiteCoordinator: true, allInclusive: true, cateringKitchen: true,
+      baseRentalMin: true, maxGuests: true, minGuests: true, description: true,
+      hasBridalSuite: true, hasGroomSuite: true,
+      hasOutdoorSpace: true, hasIndoorSpace: true,
+      onSiteCoordinator: true, allInclusive: true,
+      cateringKitchen: true, barSetup: true,
+      tablesChairsIncluded: true, linensIncluded: true,
+      avIncluded: true, lightingIncluded: true,
+      adaCompliant: true, nearbyLodging: true,
       instagram: true, facebook: true,
     },
   });
@@ -345,45 +435,120 @@ async function main() {
         v.maxGuests ? "cap" : null,
       ].filter(Boolean).join("+");
 
-      // ── Synthesis ────────────────────────────────────────────────────
-      const prompt = buildPrompt({
+      // ── Synthesis — description + all structured fields ───────────
+      const rawJson = await llm(buildSynthesisPrompt({
         name: v.name, city: v.city, venueType: v.venueType,
         styleTags: v.styleTags ?? [],
         googleRating: v.googleRating, googleReviews: v.googleReviews,
-        baseRentalMin: v.baseRentalMin, maxGuests: v.maxGuests,
-        hasBridalSuite: v.hasBridalSuite, hasOutdoorSpace: v.hasOutdoorSpace,
-        hasIndoorSpace: v.hasIndoorSpace, onSiteCoordinator: v.onSiteCoordinator,
-        allInclusive: v.allInclusive, cateringKitchen: v.cateringKitchen,
+        baseRentalMin: v.baseRentalMin, maxGuests: v.maxGuests, minGuests: v.minGuests,
+        hasBridalSuite: v.hasBridalSuite, hasGroomSuite: v.hasGroomSuite,
+        hasOutdoorSpace: v.hasOutdoorSpace, hasIndoorSpace: v.hasIndoorSpace,
+        onSiteCoordinator: v.onSiteCoordinator, allInclusive: v.allInclusive,
+        cateringKitchen: v.cateringKitchen, barSetup: v.barSetup,
+        tablesChairsIncluded: v.tablesChairsIncluded, linensIncluded: v.linensIncluded,
+        avIncluded: v.avIncluded, lightingIncluded: v.lightingIncluded,
+        adaCompliant: v.adaCompliant, nearbyLodging: v.nearbyLodging,
         instagram: v.instagram, facebook: v.facebook,
         websiteText, googleReviewExcerpts: googleReviews, yelpReviewExcerpts: yelpReviews,
-      });
+      }), 900);
 
-      let description = sanitize(await llm(prompt, 500));
+      type SynthResult = {
+        description: string;
+        venueType: string | null;
+        styleTags: string[] | null;
+        maxGuests: number | null;
+        minGuests: number | null;
+        seatedMax: number | null;
+        baseRentalMin: number | null;
+        baseRentalMax: number | null;
+        perHeadMin: number | null;
+        perHeadMax: number | null;
+        priceTier: string | null;
+        hasBridalSuite: boolean;
+        hasGroomSuite: boolean;
+        hasOutdoorSpace: boolean;
+        hasIndoorSpace: boolean;
+        onSiteCoordinator: boolean;
+        cateringKitchen: boolean;
+        barSetup: boolean;
+        tablesChairsIncluded: boolean;
+        linensIncluded: boolean;
+        avIncluded: boolean;
+        lightingIncluded: boolean;
+        adaCompliant: boolean;
+        nearbyLodging: boolean;
+      };
 
-      // ── Humanizer pass ───────────────────────────────────────────────
-      const humanized = sanitize(await llm(buildHumanizerPrompt(description, v.name), 400));
-      if (humanized.length >= 120) description = humanized;
-
-      // ── Validate ─────────────────────────────────────────────────────
-      if (description.length < 120) {
-        console.log(`⚠️  too short (${description.length}c) — skipping`);
+      const result = parseJSON<SynthResult>(rawJson);
+      if (!result || !result.description) {
+        console.log(`⚠️  JSON parse failed — skipping`);
         errors++;
         continue;
       }
 
-      console.log(`✅ ${description.length}c [${sources || "db-only"}]`);
+      // ── Humanizer pass on description only ───────────────────────
+      let description = sanitize(result.description);
+      const humanized = sanitize(await llm(buildHumanizerPrompt(description, v.name), 400));
+      if (humanized.length >= 120) description = humanized;
 
-      // ── Write (backup first, always) ─────────────────────────────────
+      // ── Validate description ──────────────────────────────────────
+      if (description.length < 120) {
+        console.log(`⚠️  description too short (${description.length}c) — skipping`);
+        errors++;
+        continue;
+      }
+
+      // ── Build update payload — only write non-null improvements ──
+      const update: Record<string, unknown> = {
+        description,
+        pipelineProcessedAt: new Date(),
+        lastAuditedAt: new Date(),
+      };
+
+      // Venue type — only upgrade from generic "Event Venue"
+      if (result.venueType && result.venueType !== "Event Venue") update.venueType = result.venueType;
+
+      // Style tags — only write if we got something meaningful
+      if (result.styleTags && result.styleTags.length > 0) update.styleTags = result.styleTags;
+
+      // Capacity — only write if bigger/better than what we have
+      if (result.maxGuests && (!v.maxGuests || result.maxGuests > v.maxGuests)) update.maxGuests = result.maxGuests;
+      if (result.minGuests && !v.minGuests) update.minGuests = result.minGuests;
+      if (result.seatedMax) update.seatedMax = result.seatedMax;
+
+      // Pricing — only write if we don't already have it
+      if (result.baseRentalMin && !v.baseRentalMin) update.baseRentalMin = result.baseRentalMin;
+      if (result.baseRentalMax) update.baseRentalMax = result.baseRentalMax;
+      if (result.perHeadMin) update.perHeadMin = result.perHeadMin;
+      if (result.perHeadMax) update.perHeadMax = result.perHeadMax;
+
+      // priceTier — always write (inferred even without exact price)
+      // If AI gave us one, use it. If not, infer from what we know.
+      const tier = result.priceTier ?? inferPriceTier(
+        result.baseRentalMin ?? v.baseRentalMin,
+        v.googleRating,
+        result.venueType ?? v.venueType
+      );
+      if (tier) update.priceTier = tier;
+
+      // Amenities — write all (booleans; false is still useful data)
+      const amenityKeys = [
+        "hasBridalSuite", "hasGroomSuite", "hasOutdoorSpace", "hasIndoorSpace",
+        "onSiteCoordinator", "cateringKitchen", "barSetup",
+        "tablesChairsIncluded", "linensIncluded", "avIncluded",
+        "lightingIncluded", "adaCompliant", "nearbyLodging"
+      ] as const;
+      for (const key of amenityKeys) {
+        if (typeof result[key] === "boolean") update[key] = result[key];
+      }
+
+      const fieldsFilled = Object.keys(update).length - 3; // subtract desc + timestamps
+      console.log(`✅ ${description.length}c [${sources || "db-only"}] +${fieldsFilled} fields`);
+
+      // ── Write (backup first, always) ─────────────────────────────
       if (!dryRun) {
-        backupDescription(v.id, v.name, v.city, v.description);
-        await prisma.venue.update({
-          where: { id: v.id },
-          data: {
-            description,
-            pipelineProcessedAt: new Date(),
-            lastAuditedAt: new Date(),
-          },
-        });
+        backupVenue(v);
+        await prisma.venue.update({ where: { id: v.id }, data: update });
       }
 
       done.add(v.id);
@@ -395,8 +560,8 @@ async function main() {
       errors++;
     }
 
-    // 1.2s between venues — stays comfortably under Gemini 60 RPM
-    await new Promise(r => setTimeout(r, 1200));
+    // 1.3s between venues — stays under Gemini 60 RPM with 2 calls/venue
+    await new Promise(r => setTimeout(r, 1300));
   }
 
   // ── Count verify ──────────────────────────────────────────────────────
