@@ -11,23 +11,23 @@ export const metadata: Metadata = {
 
 export default function ArchitecturePage() {
   return (
-    <div className="min-h-screen" style={{ background: "#f8f7f5", fontFamily: "Inter, sans-serif" }}>
+    <div className="min-h-screen" style={{ background: "#f8f7f5", fontFamily: "Nunito Sans, sans-serif" }}>
       {/* Header */}
       <div style={{ background: "linear-gradient(135deg, #3b6341 0%, #2f5035 100%)" }} className="text-white py-16 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center gap-3 mb-4">
             <Badge style={{ background: "rgba(255,255,255,0.2)", color: "white" }}>Architecture Doc</Badge>
-            <Badge style={{ background: "rgba(255,255,255,0.2)", color: "white" }}>v2.0 · March 2026</Badge>
+            <Badge style={{ background: "rgba(255,255,255,0.2)", color: "white" }}>v3.0 · March 2026</Badge>
           </div>
           <h1 className="playfair text-5xl font-bold mb-3">Green Bowtie</h1>
           <p className="text-xl mb-6" style={{ color: "#bbf7d0" }}>Technology Architecture &amp; Infrastructure Overview</p>
           <div className="flex flex-wrap gap-6 text-sm">
             {[
               { label: "Domain", value: "greenbowtie.com" },
-              { label: "Venues", value: "2,786 live" },
-              { label: "Geocoded", value: "2,115 pins" },
+              { label: "Venues", value: "2,898 live" },
+              { label: "CA Total", value: "7,929 scraped" },
               { label: "States", value: "51 configured" },
-              { label: "Tests", value: "52 unit + 10 E2E" },
+              { label: "Tests", value: "228 passing" },
             ].map((s, i) => (
               <div key={s.label} className={i > 0 ? "border-l pl-6" : ""} style={{ borderColor: "#4a7a50" }}>
                 <div style={{ color: "#86efac" }}>{s.label}</div>
@@ -43,9 +43,9 @@ export default function ArchitecturePage() {
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { num: "52", label: "Unit Tests" },
-            { num: "10", label: "End-to-End (E2E) Tests" },
-            { num: "2,786", label: "Live CA Venues" },
+            { num: "228", label: "Unit Tests" },
+            { num: "11", label: "Test Files" },
+            { num: "2,898", label: "Live CA Venues" },
             { num: "51", label: "States Configured" },
           ].map(s => (
             <Card key={s.label} className="p-5 text-center">
@@ -64,7 +64,7 @@ export default function ArchitecturePage() {
               <div className="space-y-4">
                 <StackItem icon="⚛️" title="Next.js 16" badge="App Router" badgeColor="blue">React framework — SSR, SSG, API routes. Chosen for SEO and performance.</StackItem>
                 <StackItem icon="🎨" title="Tailwind CSS v4" badge="Utility-first" badgeColor="blue">Uses <Code>@import "tailwindcss"</Code> syntax (v4 breaking change from v3).</StackItem>
-                <StackItem icon="🔤" title="Playfair Display + Inter">Playfair for headings (elegant), Inter for body (clean, readable).</StackItem>
+                <StackItem icon="🔤" title="Tenor Sans + Nunito Sans">Tenor Sans for headings (understated elegance), Nunito Sans for body (soft, modern, readable).</StackItem>
                 <StackItem icon="🗺️" title="Leaflet.js" badge="Free · No API key" badgeColor="green">Interactive map. OpenStreetMap tiles. Dynamic import (SSR disabled).</StackItem>
               </div>
             </div>
@@ -73,7 +73,7 @@ export default function ArchitecturePage() {
               <div className="space-y-4">
                 <StackItem icon="🐘" title="PostgreSQL 17 via Neon" badge="Serverless" badgeColor="purple">Hosted on Neon.tech. Serverless Postgres — scales to zero, HTTP-compatible.</StackItem>
                 <StackItem icon="🔷" title="Prisma 7 ORM" badge="pg adapter" badgeColor="blue">Uses <Code>@prisma/adapter-pg</Code> — required for Neon serverless compatibility.</StackItem>
-                <StackItem icon="📍" title="Nominatim Geocoding" badge="Free · No key" badgeColor="green">OpenStreetMap geocoding. 1 req/sec rate limit. 2,115/2,786 venues geocoded.</StackItem>
+                <StackItem icon="📍" title="Nominatim Geocoding" badge="Free · No key" badgeColor="green">OpenStreetMap geocoding. 1 req/sec rate limit. 2,115/7,929 CA venues geocoded.</StackItem>
                 <StackItem icon="🌎" title="Google Places API" badge="Paid · Key restricted" badgeColor="amber">Used for initial data scraping only. Key restricted to greenbowtie.com domain.</StackItem>
               </div>
             </div>
@@ -87,8 +87,9 @@ export default function ArchitecturePage() {
             <InfraCard icon="▲" title="Vercel" badge="Hosting" bg="#f0f7f1" border="#c6e0c8">Auto-deploys on every GitHub push to <Code>main</Code>. ~45 second deploy time. Free tier. Global CDN.</InfraCard>
             <InfraCard icon="🐘" title="Neon" badge="Database" bg="#eff6ff" border="#bfdbfe">Serverless PostgreSQL. Pooled connection URL for app. Direct URL for migrations. Free tier.</InfraCard>
             <InfraCard icon="📊" title="Plausible" badge="Analytics" bg="#fff7ed" border="#fed7aa">Privacy-first analytics. No cookies, no GDPR banner. Tracks visitors, top pages, referrers.</InfraCard>
-            <InfraCard icon="🐙" title="GitHub" badge="Source Control" bg="#fdf4ff" border="#e9d5ff">Repo: <Code>managerofinfiniteminds/wedding-venues</Code>. CI on every push. v0.1.0 and v0.2.0 tagged.</InfraCard>
+            <InfraCard icon="🐙" title="GitHub" badge="Source Control" bg="#fdf4ff" border="#e9d5ff">Repo: <Code>managerofinfiniteminds/wedding-venues</Code>. CI on every push. v0.1.0, v0.2.0, v0.3.0 tagged.</InfraCard>
             <InfraCard icon="⚙️" title="GitHub Actions CI" badge="CI/CD" bg="#f0fdf4" border="#bbf7d0">Runs on every push: install → prisma generate → unit tests → build. Blocks bad code.</InfraCard>
+            <InfraCard icon="☁️" title="Cloudflare R2" badge="Photo Storage" bg="#fff7ed" border="#fed7aa">Venue photos stored in R2 bucket <Code>greenbowtie-photos</Code>. Public CDN. Zero egress fees. Custom domain <Code>photos.greenbowtie.com</Code> planned.</InfraCard>
             <InfraCard icon="🌐" title="GoDaddy + Vercel DNS" badge="Domain" bg="#fff1f2" border="#fecdd3">A record → 216.198.79.1 (Vercel). CNAME www → cname.vercel-dns.com. SSL auto-managed.</InfraCard>
           </div>
         </Card>
@@ -100,7 +101,7 @@ export default function ArchitecturePage() {
           <div className="space-y-2.5 font-mono text-sm">
             {[
               { method: "GET", color: "green", path: "/venues", desc: "US hub — state picker (51 states)" },
-              { method: "GET", color: "green", path: "/venues/california", desc: "CA results — filters, sort, search, 2,786 venues" },
+              { method: "GET", color: "green", path: "/venues/california", desc: "CA results — filters, sort, search, 7,929 CA venues" },
               { method: "GET", color: "green", path: "/venues/texas", desc: "Coming Soon page with email capture" },
               { method: "GET", color: "green", path: "/venues/california/[slug]", desc: "Venue detail — SEO, JSON-LD, Open Graph" },
               { method: "301", color: "amber", path: "/venues/[slug]", desc: "Legacy redirect → /venues/california/[slug]" },
@@ -123,16 +124,16 @@ export default function ArchitecturePage() {
         {/* Data Pipeline */}
         <Card className="p-8">
           <SectionTitle>Data Pipeline</SectionTitle>
-          <p className="text-sm text-gray-500 mb-6">How 2,786 real wedding venues got into the database</p>
+          <p className="text-sm text-gray-500 mb-6">AI-driven pipeline — scrape → pre-filter → clean → enrich → gate → photo → sync → publish</p>
           <div className="flex flex-wrap items-center gap-3 mb-6 text-xs">
             {[
-              { label: "Google Places API", sub: "scrape-venues-full.ts" },
-              { label: "Raw JSON", sub: "7,928 venues" },
-              { label: "Quality Filter v1", sub: "quality-filter.ts" },
-              { label: "AI Filter v2", sub: "quality-filter-v2.ts" },
-              { label: "Seed DB", sub: "2,786 venues" },
-              { label: "Nominatim Geocode", sub: "2,115 pins" },
-              { label: "Bounds Check", sub: "fix-bad-coords.ts" },
+              { label: "Google Places + Knot", sub: "7,929 CA venues" },
+              { label: "Pre-Filter", sub: "rules-based, cheap" },
+              { label: "Clean", sub: "Gemini Flash" },
+              { label: "Enrich", sub: "Grok :online" },
+              { label: "Re-Gate", sub: "Gemini Flash" },
+              { label: "Photos", sub: "website → R2 → Places" },
+              { label: "Sync Neon", sub: "2,898 published" },
             ].map((s, i, arr) => (
               <div key={s.label} className="flex items-center gap-3">
                 <div className="rounded-xl px-3 py-2 text-center font-semibold border-2 text-xs" style={{ background: "#f0f7f1", borderColor: "#3b6341", color: "#3b6341", minWidth: 90 }}>
@@ -144,17 +145,22 @@ export default function ArchitecturePage() {
           </div>
           <div className="grid md:grid-cols-3 gap-4 text-sm">
             <div className="rounded-lg p-4 border" style={{ background: "#f8fafc", borderColor: "#e2e8f0" }}>
-              <div className="font-semibold mb-1">📡 Scraping</div>
-              <div className="text-gray-600">159 Google Places text queries + geographic grid scan. API key env-var only — never in code.</div>
+              <div className="font-semibold mb-1">📡 Sources</div>
+              <div className="text-gray-600">Google Places API (grid scan) + The Knot scraper (phase 2 — 4,353 checkpoint, 48hr cooldown). All keys env-var only.</div>
             </div>
             <div className="rounded-lg p-4 border" style={{ background: "#f8fafc", borderColor: "#e2e8f0" }}>
-              <div className="font-semibold mb-1">🧹 Filtering</div>
-              <div className="text-gray-600">Removed racetracks, churches, simulators, community centers. 2 rounds — rules-based then AI.</div>
+              <div className="font-semibold mb-1">🤖 AI Stack</div>
+              <div className="text-gray-600">Gemini Flash (clean + gate), Grok-fast:online (web enrich), Whisper small (audio captions). OpenRouter API.</div>
             </div>
             <div className="rounded-lg p-4 border" style={{ background: "#f8fafc", borderColor: "#e2e8f0" }}>
-              <div className="font-semibold mb-1">📍 Geocoding</div>
-              <div className="text-gray-600">Nominatim free geocoding (~1 req/sec). CA bounds check: lat 32.5–42.0, lng -124.5 to -114.1.</div>
+              <div className="font-semibold mb-1">📸 Photos</div>
+              <div className="text-gray-600">Website og:image → Cloudflare R2 (primary). Google Places fallback. R2 bucket: <code>greenbowtie-photos</code>. Public CDN URL via R2.</div>
             </div>
+          </div>
+          <div className="mt-4 rounded-lg p-4 border text-sm" style={{ background: "#f0f7f1", borderColor: "#c6e0c8" }}>
+            <div className="font-semibold mb-1 text-[#3b6341]">⚙️ Pipeline Command</div>
+            <code className="text-xs" style={{ color: "#374151" }}>npx tsx@latest scripts/audit/pipeline.ts --cities los-angeles,san-diego,... 2&gt;&amp;1</code>
+            <div className="text-gray-500 text-xs mt-1">Idempotent — skip gate: <code>pipelineProcessedAt</code> (30-day TTL). Run logs: <code>scripts/audit/runs/</code></div>
           </div>
         </Card>
 
@@ -165,21 +171,24 @@ export default function ArchitecturePage() {
             <div>
               <div className="flex items-center gap-2 mb-3 flex-wrap">
                 <Badge color="blue">Vitest + React Testing Library</Badge>
-                <span className="font-semibold text-sm">52 Unit Tests</span>
+                <span className="font-semibold text-sm">228 Unit Tests · 11 Files</span>
               </div>
               <div className="space-y-1.5 text-sm">
                 {[
-                  "states.test.ts — 15 tests (all 51 states valid, slugs match keys, live/coming-soon)",
-                  "filters.test.ts — 12 tests (where clause logic, multi-filter combos)",
-                  "urlParams.test.ts — 13 tests (filter URL building, toggle, clear)",
-                  "VenueCard.test.tsx — 12 tests (renders, expand/collapse, contact info)",
+                  "navigation.test.ts — sort URL bug regression",
+                  "venueFilters.test.ts — VENUE_TYPES, STYLES, buildFilterUrl",
+                  "apiRoutes.test.ts — sort logic, where clause, pagination, region expansion",
+                  "venueSlug.test.ts — slug gen, photo URL validation, description quality",
+                  "robots.test.ts — disallow rules, sitemap URLs, internal page noindex",
+                  "citySearch.test.ts — 11 tests (multi-city chips, cross-state search)",
+                  "VenueCard.test.tsx — 15 tests (renders, expand/collapse, contact info)",
                 ].map(t => <TestPass key={t}>{t}</TestPass>)}
               </div>
               <pre className="mt-4 text-xs rounded-xl p-4" style={{ background: "#0f1117", color: "#e2e8f0", lineHeight: 1.7 }}>
 {`npm test
-`}<span style={{ color: "#6b7280" }}>{` Test Files  4 passed (4)
-      Tests  52 passed (52)
-   Duration  533ms`}</span>
+`}<span style={{ color: "#6b7280" }}>{` Test Files  11 passed (11)
+      Tests  228 passed (228)
+   Duration  1.14s`}</span>
               </pre>
             </div>
             <div>
@@ -215,7 +224,7 @@ export default function ArchitecturePage() {
               "👨‍💻 Push to GitHub",
               "⚙️ GitHub Actions CI",
               "📦 npm install + prisma generate",
-              "🧪 52 Unit Tests",
+              "🧪 228 Unit Tests",
               "🏗️ next build (TypeScript)",
               "▲ Vercel Deploy (~45s)",
               "🌐 Live on greenbowtie.com",
@@ -238,7 +247,7 @@ export default function ArchitecturePage() {
   `}<span style={{ color: "#fbbf24" }}>2.</span>{` npm ci
   `}<span style={{ color: "#fbbf24" }}>3.</span>{` npx prisma generate
   `}<span style={{ color: "#fbbf24" }}>4.</span>{` npx prisma migrate deploy
-  `}<span style={{ color: "#fbbf24" }}>5.</span>{` npm test  `}<span style={{ color: "#6b7280" }}>← 52 tests must pass</span>{`
+  `}<span style={{ color: "#fbbf24" }}>5.</span>{` npm test  `}<span style={{ color: "#6b7280" }}>← 228 tests must pass</span>{`
   `}<span style={{ color: "#fbbf24" }}>6.</span>{` npm run build  `}<span style={{ color: "#6b7280" }}>← TypeScript must compile clean
   → if any step fails: deployment blocked</span>
           </pre>
@@ -252,7 +261,7 @@ export default function ArchitecturePage() {
               <CheckItem done>generateMetadata() on every venue detail page</CheckItem>
               <CheckItem done>JSON-LD LocalBusiness structured data</CheckItem>
               <CheckItem done>Open Graph + Twitter card meta tags</CheckItem>
-              <CheckItem done>Dynamic /sitemap.xml — 2,786+ venue URLs</CheckItem>
+              <CheckItem done>Dynamic /sitemap.xml — 2,898+ venue URLs</CheckItem>
               <CheckItem done>/robots.txt — crawl rules configured</CheckItem>
               <CheckItem done>metadataBase set to greenbowtie.com</CheckItem>
               <CheckItem done>Plausible Analytics — privacy-first, GDPR compliant</CheckItem>
@@ -278,17 +287,24 @@ export default function ArchitecturePage() {
           <SectionTitle>Version History</SectionTitle>
           <div className="space-y-4">
             <div className="flex gap-4">
-              <div className="w-16 text-right flex-shrink-0"><Badge color="green">v0.2.0</Badge></div>
+              <div className="w-16 text-right flex-shrink-0"><Badge color="green">v0.3.0</Badge></div>
+              <div>
+                <div className="font-semibold text-gray-800">AI Pipeline + R2 Photos — March 2026</div>
+                <div className="text-sm text-gray-500">Full AI pipeline (pre-filter → clean → enrich → gate → photo), Cloudflare R2 photo hosting, audit engine (7 checks/venue), 228 tests (11 files), multi-city chip search, SortSelect bug fix, new logo (greenbowtie-logo.svg), Tenor Sans + Nunito Sans fonts, 2,898 published venues</div>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="w-16 text-right flex-shrink-0"><Badge color="blue">v0.2.0</Badge></div>
               <div>
                 <div className="font-semibold text-gray-800">US Routing — March 2026</div>
-                <div className="text-sm text-gray-500">Multi-state URL structure, /venues hub, all 50 US states + Puerto Rico, states.ts single source of truth, 52 tests, Vercel deploy, Neon DB</div>
+                <div className="text-sm text-gray-500">Multi-state URL structure, /venues hub, all 50 US states + Puerto Rico, states.ts single source of truth, GitHub Actions CI, Vercel deploy, Neon serverless DB</div>
               </div>
             </div>
             <div className="flex gap-4">
               <div className="w-16 text-right flex-shrink-0"><Badge color="gray">v0.1.0</Badge></div>
               <div>
                 <div className="font-semibold text-gray-800">California Beta — March 2026</div>
-                <div className="text-sm text-gray-500">2,786 CA venues from Google Places, expandable cards, Leaflet map, SEO, sitemap, mobile responsive, Plausible analytics</div>
+                <div className="text-sm text-gray-500">7,929 CA venues from Google Places, expandable cards, Leaflet map, SEO, sitemap, mobile responsive, Plausible analytics</div>
               </div>
             </div>
           </div>
