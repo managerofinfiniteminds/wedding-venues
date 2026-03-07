@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const INTERNAL_PATHS = ["/data", "/monetize", "/architecture", "/dashboard", "/audit", "/font-preview"];
+const INTERNAL_PATHS = ["/data", "/monetize", "/architecture", "/dashboard", "/audit", "/font-preview", "/internal-home"];
 const INTERNAL_HOST = "internal.greenbowtie.com";
 const PUBLIC_HOST = "greenbowtie.com";
 
@@ -21,8 +21,15 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(url, 301);
   }
 
+  // On internal subdomain: redirect "/" to the internal home dashboard
+  if (isInternalHost && pathname === "/") {
+    const url = req.nextUrl.clone();
+    url.pathname = "/internal-home";
+    return NextResponse.redirect(url, 302);
+  }
+
   // On internal subdomain: keep non-internal paths on main site
-  if (isInternalHost && !isInternalPath && pathname !== "/" && !pathname.startsWith("/api/")) {
+  if (isInternalHost && !isInternalPath && !pathname.startsWith("/api/")) {
     const url = req.nextUrl.clone();
     url.host = PUBLIC_HOST;
     url.protocol = "https:";
