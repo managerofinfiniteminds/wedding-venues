@@ -83,13 +83,16 @@ const targetCities = citiesArg
 const slugsIdx  = args.indexOf("--slugs");
 const slugsArg  = slugsIdx !== -1 ? args[slugsIdx + 1] : null;
 const targetSlugs = slugsArg ? slugsArg.split(",").map(s => s.trim()) : [];
+const stateIdx  = args.indexOf("--state");
+const targetState = stateIdx !== -1 ? args[stateIdx + 1]?.trim() : null;
 const limitIdx = args.indexOf("--limit");
 const limitArg = limitIdx !== -1 ? args[limitIdx + 1] : null;
 const limitN   = limitArg ? parseInt(limitArg) : 99999;
 
 // ── File paths ────────────────────────────────────────────────────────────
-const STATE_FILE  = path.join(__dirname, "deep-enrich-state.json");
-const BACKUP_FILE = path.join(__dirname, "deep-enrich-backup.jsonl");
+const stateTag    = targetState ?? "california";
+const STATE_FILE  = path.join(__dirname, `deep-enrich-state-${stateTag}.json`);
+const BACKUP_FILE = path.join(__dirname, `deep-enrich-backup-${stateTag}.jsonl`);
 
 // ── State — crash-safe resume ─────────────────────────────────────────────
 function loadState(): Set<string> {
@@ -382,7 +385,7 @@ async function main() {
   console.log(`   Backup: ${BACKUP_FILE}\n`);
 
   const where: any = {
-    stateSlug: "california",
+    stateSlug: targetState ?? "california",
     isPublished: true,
     ...(targetSlugs.length ? { slug: { in: targetSlugs } } : targetCities.length ? { city: { in: targetCities } } : {}),
   };
@@ -411,7 +414,7 @@ async function main() {
   }).slice(0, limitN);
 
   const beforeCount = await prisma.venue.count({ where });
-  console.log(`📊 ${venues.length} to process | ${beforeCount} total published CA\n`);
+  console.log(`📊 ${venues.length} to process | ${beforeCount} total published ${(targetState ?? "california").toUpperCase()}\n`);
 
   let enriched = 0, errors = 0;
 
