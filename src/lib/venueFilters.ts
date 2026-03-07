@@ -127,3 +127,12 @@ export function formatGuestLabel(min?: string, max?: string): string | null {
   if (min) return `${min}+ guests`;
   return `Under ${max} guests`;
 }
+
+/** Convert a city name to a URL-safe slug. E.g. "Los Angeles" → "los-angeles" */
+export function cityToSlug(city: string): string {
+  return city
+    .toLowerCase()
+    .replace(/['']/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}

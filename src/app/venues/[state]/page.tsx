@@ -20,6 +20,7 @@ import {
   formatBudgetLabel,
   formatGuestLabel,
   VenueSearchParams,
+  cityToSlug,
 } from "@/lib/venueFilters";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
@@ -204,6 +205,42 @@ export default async function StateVenuesPage({
         <MobileFilters filterCount={activeFilterCount}>{filterPanel}</MobileFilters>
 
         <div className="max-w-screen-xl mx-auto px-4 py-8">
+
+          {/* H1 + Breadcrumb — shown when no filters active */}
+          {!hasFilters && (
+            <div className="mb-6">
+              <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-3">
+                <Link href="/" className="hover:text-[#3b6341] transition-colors">Home</Link>
+                <span>/</span>
+                <Link href="/venues" className="hover:text-[#3b6341] transition-colors">Venues</Link>
+                <span>/</span>
+                <span className="text-gray-800 font-medium">{stateConfig.name}</span>
+              </nav>
+              <h1 className="playfair text-3xl md:text-4xl font-bold text-gray-800">
+                Wedding Venues in {stateConfig.name}
+              </h1>
+            </div>
+          )}
+
+          {/* Browse by City — shown when no city/region filter is active */}
+          {!hasFilters && cityCounts.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Browse by City</h2>
+              <div className="flex flex-wrap gap-2">
+                {cityCounts.map(({ city, _count }) => (
+                  <Link
+                    key={city}
+                    href={`/venues/${state}/${cityToSlug(city)}`}
+                    className="inline-flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1.5 text-sm text-gray-700 hover:border-[#3b6341] hover:text-[#3b6341] transition-colors shadow-sm"
+                  >
+                    {city}
+                    <span className="text-xs text-gray-400 font-medium">{_count.city.toLocaleString()}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <p className="text-gray-600 text-sm">
               <span className="font-semibold text-gray-800">{totalVenues.toLocaleString()}</span> venue

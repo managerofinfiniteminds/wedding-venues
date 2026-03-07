@@ -5,26 +5,48 @@ import Link from "next/link";
 import { InquiryForm } from "@/components/InquiryForm";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { getState } from "@/lib/states";
+import { VenueList } from "@/components/VenueList";
+import { cityToSlug, PAGE_SIZE } from "@/lib/venueFilters";
 import { Metadata } from "next";
+import type { Venue } from "@prisma/client";
 
-export async function generateMetadata({ params }: { params: Promise<{ state: string, slug: string }> }): Promise<Metadata> {
-    const { state, slug } = await params;
-    const stateConfig = getState(state);
-    const venue = await prisma.venue.findUnique({ where: { slug } });
+export async function generateMetadata({ params }: { params: Promise<{ state: string; slug: string }> }): Promise<Metadata> {
+  const { state, slug } = await params;
+  const stateConfig = getState(state);
+  if (!stateConfig) return { title: "Not Found" };
 
-    if (!stateConfig || !venue) {
-        return { title: "Not Found" };
-    }
-
+  // Try venue first
+  const venue = await prisma.venue.findUnique({ where: { slug } });
+  if (venue) {
     return {
-        title: `${venue.name} — ${venue.city}, ${stateConfig.abbr} Wedding Venue`,
+      title: `${venue.name} — ${venue.city}, ${stateConfig.abbr} Wedding Venue`,
+      description: venue.description
+        ? `${venue.description.slice(0, 150)}...`
+        : `${venue.name} is a wedding venue in ${venue.city}, ${stateConfig.name}. Browse photos, pricing, and availability.`,
     };
+  }
+
+  // Try city
+  const cities = await prisma.venue.groupBy({
+    by: ["city"],
+    where: { isPublished: true, stateSlug: state },
+    _count: { city: true },
+  });
+  const cityMatch = cities.find((c) => cityToSlug(c.city) === slug);
+  if (cityMatch) {
+    return {
+      title: `Wedding Venues in ${cityMatch.city}, ${stateConfig.name} | Green Bowtie`,
+      description: `Browse ${cityMatch._count.city} wedding venues in ${cityMatch.city}, ${stateConfig.name}. Find the perfect venue for your wedding day on Green Bowtie.`,
+    };
+  }
+
+  return { title: "Not Found" };
 }
 
-export default async function VenueDetailPage({
+export default async function VenueOrCityPage({
   params,
 }: {
-  params: Promise<{ state: string, slug: string }>;
+  params: Promise<{ state: string; slug: string }>;
 }) {
   const { state, slug } = await params;
   const stateConfig = getState(state);
@@ -33,12 +55,65 @@ export default async function VenueDetailPage({
     redirect(`/venues/${state}`);
   }
 
+  // Try venue first
   const venue = await prisma.venue.findUnique({
     where: { slug, stateSlug: state },
   });
 
-  if (!venue || !venue.isPublished) notFound();
+  if (venue && venue.isPublished) {
+    return <VenueDetailPage venue={venue} state={state} stateAbbr={stateConfig.abbr} stateName={stateConfig.name} />;
+  }
 
+  // Check if it's a city slug
+  const cityCounts = await prisma.venue.groupBy({
+    by: ["city"],
+    where: { isPublished: true, stateSlug: state },
+    _count: { city: true },
+  });
+  const cityMatch = cityCounts.find((c) => cityToSlug(c.city) === slug);
+
+  if (cityMatch) {
+    const cityName = cityMatch.city;
+    const totalVenues = cityMatch._count.city;
+
+    const venues = await prisma.venue.findMany({
+      where: { isPublished: true, stateSlug: state, city: cityName },
+      orderBy: [
+        { isFeatured: "desc" },
+        { googleRating: { sort: "desc", nulls: "last" } },
+        { googleReviews: { sort: "desc", nulls: "last" } },
+        { id: "asc" },
+      ],
+      take: PAGE_SIZE,
+    });
+
+    return (
+      <CityVenuePage
+        city={cityName}
+        state={state}
+        stateName={stateConfig.name}
+        venues={venues}
+        totalVenues={totalVenues}
+      />
+    );
+  }
+
+  notFound();
+}
+
+// ─── Venue Detail ────────────────────────────────────────────────────────────
+
+function VenueDetailPage({
+  venue,
+  state,
+  stateAbbr,
+  stateName,
+}: {
+  venue: Venue;
+  state: string;
+  stateAbbr: string;
+  stateName: string;
+}) {
   return (
     <div className="min-h-screen bg-stone-50">
 
@@ -66,7 +141,7 @@ export default async function VenueDetailPage({
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <span className="bg-white text-pink-700 text-sm px-3 py-1 rounded-full font-medium">
-              {venue.city}, {stateConfig.abbr}
+              {venue.city}, {stateAbbr}
             </span>
             {venue.styleTags.map((tag) => (
               <span key={tag} className="bg-emerald-600/80 text-white text-sm px-3 py-1 rounded-full">
@@ -201,7 +276,6 @@ export default async function VenueDetailPage({
             <h2 className="playfair text-2xl font-semibold text-gray-800 mb-4">Pricing &amp; Capacity</h2>
             {(venue.baseRentalMin || venue.priceTier || venue.perHeadMin || venue.perHeadMax || venue.maxGuests) ? (
               <div className="space-y-4">
-                {/* Site fee */}
                 {venue.baseRentalMin && (
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl font-bold text-[#3b6341]">
@@ -215,7 +289,6 @@ export default async function VenueDetailPage({
                     <span className="text-sm text-gray-500">starting site fee</span>
                   </div>
                 )}
-                {/* Price tier badge (when no exact price) */}
                 {!venue.baseRentalMin && venue.priceTier && (
                   <div>
                     <span className={`inline-block text-sm font-semibold px-3 py-1 rounded-full ${
@@ -229,7 +302,6 @@ export default async function VenueDetailPage({
                     </span>
                   </div>
                 )}
-                {/* Per-head pricing */}
                 {(venue.perHeadMin || venue.perHeadMax) && (
                   <div className="text-sm text-gray-700">
                     <span className="font-medium">Per person: </span>
@@ -238,7 +310,6 @@ export default async function VenueDetailPage({
                       : `$${(venue.perHeadMin ?? venue.perHeadMax)!.toLocaleString()}`}
                   </div>
                 )}
-                {/* Capacity */}
                 {venue.maxGuests && (
                   <div className="flex items-center gap-2 text-sm text-gray-700">
                     <span>👥</span>
@@ -260,8 +331,6 @@ export default async function VenueDetailPage({
 
         {/* Sidebar */}
         <div className="space-y-4">
-
-          {/* Quick contact links */}
           {(venue.phone || venue.email || venue.website) && (
             <div className="bg-stone-50 border border-gray-200 rounded-2xl p-4">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Quick Contact</p>
@@ -285,7 +354,6 @@ export default async function VenueDetailPage({
             </div>
           )}
 
-          {/* Inquiry form */}
           <div className="sticky top-24">
             <InquiryForm venueId={venue.id} venueName={venue.name} />
           </div>
@@ -295,6 +363,77 @@ export default async function VenueDetailPage({
               ⚠️ Some details for this venue are still being verified. Contact them directly for the most accurate information.
             </div>
           )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── City Page ────────────────────────────────────────────────────────────────
+
+function CityVenuePage({
+  city,
+  state,
+  stateName,
+  venues,
+  totalVenues,
+}: {
+  city: string;
+  state: string;
+  stateName: string;
+  venues: Venue[];
+  totalVenues: number;
+}) {
+  return (
+    <div className="min-h-screen bg-[#f8f7f5]">
+      <div className="max-w-screen-xl mx-auto px-4 py-8">
+
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-1.5 text-sm text-gray-500 mb-6">
+          <Link href="/" className="hover:text-[#3b6341] transition-colors">Home</Link>
+          <span>/</span>
+          <Link href="/venues" className="hover:text-[#3b6341] transition-colors">Venues</Link>
+          <span>/</span>
+          <Link href={`/venues/${state}`} className="hover:text-[#3b6341] transition-colors">{stateName}</Link>
+          <span>/</span>
+          <span className="text-gray-800 font-medium">{city}</span>
+        </nav>
+
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="playfair text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+            Wedding Venues in {city}, {stateName}
+          </h1>
+          <p className="text-gray-500 text-sm">
+            <span className="font-semibold text-gray-700">{totalVenues.toLocaleString()}</span> wedding venue{totalVenues !== 1 ? "s" : ""} in {city}
+          </p>
+        </div>
+
+        {/* Venues */}
+        {venues.length === 0 ? (
+          <div className="text-center py-20 text-gray-500 bg-white rounded-2xl border border-gray-100">
+            <p className="text-lg font-semibold mb-2">No venues found</p>
+            <Link href={`/venues/${state}`} className="text-pink-600 hover:underline text-sm">
+              Browse all {stateName} venues
+            </Link>
+          </div>
+        ) : (
+          <VenueList
+            initialVenues={venues}
+            initialTotal={totalVenues}
+            searchParams={{ city }}
+            stateSlug={state}
+          />
+        )}
+
+        {/* Back link */}
+        <div className="mt-12 text-center">
+          <Link
+            href={`/venues/${state}`}
+            className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#3b6341] transition-colors"
+          >
+            ← All {stateName} venues
+          </Link>
         </div>
       </div>
     </div>
