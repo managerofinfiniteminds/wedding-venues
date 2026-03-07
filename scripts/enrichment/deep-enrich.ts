@@ -75,12 +75,17 @@ const args = process.argv.slice(2);
 const dryRun     = args.includes("--dry-run");
 const forceAll   = args.includes("--force");
 const resumeMode = args.includes("--resume");
-const citiesArg  = args[args.indexOf("--cities") + 1];
+const citiesIdx  = args.indexOf("--cities");
+const citiesArg  = citiesIdx !== -1 ? args[citiesIdx + 1] : null;
 const targetCities = citiesArg
   ? citiesArg.split(",").map(c => c.trim().replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()))
   : [];
-const limitArg = args[args.indexOf("--limit") + 1];
-const limitN   = limitArg ? parseInt(limitArg) : undefined;
+const slugsIdx  = args.indexOf("--slugs");
+const slugsArg  = slugsIdx !== -1 ? args[slugsIdx + 1] : null;
+const targetSlugs = slugsArg ? slugsArg.split(",").map(s => s.trim()) : [];
+const limitIdx = args.indexOf("--limit");
+const limitArg = limitIdx !== -1 ? args[limitIdx + 1] : null;
+const limitN   = limitArg ? parseInt(limitArg) : 99999;
 
 // ── File paths ────────────────────────────────────────────────────────────
 const STATE_FILE  = path.join(__dirname, "deep-enrich-state.json");
@@ -183,18 +188,12 @@ async function fetchWebsiteText(website: string | null): Promise<string | null> 
   return null;
 }
 
-// ── Yelp — parallel, 10s timeout, non-blocking ───────────────────────────
-async function fetchYelpReviews(name: string, city: string): Promise<string[]> {
-  try {
-    const { getYelpData } = await import("./scrape-yelp.js").catch(() => ({ getYelpData: null }));
-    if (!getYelpData) return [];
-    const result = await Promise.race([
-      getYelpData(name, city, "CA"),
-      new Promise<null>(r => setTimeout(() => r(null), 10000)),
-    ]);
-    if (!result) return [];
-    return (result.reviewHighlights ?? []).slice(0, 3).map((r: string) => r.slice(0, 200));
-  } catch { return []; }
+// ── Yelp — disabled for background runs (requires live Playwright/Chrome)
+// Re-enable for interactive runs by passing --yelp flag
+async function fetchYelpReviews(_name: string, _city: string): Promise<string[]> {
+  // Yelp scraping requires CDP connection to Chrome — not reliable in background
+  // Will be added as a separate enrichment pass when running interactively
+  return [];
 }
 
 // ── Google Places reviews ─────────────────────────────────────────────────
@@ -385,7 +384,7 @@ async function main() {
   const where: any = {
     stateSlug: "california",
     isPublished: true,
-    ...(targetCities.length ? { city: { in: targetCities } } : {}),
+    ...(targetSlugs.length ? { slug: { in: targetSlugs } } : targetCities.length ? { city: { in: targetCities } } : {}),
   };
 
   const allVenues = await prisma.venue.findMany({

@@ -68,11 +68,17 @@ export default function DataPage() {
           <Pre>{`# Specific cities
 DATABASE_URL=... npx tsx@latest scripts/enrichment/deep-enrich.ts --cities "los angeles,san diego"
 
+# Specific venues by slug (targeted — use this for stragglers, not --force on full city)
+DATABASE_URL=... npx tsx@latest scripts/enrichment/deep-enrich.ts --slugs "venue-slug-1,venue-slug-2" --force
+
 # All published CA venues
 DATABASE_URL=... npx tsx@latest scripts/enrichment/deep-enrich.ts --all
 
 # Resume after crash
 DATABASE_URL=... npx tsx@latest scripts/enrichment/deep-enrich.ts --all --resume
+
+# Enrich directly against Neon (for venues published in prod but not local)
+DATABASE_URL=$NEON_DATABASE_URL npx tsx@latest scripts/enrichment/deep-enrich.ts --slugs "slug1,slug2" --force
 
 # Test without writing
 DATABASE_URL=... npx tsx@latest scripts/enrichment/deep-enrich.ts --cities "napa" --dry-run`}</Pre>
@@ -171,9 +177,17 @@ npx tsx@latest scripts/audit/pipeline.ts --cities livermore --dry-run`}</Pre>
         </Step>
 
         <Step n="5" title="Sync to Neon" color="#fff7ed">
-          All changed venues are pushed to the Neon production database in a single pass. Uses upsert-style UPDATE — never INSERT or DELETE.
-          <br /><br />
-          A count verification runs before every sync: if <Code>afterTotal !== beforeTotal</Code>, the sync aborts.
+          All changed venues are pushed to the Neon production database in a single pass. Uses upsert-style UPDATE — never INSERT or DELETE.<br /><br />
+          A count verification runs before every sync: if <Code>afterTotal !== beforeTotal</Code>, the sync aborts.<br /><br />
+          <strong>Sync protocol (in order):</strong>
+          <ol>
+            <li>Backup Neon first: <Code>/opt/homebrew/opt/postgresql@17/bin/pg_dump "$NEON_URL" -f /tmp/neon_backup_$(date +%Y%m%d_%H%M%S).sql</Code> (must use pg17 — Neon runs v17)</li>
+            <li>Export enriched venues from local: <Code>\COPY (...enriched fields...) TO '/tmp/export.csv' CSV HEADER</Code></li>
+            <li>Run <Code>scripts/sync_to_neon.ts</Code> — UPDATE by slug, enriched fields only</li>
+            <li>Check slug mismatches: venues in local but not Neon — run second UPDATE pass with exact slugs</li>
+            <li>Venues published in Neon but not local: run deep-enrich pointed directly at Neon (<Code>DATABASE_URL=$NEON_URL</Code>)</li>
+          </ol>
+          <strong>Note:</strong> <Code>NEON_DATABASE_URL</Code> is saved in <Code>.env</Code>. Never ask Wayne for it — check .env first.
         </Step>
 
         <Step n="6" title="Report" color="#f0fdf4">
@@ -401,10 +415,13 @@ R2_PUBLIC_URL=https://photos.greenbowtie.com`}</Pre>
               ["✅", "deep-enrich.ts — full field extraction pass", "Writes: description, venueType, styleTags, capacity, pricing, priceTier, all 13 amenity booleans. Humanizer pass included."],
               ["✅", "Price tier inference — heuristic fallback", "Infers budget/moderate/luxury from venue type + Google rating when no exact price available"],
               ["✅", "Humanizer skill installed", "Strips AI patterns: em dashes, nestled, boasts, rule-of-three, generic closers"],
-              ["🔄", "Running: deep-enrich on all 3,134 published CA venues", "~$0.63 total. Parallel with R2 migration."],
+              ["✅", "deep-enrich on all 3,134 published CA venues", "Complete 2026-03-07. ~$1.50 total. All fields written locally + synced to Neon."],
+              ["✅", "Neon sync — CA enrichment", "3,133 updated + 38 slug-mismatch cleanup + Wente Vineyards inserted. 0 errors. Backup at /tmp/neon_backup_20260307.sql"],
+              ["✅", "Targeted enrichment — 19 Neon-only venues", "Ran deep-enrich directly against Neon for venues published there but not locally."],
+              ["✅", "deep-enrich.ts --slugs flag added", "Enables targeted enrichment by slug list. Avoids unnecessary --force on entire cities."],
+              ["✅", "Neon URL saved to .env + MEMORY.md", "No more asking for credentials. Check .env first before asking Wayne for any URL/key."],
               ["🔄", "Running: R2 photo migration for all CA venues", "3,032 photos → stable Cloudflare URLs. Parallel with deep-enrich."],
               ["⏳", "California-wide main pipeline run", "Descriptions + publish gate for remaining ~4,795 unpublished venues"],
-              ["⏳", "Neon sync after deep-enrich completes", "Push all enriched fields to production DB"],
               ["⏳", "Switch R2 to photos.greenbowtie.com custom domain", "Before national rollout — see R2 Setup section"],
               ["⏳", "Texas / New York pilot (validate new state quality)", "After California pass is reviewed"],
               ["⏳", "National rollout", "After custom domain + 2 state validation"],
