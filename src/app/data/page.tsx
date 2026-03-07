@@ -18,8 +18,75 @@ export default function DataPage() {
 
       {/* ── OVERVIEW ── */}
       <Section title="Overview">
-        <p>Green Bowtie's venue directory is built on a fully automated data pipeline. Every venue goes through a series of AI-driven steps before being published. The pipeline is designed to run incrementally — only processing what's new or stale — and can scale from 3 cities to all 50 states without changing the workflow.</p>
-        <p>All pipeline code lives in <Code>scripts/audit/pipeline.ts</Code>. Run it from the project root.</p>
+        <p>Green Bowtie's venue directory is built on a three-stage enrichment pipeline. Venues are seeded from Google Places, enriched with pricing and capacity from The Knot, then deep-enriched with multi-source AI descriptions synthesized from the venue's website, real couple reviews, and all structured data we have. Each stage is designed to run incrementally — only processing what's new or stale — and scales from 3 cities to all 50 states without changing the workflow.</p>
+        <p>Descriptions go through a humanizer pass that strips AI writing patterns (em dashes, "nestled", "boasts", rule-of-three, vague praise) and rewrites for natural, specific, voice-forward copy.</p>
+      </Section>
+
+      {/* ── ENRICHMENT STAGES ── */}
+      <Section title="Enrichment Stages (in order)">
+        <Step n="1" title="Seed — Google Places via Outscraper" color="#e0f2fe">
+          <strong>Script:</strong> <Code>scripts/outscraper-scrape.ts</Code> + <Code>scripts/outscraper-seed.ts</Code><br />
+          One-time per state. Pulls venue name, address, phone, website, Google rating, photo URL. ~$3–6/state via Outscraper API.<br />
+          <strong>Output:</strong> Raw venue records in DB with Google data. Not yet published.
+        </Step>
+
+        <Step n="2" title="Knot Scrape — Pricing + Capacity" color="#dcfce7">
+          <strong>Script:</strong> <Code>scripts/enrichment/phase2-knot-cities.ts</Code><br />
+          Uses Playwright connected to your real Chrome browser (CDP) to scrape The Knot listing pages city by city.<br />
+          Writes starting price and max guests to matched venues via fuzzy name matching.<br />
+          <strong>Safety:</strong> 12–20s random jitter between cities, Cloudflare block detection with 5-minute backoff, per-city checkpoint for crash recovery.<br />
+          <strong>Run:</strong> <Code>DATABASE_URL=... npx tsx@latest scripts/enrichment/phase2-knot-cities.ts --resume</Code><br />
+          <strong>Output:</strong> <Code>baseRentalMin</Code>, <Code>maxGuests</Code> populated for matched venues.
+        </Step>
+
+        <Step n="3" title="AI Pre-filter + Publish Gate" color="#fef9c3">
+          <strong>Script:</strong> <Code>scripts/audit/pipeline.ts</Code><br />
+          Two-tier screen on all unaudited venues before paying for web search:<br />
+          <ol>
+            <li><strong>Free hardcoded patterns</strong> — 30+ regex rejects (bowling, trampoline, fast food, etc.)</li>
+            <li><strong>Gemini Flash name screen</strong> — ambiguous cases, no web search, permissive</li>
+          </ol>
+          Venues that pass get Grok :online enrichment (web search, description, photo). Re-gate step checks published venues on name-first logic.<br />
+          <strong>Flags:</strong> <Code>prefilter_not_wedding</Code>, <Code>regate_not_wedding</Code>, <Code>enrich_uncertain</Code> (max 2 attempts then manual review)<br />
+          <strong>Crash safety:</strong> <Code>pipelineProcessedAt</Code> stamped per-venue immediately. <Code>--resume</Code> skips stamped venues.
+        </Step>
+
+        <Step n="4" title="Deep Enrich — Multi-source Description Synthesis" color="#ede9fe">
+          <strong>Script:</strong> <Code>scripts/enrichment/deep-enrich.ts</Code><br />
+          <strong>Model:</strong> Gemini Flash 2.0 (~$0.0001/venue — no web search, we provide the data)<br />
+          Upgrades every published venue description by synthesizing:<br />
+          <ol>
+            <li>Venue website — weddings/events subpage scraped directly (free)</li>
+            <li>Google Places reviews — top 3–5 high-rating excerpts via Places API</li>
+            <li>Knot data — price + capacity already in DB</li>
+            <li>Structured DB fields — rating, type, tags, amenities</li>
+          </ol>
+          Every source is optional — degrades gracefully to DB-only if website/reviews unavailable.<br />
+          <strong>Humanizer pass:</strong> Second Gemini Flash call strips AI writing patterns per the humanizer skill (em dashes, "nestled", "boasts", rule of three, generic closers). Uses specific details over vague claims.<br />
+          <strong>Output:</strong> 4–5 sentence description grounded in real venue data. Reads like a knowledgeable local wrote it.<br />
+          <strong>Run:</strong>
+          <Pre>{`# Specific cities
+DATABASE_URL=... npx tsx@latest scripts/enrichment/deep-enrich.ts --cities "los angeles,san diego"
+
+# All published CA venues
+DATABASE_URL=... npx tsx@latest scripts/enrichment/deep-enrich.ts --all
+
+# Resume after crash
+DATABASE_URL=... npx tsx@latest scripts/enrichment/deep-enrich.ts --all --resume
+
+# Test without writing
+DATABASE_URL=... npx tsx@latest scripts/enrichment/deep-enrich.ts --cities "napa" --dry-run`}</Pre>
+        </Step>
+
+        <Step n="5" title="Photo Audit + R2 Mirror" color="#fce7f3">
+          <strong>Script:</strong> <Code>scripts/audit/pipeline.ts --photos-only</Code><br />
+          Vision-scores every published venue photo (Gemini Flash Vision, ~$0.002/venue). Upgrades low scores by finding better photos from the venue website. Mirrors all photos to Cloudflare R2 for stable hosting — Google Places URLs expire.<br />
+          <strong>Source priority:</strong> Venue website og:image → Google Places gallery → flag as needs-manual
+        </Step>
+
+        <Step n="6" title="Neon Sync" color="#fff7ed">
+          All changed venues pushed to Neon production DB. COUNT verified before/after every sync — aborts if record count changes.
+        </Step>
       </Section>
 
       {/* ── PIPELINE STEPS ── */}
@@ -132,7 +199,9 @@ npx tsx@latest scripts/audit/pipeline.ts --cities livermore --dry-run`}</Pre>
               ["Re-gate", "Gemini Flash 2.0", "~$0.00008", "Skipped if pipelineProcessedAt < 30d"],
               ["Photo scoring", "Gemini Flash Vision", "~$0.002", "Up to 10 images scored; skipped if photoAuditedAt < 30d"],
               ["R2 upload", "Cloudflare R2", "~$0.000015/upload", "One-time per photo; free tier covers 100k/mo"],
-              ["Total (new venue)", "—", "~$0.003", "Drops to ~$0.0001 on re-runs (skip logic)"],
+              ["Deep enrich (synthesis)", "Gemini Flash 2.0", "~$0.0001", "Website fetch + reviews + DB data → no web search needed"],
+              ["Humanizer pass", "Gemini Flash 2.0", "~$0.00005", "Second pass on description only — very short prompt"],
+              ["Total (new venue)", "—", "~$0.003", "Drops to ~$0.0002 on re-runs (deep enrich replaces basic enrich)"],
             ].map(([step, model, cost, notes]) => (
               <tr key={step} style={{ borderBottom: "1px solid #f3f4f6" }}>
                 <td style={{ padding: "8px 12px" }}><Code>{step}</Code></td>
@@ -327,10 +396,13 @@ R2_PUBLIC_URL=https://photos.greenbowtie.com`}</Pre>
               ["✅", "Multi-city chip search", "Select multiple cities as chips. Same-state → /venues/ca?city=X&city=Y. Cross-state → /venues?q=..."],
               ["✅", "/monetize strategy page", "9 revenue streams, blended revenue model, 4-phase roadmap. Internal, noindex."],
               ["✅", "/architecture updated to v3.0", "228 tests, AI pipeline, R2, new logo/fonts, 2898 venues."],
-              ["⏳", "California-wide pipeline run", "Batch 1 (20 biggest cities, 1,417 venues) running now — session cool-summit"],
+              ["✅", "Knot phase2 scrape — all 633 CA cities", "+421 prices, +243 capacity. State code bug fixed, 15-20s jitter, CF block detection"],
+              ["✅", "Pipeline stamp fix — per-venue pipelineProcessedAt", "Now stamped immediately after each venue, not end-of-run. --resume flag added"],
+              ["✅", "deep-enrich.ts — multi-source description synthesis", "Website + Google reviews + Knot data + DB fields → Gemini Flash → humanizer pass"],
+              ["✅", "Humanizer skill installed", "Strips AI patterns: em dashes, nestled, boasts, rule-of-three, generic closers"],
+              ["⏳", "Run deep-enrich on all 3,134 published CA venues", "Next step — ~$0.31 total at $0.0001/venue"],
+              ["⏳", "California-wide main pipeline run", "Descriptions + publish gate for remaining unpublished venues"],
               ["⏳", "Switch R2 to photos.greenbowtie.com custom domain", "Before national rollout — see R2 Setup section"],
-              ["⏳", "Resume The Knot scraping (cooldown expires 2026-03-07)", "Run with --resume flag, delay=5s, ~4,353 checkpoint"],
-              ["⏳", "Post-Knot pipeline refresh", "Run pipeline --force on California after Knot batch completes"],
               ["⏳", "Texas / New York pilot (validate new state quality)", "After California pass is reviewed"],
               ["⏳", "National rollout", "After custom domain + 2 state validation"],
               ["⏳", "Venue detail pages — SEO optimization", "Individual venue pages with full content"],
@@ -391,7 +463,9 @@ R2_PUBLIC_URL=https://photos.greenbowtie.com`}</Pre>
           </thead>
           <tbody>
             {[
-              ["scripts/audit/pipeline.ts", "Main pipeline — enrich, clean, gate, photo, sync, report"],
+              ["scripts/enrichment/deep-enrich.ts", "Deep enrichment — multi-source synthesis + humanizer pass"],
+              ["scripts/enrichment/phase2-knot-cities.ts", "Knot scraper — pricing + capacity via Playwright CDP"],
+              ["scripts/audit/pipeline.ts", "Main pipeline — pre-filter, enrich, clean, gate, photo, sync, report"],
               ["scripts/audit/photo-check.ts", "Photo scoring + swap logic (website → Places → flag)"],
               ["scripts/photos/migrate-to-r2.ts", "One-shot migration of all venue photos to R2"],
               ["scripts/photos/r2-upload.ts", "Shared R2 upload helper (graceful if R2 not configured)"],
