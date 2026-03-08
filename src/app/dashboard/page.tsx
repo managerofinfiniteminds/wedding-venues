@@ -32,7 +32,7 @@ export default async function DashboardPage() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("gb_session")?.value;
 
-  if (!sessionToken) redirect("/internal-home");
+  if (!sessionToken) redirect("/venues");
 
   const owner = await prisma.venueOwner.findUnique({
     where: { sessionToken },
@@ -51,7 +51,7 @@ export default async function DashboardPage() {
   });
 
   if (!owner || !owner.sessionExpires || owner.sessionExpires < new Date()) {
-    redirect("/internal-home");
+    redirect("/venues");
   }
 
   const venue = owner.venue;

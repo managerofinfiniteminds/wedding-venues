@@ -65,7 +65,8 @@ export async function POST(req: NextRequest) {
       }).catch((e) => console.error("[inquiry] couple email failed:", e)),
     ];
 
-    if (venue.email) {
+    const venueNotificationsEnabled = process.env.VENUE_NOTIFICATIONS_ENABLED === "true";
+    if (venue.email && venueNotificationsEnabled) {
       emailPromises.push(
         sendVenueNotification({
           venueEmail: venue.email,
@@ -86,6 +87,8 @@ export async function POST(req: NextRequest) {
           inquiryId: inquiry.id,
         }).catch((e) => console.error("[inquiry] venue email failed:", e))
       );
+    } else if (venue.email && !venueNotificationsEnabled) {
+      console.log("[inquiry] VENUE_NOTIFICATIONS_ENABLED=false — skipping venue notification for", venue.slug);
     }
 
     // Auto-subscribe couple to Klaviyo list (fire and forget)

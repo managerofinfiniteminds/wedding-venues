@@ -6,7 +6,6 @@ const INTERNAL_PATHS = [
   "/admin",
   "/audit",
   "/data",
-  "/dashboard",
   "/features",
   "/font-preview",
   "/handbook",
