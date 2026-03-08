@@ -62,7 +62,12 @@ export default async function VenueOrCityPage({
   });
 
   if (venue && venue.isPublished) {
-    return <VenueDetailPage venue={venue} state={state} stateAbbr={stateConfig.abbr} stateName={stateConfig.name} />;
+    // Check if venue has a verified owner
+    const owner = await prisma.venueOwner.findUnique({
+      where: { venueId: venue.id },
+      select: { verified: true },
+    });
+    return <VenueDetailPage venue={venue} state={state} stateAbbr={stateConfig.abbr} stateName={stateConfig.name} isVerified={owner?.verified ?? false} />;
   }
 
   // Check if it's a city slug
@@ -109,11 +114,13 @@ function VenueDetailPage({
   state,
   stateAbbr,
   stateName,
+  isVerified,
 }: {
   venue: Venue;
   state: string;
   stateAbbr: string;
   stateName: string;
+  isVerified: boolean;
 }) {
   const canonicalUrl = `https://www.greenbowtie.com/venues/${state}/${venue.slug}`;
 
@@ -142,6 +149,25 @@ function VenueDetailPage({
           <div className="flex flex-wrap items-center gap-3 mb-2">
             <h1 className="playfair text-4xl md:text-5xl font-bold">{venue.name}</h1>
             <FavoriteButton venueId={venue.id} venueName={venue.name} size="md" />
+            {isVerified && (
+              <span
+                title="This venue owner has claimed and verified their listing on Green Bowtie"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 5,
+                  background: "rgba(255,255,255,0.15)", backdropFilter: "blur(4px)",
+                  border: "1px solid rgba(255,255,255,0.3)",
+                  color: "#ffffff", fontSize: 12, fontWeight: 700,
+                  padding: "4px 10px", borderRadius: 999,
+                  letterSpacing: "0.02em",
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <circle cx="6" cy="6" r="6" fill="#86efac"/>
+                  <path d="M3.5 6L5.5 8L8.5 4.5" stroke="#166534" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Verified Owner
+              </span>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <span className="bg-white text-pink-700 text-sm px-3 py-1 rounded-full font-medium">
