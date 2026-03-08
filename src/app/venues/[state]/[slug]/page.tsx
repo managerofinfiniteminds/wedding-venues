@@ -367,18 +367,19 @@ function VenueDetailPage({
               ⚠️ Some details for this venue are still being verified. Contact them directly for the most accurate information.
             </div>
           )}
+        </div>
+      </div>
 
-          {/* Claim listing CTA */}
-          <div className="bg-stone-50 border border-gray-200 rounded-xl p-4">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Own this venue?</p>
-            <p className="text-xs text-gray-500 mb-3 leading-relaxed">Claim your listing to manage photos, pricing, and respond to couple inquiries directly.</p>
-            <Link
-              href={`/claim/${venue.slug}`}
-              className="block text-center text-xs font-semibold text-[#3b6341] border border-[#3b6341] rounded-full py-2 px-4 hover:bg-[#3b6341] hover:text-white transition-colors"
-            >
-              Claim This Listing →
-            </Link>
-          </div>
+      {/* Claim strip — subtle full-width bar at bottom */}
+      <div style={{ borderTop: "1px solid #e5e7eb", background: "#f8f7f4", marginTop: 8 }}>
+        <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between gap-4 flex-wrap">
+          <p className="text-xs text-gray-400">Is this your venue?</p>
+          <Link
+            href={`/claim/${venue.slug}`}
+            className="text-xs font-medium text-[#3b6341] hover:underline whitespace-nowrap"
+          >
+            Claim this listing and manage your profile →
+          </Link>
         </div>
       </div>
     </div>
