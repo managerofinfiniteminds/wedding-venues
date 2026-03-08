@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { Suspense } from "react";
 import { AuditControls } from "./AuditControls";
 
 export const metadata: Metadata = {
@@ -143,11 +144,13 @@ export default async function AuditPage({
           ))}
         </div>
 
-        {/* Filters — client component */}
-        <AuditControls
-          filters={filters}
-          states={stateRows.map((r) => ({ slug: r.stateSlug, name: r.state, count: r._count.id }))}
-        />
+        {/* Filters — client component wrapped in Suspense (required for useSearchParams) */}
+        <Suspense fallback={<div style={{ height: 56, background: "#fff", borderRadius: 14, border: "1px solid #e5e7eb", marginBottom: 20 }} />}>
+          <AuditControls
+            filters={filters}
+            states={stateRows.map((r) => ({ slug: r.stateSlug, name: r.state, count: r._count.id }))}
+          />
+        </Suspense>
 
         {/* Table */}
         <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #e5e7eb", overflow: "hidden" }}>
