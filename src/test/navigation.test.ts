@@ -9,6 +9,10 @@
  */
 
 import { describe, it, expect } from "vitest";
+import * as fs from "fs";
+import * as path from "path";
+
+const PROJECT_ROOT = path.resolve(__dirname, "../../");
 
 // ── Mirrors SortSelect logic ────────────────────────────────────────────────
 // The bug: was hardcoded to `/venues?` — now uses pathname
@@ -222,5 +226,41 @@ describe("Sort option values", () => {
 
   it("price_asc and price_desc are distinct", () => {
     expect(VALID_SORTS.indexOf("price_asc")).not.toBe(VALID_SORTS.indexOf("price_desc"));
+  });
+});
+
+// ── Nav/Footer visibility fix ───────────────────────────────────────────────
+describe("Nav/Footer visibility — isStandalone removed from layout", () => {
+  it("standalone pages are in the (standalone) route group", () => {
+    const standaloneDir = path.join(PROJECT_ROOT, "src/app/(standalone)");
+    expect(fs.existsSync(standaloneDir)).toBe(true);
+    expect(fs.existsSync(path.join(standaloneDir, "privacy/page.tsx"))).toBe(true);
+    expect(fs.existsSync(path.join(standaloneDir, "terms/page.tsx"))).toBe(true);
+    expect(fs.existsSync(path.join(standaloneDir, "contact/page.tsx"))).toBe(true);
+  });
+
+  it("root layout does not reference isStandalone", () => {
+    const layoutPath = path.join(PROJECT_ROOT, "src/app/layout.tsx");
+    const content = fs.readFileSync(layoutPath, "utf-8");
+    expect(content).not.toContain("isStandalone");
+  });
+
+  it("root layout does not read x-pathname header", () => {
+    const layoutPath = path.join(PROJECT_ROOT, "src/app/layout.tsx");
+    const content = fs.readFileSync(layoutPath, "utf-8");
+    expect(content).not.toContain("x-pathname");
+  });
+
+  it("middleware does not inject x-pathname header", () => {
+    const middlewarePath = path.join(PROJECT_ROOT, "src/middleware.ts");
+    const content = fs.readFileSync(middlewarePath, "utf-8");
+    expect(content).not.toContain("x-pathname");
+  });
+
+  it("root layout uses shouldShowNav from layoutUtils", () => {
+    const layoutPath = path.join(PROJECT_ROOT, "src/app/layout.tsx");
+    const content = fs.readFileSync(layoutPath, "utf-8");
+    expect(content).toContain("shouldShowNav");
+    expect(content).toContain("layoutUtils");
   });
 });

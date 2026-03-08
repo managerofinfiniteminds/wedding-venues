@@ -9,6 +9,35 @@
 
 import { test, expect } from "@playwright/test";
 
+test.describe("Green Bowtie smoke tests — standalone pages", () => {
+  test("homepage loads", async ({ page }) => {
+    const res = await page.goto("/");
+    expect(res?.status()).toBe(200);
+    await expect(page).toHaveTitle(/Green Bowtie/);
+  });
+
+  test("/privacy loads (standalone layout — no nav)", async ({ page }) => {
+    const res = await page.goto("/privacy");
+    expect(res?.status()).toBe(200);
+    await expect(page.locator("h1")).toContainText(/privacy/i);
+    await expect(page.locator("nav")).not.toBeVisible();
+  });
+
+  test("/terms loads (standalone layout — no nav)", async ({ page }) => {
+    const res = await page.goto("/terms");
+    expect(res?.status()).toBe(200);
+    await expect(page.locator("h1")).toContainText(/terms/i);
+    await expect(page.locator("nav")).not.toBeVisible();
+  });
+
+  test("/contact loads (standalone layout — no nav)", async ({ page }) => {
+    const res = await page.goto("/contact");
+    expect(res?.status()).toBe(200);
+    await expect(page.locator("h1")).toContainText(/contact|get in touch/i);
+    await expect(page.locator("nav")).not.toBeVisible();
+  });
+});
+
 test.describe("Green Bowtie smoke tests", () => {
 
   test("US hub page loads with state cards", async ({ page }) => {

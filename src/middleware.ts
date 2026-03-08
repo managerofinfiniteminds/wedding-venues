@@ -52,10 +52,8 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(url, 302);
   }
 
-  // Pass pathname to layout via request header so root layout can suppress Nav/Footer
-  const requestHeaders = new Headers(req.headers);
-  requestHeaders.set("x-pathname", pathname);
-  return NextResponse.next({ request: { headers: requestHeaders } });
+  // No pathname injection needed — standalone pages use their own route group layout
+  return NextResponse.next();
 }
 
 export const config = {

@@ -3,6 +3,7 @@ import "./globals.css";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
 import { headers } from "next/headers";
+import { shouldShowNav } from "@/lib/layoutUtils";
 
 
 export const metadata: Metadata = {
@@ -34,9 +35,7 @@ export default async function RootLayout({
 }>) {
   const headersList = await headers();
   const host = headersList.get("x-forwarded-host") ?? headersList.get("host") ?? "";
-  const isInternal = host.startsWith("internal.");
-  const pathname = headersList.get("x-pathname") ?? "";
-  const isStandalone = pathname.startsWith("/privacy") || pathname.startsWith("/terms") || pathname.startsWith("/contact");
+  const isInternal = shouldShowNav(host) === false;
 
   return (
     <html lang="en">
@@ -52,9 +51,9 @@ export default async function RootLayout({
         />
       </head>
       <body className="antialiased bg-stone-50 text-gray-800 flex flex-col min-h-screen">
-        {!isInternal && !isStandalone && <Nav />}
+        {!isInternal && <Nav />}
         <div className="flex-1">{children}</div>
-        {!isInternal && !isStandalone && <Footer />}
+        {!isInternal && <Footer />}
       </body>
     </html>
   );
