@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendCoupleConfirmation, sendVenueNotification } from "@/lib/emails";
+import { subscribeCouple } from "@/lib/klaviyo";
 
 export async function POST(req: NextRequest) {
   try {
@@ -86,6 +87,15 @@ export async function POST(req: NextRequest) {
         }).catch((e) => console.error("[inquiry] venue email failed:", e))
       );
     }
+
+    // Auto-subscribe couple to Klaviyo list (fire and forget)
+    subscribeCouple({
+      email: coupleEmail,
+      firstName: coupleName.split(" ")[0],
+      lastName: coupleName.split(" ").slice(1).join(" ") || undefined,
+      weddingDate: weddingDate ?? undefined,
+      city: venue ? undefined : undefined, // venue city not in scope here
+    }).catch((e) => console.error("[inquiry] klaviyo subscribe failed:", e));
 
     // Fire and forget
     Promise.all(emailPromises);

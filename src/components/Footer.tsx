@@ -1,9 +1,29 @@
 import Link from "next/link";
+import { EmailCapture } from "@/components/EmailCapture";
 
 export function Footer() {
   const year = new Date().getFullYear();
   return (
     <footer className="bg-white border-t border-gray-100 mt-16">
+      {/* Email capture band */}
+      <div className="bg-[#f0f4f0] border-b border-[#d4e4d8]">
+        <div className="max-w-screen-xl mx-auto px-4 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="text-center md:text-left">
+            <h3 className="playfair text-xl font-bold text-gray-800">Find your perfect venue</h3>
+            <p className="text-sm text-gray-500 mt-1">Join couples discovering beautiful wedding venues across the US.</p>
+          </div>
+          <div className="w-full md:w-auto md:min-w-[380px]">
+            <EmailCapture
+              headline=""
+              subtext=""
+              placeholder="Enter your email"
+              buttonLabel="Get Early Access"
+              variant="inline"
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-screen-xl mx-auto px-4 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
