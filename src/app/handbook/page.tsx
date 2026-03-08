@@ -151,6 +151,34 @@ export default function HandbookPage() {
           </div>
         </div>
 
+        {/* ── STANDING OPS RULES ── */}
+        <div style={{
+          background: "#7f1d1d", border: "1px solid #991b1b", borderRadius: 14,
+          padding: "20px 24px", marginBottom: 48,
+        }}>
+          <h2 style={{ color: "#fecaca", fontSize: 16, fontWeight: 700, margin: "0 0 12px" }}>
+            🚨 Standing Operations Rules — Read Before Acting
+          </h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {[
+              "ALWAYS query Neon (production) — not local DB — before making any infrastructure decision.",
+              "Before deleting any API key, service, or credential: identify every production dependency first.",
+              "Have a rollback plan BEFORE acting on anything destructive. No rollback = don't proceed, ask Wayne.",
+              "Backup before every write operation on production data. COUNT check before and after.",
+              "Never auto-delete, auto-unpublish, or overwrite verified production data.",
+              "If unsure about production impact: ask Wayne first. Speed is not worth downtime.",
+            ].map((rule, i) => (
+              <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <span style={{ color: "#f87171", fontWeight: 700, flexShrink: 0 }}>{i + 1}.</span>
+                <span style={{ color: "#fecaca", fontSize: 14, lineHeight: 1.5 }}>{rule}</span>
+              </div>
+            ))}
+          </div>
+          <p style={{ color: "#f87171", fontSize: 12, marginTop: 12, marginBottom: 0 }}>
+            ⚠️ Incident 2026-03-07: Deleted Google Places API key without checking Neon — broke 2,620+ venue photos. Key restored via 30-day recovery. Preventable.
+          </p>
+        </div>
+
         {/* ── 1. PRODUCT ── */}
         <Section title="1. The Product">
           <Card title="Green Bowtie" status="live">
