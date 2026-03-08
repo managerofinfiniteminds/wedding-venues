@@ -6,6 +6,7 @@ import { InquiryForm } from "@/components/InquiryForm";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { getState } from "@/lib/states";
 import { VenueList } from "@/components/VenueList";
+import { VenueSchema } from "@/components/VenueSchema";
 import { cityToSlug, PAGE_SIZE } from "@/lib/venueFilters";
 import { Metadata } from "next";
 import type { Venue } from "@prisma/client";
@@ -114,8 +115,11 @@ function VenueDetailPage({
   stateAbbr: string;
   stateName: string;
 }) {
+  const canonicalUrl = `https://www.greenbowtie.com/venues/${state}/${venue.slug}`;
+
   return (
     <div className="min-h-screen bg-stone-50">
+      <VenueSchema venue={venue} stateName={stateName} url={canonicalUrl} />
 
       {/* Back link */}
       <div className="max-w-screen-xl mx-auto px-4 pt-4">
