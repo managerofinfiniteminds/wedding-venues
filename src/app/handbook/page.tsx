@@ -389,8 +389,82 @@ export default function HandbookPage() {
           </Card>
         </Section>
 
-        {/* ── 12. LAUNCH CHECKLIST ── */}
-        <Section title="12. Launch Checklist">
+        {/* ── 12. DATABASE SCHEMA ── */}
+        <Section title="12. Database Schema">
+          <Card title="Venue" status="live">
+            <Row label="Fields" value="80+ fields" />
+            <Row label="Identity" value="name, slug, phone, email, website, instagram, facebook, tiktok" />
+            <Row label="Location" value="street, city, state, stateSlug, zip, latitude, longitude" />
+            <Row label="Capacity" value="minGuests, maxGuests, seatedMax, standingMax, ceremonyOnly" />
+            <Row label="Pricing" value="baseRentalMin, baseRentalMax, priceTier (budget/moderate/luxury), perHeadMin, perHeadMax, depositPercent, allInclusive" />
+            <Row label="Spaces" value="hasIndoorSpace, hasOutdoorSpace, hasBridalSuite, hasGroomSuite, parkingSpots" />
+            <Row label="Inclusions" value="tablesChairsIncluded, linensIncluded, avIncluded, lightingIncluded, cateringKitchen, barSetup, onSiteCoordinator, adaCompliant, nearbyLodging" />
+            <Row label="Vendor policy" value="preferredVendorList, outsideVendorsAllowed, inHouseCateringRequired, byobPolicy" />
+            <Row label="Enrichment" value="description, styleTags, venueType, photoTags, completenessScore, pipelineProcessedAt, googleRating, googleReviews, primaryPhotoUrl" />
+            <Row label="Monetization" value="isPublished, isFeatured, featuredUntil" />
+          </Card>
+
+          <Card title="Inquiry" status="live">
+            <Row label="Purpose" value="Couple contact form submissions from venue detail pages" />
+            <Row label="Key fields" value="venueId, coupleName, partnerName, coupleEmail, couplePhone, weddingDate, weddingDateFlexible, guestCount, budgetMin, budgetMax, message, preferredContact, source" />
+            <Row label="Status flow" value="new → viewed → responded → booked / lost" />
+          </Card>
+
+          <Card title="VenueOwner" status="live">
+            <Row label="Purpose" value="Claimed venue owner accounts — magic link auth, no passwords" />
+            <Row label="Key fields" value="venueId, email, name, phone, verified, plan (free/featured/pro), planStartedAt, planExpiresAt, stripeCustomerId, stripeSubId, sessionToken, sessionExpires" />
+          </Card>
+
+          <Card title="ClaimToken" status="live">
+            <Row label="Purpose" value="One-time magic link tokens for venue claiming flow" />
+            <Row label="Key fields" value="venueId, email, token, expiresAt, usedAt — consumed on first use" />
+          </Card>
+        </Section>
+
+        {/* ── 13. TECH STACK ── */}
+        <Section title="13. Tech Stack">
+          <Card title="Frontend" status="live">
+            <Row label="Next.js 16" value="App Router, SSR + SSG. SEO is mission-critical so server rendering is required." />
+            <Row label="TypeScript" value="Throughout — frontend, backend, scripts. Build fails on type errors." />
+            <Row label="Tailwind CSS v4" value='Uses @import "tailwindcss" syntax — NOT the v3 @tailwind directives. Breaking change.' />
+            <Row label="Leaflet.js" value="Interactive venue map. OpenStreetMap tiles. No API key. Dynamic import with ssr: false." />
+          </Card>
+
+          <Card title="Backend & Data" status="live">
+            <Row label="Prisma 7" value="ORM for all DB access. Requires @prisma/adapter-pg for Neon serverless compatibility." />
+            <Row label="Playwright" value="Browser automation for scraping The Knot and venue sites. Connects via CDP to Chrome at port 18800." />
+            <Row label="tsx / ts-node" value="Runs enrichment scripts directly without compile step." />
+          </Card>
+        </Section>
+
+        {/* ── 14. AUTH & SECURITY ── */}
+        <Section title="14. Auth & Security">
+          <Card title="Access Control" status="live">
+            <Row label="Internal subdomain" value="internal.greenbowtie.com protected by Cloudflare Access — OTP email gate. Only whitelisted emails can access." />
+            <Row label="Venue owner auth" value="Magic link flow. No passwords. Claim → ClaimToken created → email sent → token consumed → VenueOwner session set. 7-day session cookie." />
+            <Row label="No public admin" value="All admin via internal subdomain or direct Neon console. No exposed admin routes on the public site." />
+          </Card>
+
+          <Card title="API Key Security" status="live">
+            <Row label="Storage" value="All keys in Vercel env vars. Never committed to repo. Local dev uses .env.local (gitignored)." />
+            <Row label="Google Places key" value="⚠️ Should be restricted to greenbowtie.com domain in Google Cloud Console — action needed." />
+            <Row label="Photo URLs" value="Google Places photo URLs embed the API key — need a caching proxy before serving to users at scale." />
+          </Card>
+        </Section>
+
+        {/* ── 15. DEPLOYMENT FLOW ── */}
+        <Section title="15. Deployment Flow">
+          <Card title="Pipeline" status="live">
+            <Row label="Flow" value="Push to GitHub main → Vercel auto-deploys → live on greenbowtie.com (~45s)" />
+            <Row label="SSL" value="Auto-managed by Vercel (Let's Encrypt)" />
+            <Row label="Env vars" value="Live in Vercel dashboard only — never in repo" />
+            <Row label="Hosting" value="Vercel (NOT Cloudflare Pages)" />
+            <Row label="DNS" value="Cloudflare — all records there, GoDaddy is registrar only" />
+          </Card>
+        </Section>
+
+        {/* ── 16. LAUNCH CHECKLIST ── */}
+        <Section title="16. Launch Checklist">
           <div style={{ background: "#fff", borderRadius: 14, border: "1px solid #e5e7eb", padding: "20px 24px" }}>
             {[
               { done: true,  item: "Vercel deployment live on greenbowtie.com" },
