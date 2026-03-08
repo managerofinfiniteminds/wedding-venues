@@ -52,12 +52,13 @@ if (missing.length) {
 const args    = process.argv.slice(2);
 const dryRun  = args.includes("--dry-run");
 const force   = args.includes("--force");  // re-upload even if already on R2
-const citiesArg = args[args.indexOf("--cities") + 1];
+const citiesIdx = args.indexOf("--cities");
+const citiesArg = citiesIdx !== -1 ? args[citiesIdx + 1] : null;
 const targetCities = citiesArg
   ? citiesArg.split(",").map(c => c.trim().replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()))
   : [];
 
-const NEON_URL = "postgresql://neondb_owner:npg_o3XHSjZF9Pcd@ep-rough-sea-ai8thyl8.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+const NEON_URL = process.env.NEON_DATABASE_URL ?? "postgresql://neondb_owner:npg_o3XHSjZF9Pcd@ep-rough-sea-ai8thyl8.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
 const R2_PUBLIC = process.env.R2_PUBLIC_URL!.replace(/\/$/, "");
 const R2_BUCKET = process.env.R2_BUCKET!;
 
@@ -72,7 +73,8 @@ const r2 = new S3Client({
 });
 
 // ── DB ────────────────────────────────────────────────────────────────────
-const pool    = new Pool({ connectionString: process.env.DATABASE_URL });
+// Always use Neon (production) for photo migration
+const pool    = new Pool({ connectionString: NEON_URL });
 const adapter = new PrismaPg(pool);
 const prisma  = new PrismaClient({ adapter });
 
@@ -141,25 +143,30 @@ async function main() {
   console.log(`   Bucket: ${R2_BUCKET}  Public: ${R2_PUBLIC}`);
   console.log(`   ${dryRun ? "DRY RUN — no changes" : "LIVE"}  ${force ? " --force (re-upload all)" : ""}\n`);
 
-  const where: Prisma.VenueWhereInput = {
-    isPublished: true,
-    primaryPhotoUrl: { not: null },
-    stateSlug: "california",
-    ...(targetCities.length ? { city: { in: targetCities } } : {}),
-  };
+  const stateIdx = args.indexOf("--state");
+  const stateArg = stateIdx !== -1 ? args[stateIdx + 1] : null;
 
-  // If not force, only migrate non-R2 URLs
-  if (!force) {
-    (where as Record<string, unknown>).AND = [
-      { primaryPhotoUrl: { not: { startsWith: R2_PUBLIC } } },
-    ];
+  // Use raw SQL for reliable filtering — Prisma's NOT startsWith is unreliable
+  const conditions: string[] = [
+    `"isPublished" = true`,
+    `"primaryPhotoUrl" IS NOT NULL`,
+  ];
+  if (!force) conditions.push(`"primaryPhotoUrl" NOT LIKE '${R2_PUBLIC}%'`);
+  if (stateArg) conditions.push(`"stateSlug" = '${stateArg}'`);
+  if (targetCities.length) {
+    const cityList = targetCities.map(c => `'${c.replace(/'/g, "''")}'`).join(",");
+    conditions.push(`"city" IN (${cityList})`);
   }
 
-  const venues = await prisma.venue.findMany({
-    where,
-    select: { id: true, name: true, slug: true, primaryPhotoUrl: true, city: true },
-    orderBy: [{ city: "asc" }, { name: "asc" }],
-  });
+  const sql = `SELECT id, name, slug, "primaryPhotoUrl", city FROM "Venue" WHERE ${conditions.join(" AND ")} ORDER BY city, name`;
+  const totalCheck = await prisma.$queryRawUnsafe<[{count: bigint}]>(`SELECT COUNT(*) FROM "Venue" WHERE "isPublished"=true`);
+  console.log(`   DB total published venues: ${totalCheck[0].count}`);
+  console.log(`   Full SQL: ${sql}\n`);
+
+  const rawVenues = await prisma.$queryRawUnsafe<Array<{
+    id: string; name: string; slug: string; primaryPhotoUrl: string; city: string;
+  }>>(sql);
+  const venues = rawVenues;
 
   console.log(`Found ${venues.length} venues to migrate\n`);
   if (!venues.length) {
