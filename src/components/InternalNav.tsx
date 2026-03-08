@@ -5,7 +5,7 @@ const NAV_LINKS = [
   { href: "/internal-home", label: "Home" },
   { href: "/handbook", label: "Handbook" },
   { href: "/data", label: "Data" },
-  { href: "/audit", label: "Audit" },
+
   { href: "/seo", label: "SEO" },
   { href: "/market", label: "Market" },
   { href: "/monetize", label: "Monetize" },
