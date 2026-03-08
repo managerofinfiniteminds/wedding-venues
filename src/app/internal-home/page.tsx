@@ -75,15 +75,7 @@ const cards = [
     badgeColor: "#16a34a",
     badgeBg: "#dcfce7",
   },
-  {
-    icon: "🏗️",
-    title: "Stack Reference",
-    href: "/stack",
-    desc: "Services, APIs, DB schema, auth, deployment, TODO checklist",
-    badge: "Reference",
-    badgeColor: "#1d4ed8",
-    badgeBg: "#dbeafe",
-  },
+
   {
     icon: "📖",
     title: "Handbook",
