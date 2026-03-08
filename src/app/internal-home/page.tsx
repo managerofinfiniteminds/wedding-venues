@@ -84,6 +84,15 @@ const cards = [
     badgeColor: "#1d4ed8",
     badgeBg: "#dbeafe",
   },
+  {
+    icon: "📊",
+    title: "Market Intelligence",
+    href: "/market",
+    desc: "Competitive analysis, market sizing, investor brief",
+    badge: "Investor",
+    badgeColor: "#1e40af",
+    badgeBg: "#dbeafe",
+  },
 ];
 
 export default async function InternalHomePage() {

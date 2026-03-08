@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: "/seo", label: "SEO" },
   { href: "/monetize", label: "Monetize" },
   { href: "/stack", label: "Stack" },
+  { href: "/market", label: "Market" },
 ];
 
 export function InternalNav() {
