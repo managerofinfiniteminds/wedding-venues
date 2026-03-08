@@ -5,21 +5,31 @@ export function Footer() {
   const year = new Date().getFullYear();
   return (
     <footer className="bg-white border-t border-gray-100 mt-16">
-      {/* Email capture band */}
-      <div className="bg-[#f0f4f0] border-b border-[#d4e4d8]">
-        <div className="max-w-screen-xl mx-auto px-4 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+      {/* Email capture band — prominent dark green */}
+      <div style={{ background: "#2d4f33", borderBottom: "1px solid #1e3824" }}>
+        <div className="max-w-screen-xl mx-auto px-4 py-12 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="text-center md:text-left">
-            <h3 className="playfair text-xl font-bold text-gray-800">Find your perfect venue</h3>
-            <p className="text-sm text-gray-500 mt-1">Join couples discovering beautiful wedding venues across the US.</p>
+            <h3 className="playfair text-2xl font-bold" style={{ color: "#ffffff", marginBottom: 6 }}>
+              Find your perfect venue 💚
+            </h3>
+            <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 15, margin: 0 }}>
+              Join thousands of couples discovering beautiful wedding venues across the US.
+            </p>
           </div>
-          <div className="w-full md:w-auto md:min-w-[380px]">
-            <EmailCapture
-              headline=""
-              subtext=""
-              placeholder="Enter your email"
-              buttonLabel="Get Early Access"
-              variant="inline"
-            />
+          <div className="w-full md:w-auto md:min-w-[420px]">
+            <div className="flex gap-2">
+              <EmailCapture
+                headline=""
+                subtext=""
+                placeholder="Enter your email address"
+                buttonLabel="Get Early Access"
+                variant="inline"
+                className="w-full"
+              />
+            </div>
+            <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 12, marginTop: 8, textAlign: "center" }}>
+              No spam. Unsubscribe anytime.
+            </p>
           </div>
         </div>
       </div>

@@ -76,12 +76,25 @@ export function EmailCapture({
           onChange={(e) => setEmail(e.target.value)}
           placeholder={placeholder}
           required
-          className="flex-1 px-4 py-2.5 rounded-full border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-[#3b6341] focus:border-transparent"
+          style={{
+            flex: 1, padding: "12px 20px", borderRadius: 100,
+            border: "none", fontSize: 14,
+            background: "rgba(255,255,255,0.95)",
+            color: "#1a1a1a", outline: "none",
+            minWidth: 0,
+          }}
         />
         <button
           type="submit"
           disabled={status === "loading"}
-          className="bg-[#3b6341] text-white text-sm font-semibold px-6 py-2.5 rounded-full hover:bg-[#2e4f34] transition-colors disabled:opacity-60 whitespace-nowrap"
+          style={{
+            background: "#86efac", color: "#1a2e1d",
+            fontWeight: 700, fontSize: 14,
+            padding: "12px 24px", borderRadius: 100,
+            border: "none", cursor: "pointer",
+            whiteSpace: "nowrap", flexShrink: 0,
+            opacity: status === "loading" ? 0.6 : 1,
+          }}
         >
           {status === "loading" ? "..." : buttonLabel}
         </button>
