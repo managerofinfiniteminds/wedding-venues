@@ -62,6 +62,7 @@ export default async function AdminPage() {
         {/* Quick actions */}
         <div style={{ display: "flex", gap: 10, marginBottom: 40, flexWrap: "wrap" }}>
           {[
+            { label: "🔍 Venue Audit", href: "/admin/audit" },
             { label: "📖 Handbook", href: "/handbook" },
             { label: "🗺️ Feature Plans", href: "/features" },
             { label: "📊 Data Pipeline", href: "/data" },

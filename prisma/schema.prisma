@@ -129,6 +129,8 @@ model Venue {
 
   // Monetization
   isFeatured    Boolean   @default(false)
+  isHidden      Boolean   @default(false)  // Hidden from public, stays in DB
+  deletedAt     DateTime?                  // Soft delete — reversible
   featuredUntil DateTime?
 
   // Relations

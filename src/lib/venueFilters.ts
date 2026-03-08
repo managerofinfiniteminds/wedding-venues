@@ -136,3 +136,6 @@ export function cityToSlug(city: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 }
+
+// Always apply these filters on public venue queries
+export const PUBLIC_VENUE_FILTER = { isPublished: true, isHidden: false, deletedAt: null } as const;
