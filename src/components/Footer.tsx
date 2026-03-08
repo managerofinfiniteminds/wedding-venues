@@ -37,6 +37,10 @@ export function Footer() {
           <Link href="/venues" className="hover:text-green-700 transition-colors">Browse Venues</Link>
           <span>·</span>
           <a href="mailto:hello@greenbowtie.com" className="hover:text-green-700 transition-colors">Contact</a>
+          <span>·</span>
+          <Link href="/privacy" className="hover:text-green-700 transition-colors">Privacy Policy</Link>
+          <span>·</span>
+          <Link href="/terms" className="hover:text-green-700 transition-colors">Terms of Service</Link>
         </div>
       </div>
     </footer>
