@@ -94,6 +94,15 @@ const cards = [
     badgeBg: "#dbeafe",
   },
   {
+    icon: "🗺️",
+    title: "Feature Plans",
+    href: "/features",
+    desc: "Storyboards, monetization plans, and rollout strategies for each major feature",
+    badge: "Planning",
+    badgeColor: "#92400e",
+    badgeBg: "#fef3c7",
+  },
+  {
     icon: "📊",
     title: "Market Intelligence",
     href: "/market",
