@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const INTERNAL_PATHS = ["/data", "/monetize", "/dashboard", "/font-preview", "/internal-home", "/seo", "/market", "/handbook", "/features"];
+const INTERNAL_PATHS = ["/data", "/monetize", "/dashboard", "/font-preview", "/internal-home", "/seo", "/market", "/handbook", "/features", "/admin"];
 const INTERNAL_HOST = "internal.greenbowtie.com";
 const PUBLIC_HOST = "greenbowtie.com";
 

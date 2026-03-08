@@ -94,6 +94,15 @@ const cards = [
     badgeBg: "#dbeafe",
   },
   {
+    icon: "🎛️",
+    title: "Admin Dashboard",
+    href: "/admin",
+    desc: "Inquiries feed, venue claims queue, operations center",
+    badge: "Live",
+    badgeColor: "#16a34a",
+    badgeBg: "#dcfce7",
+  },
+  {
     icon: "🗺️",
     title: "Feature Plans",
     href: "/features",
