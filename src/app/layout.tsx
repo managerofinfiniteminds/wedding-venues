@@ -36,7 +36,7 @@ export default async function RootLayout({
   const host = headersList.get("x-forwarded-host") ?? headersList.get("host") ?? "";
   const isInternal = host.startsWith("internal.");
   const pathname = headersList.get("x-pathname") ?? "";
-  const isStandalone = pathname.startsWith("/privacy") || pathname.startsWith("/terms");
+  const isStandalone = pathname.startsWith("/privacy") || pathname.startsWith("/terms") || pathname.startsWith("/contact");
 
   return (
     <html lang="en">

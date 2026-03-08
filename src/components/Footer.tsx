@@ -46,7 +46,7 @@ export function Footer() {
         <div className="flex items-center gap-4 text-xs text-gray-400">
           <Link href="/venues" className="hover:text-green-700 transition-colors">Browse Venues</Link>
           <span>·</span>
-          <a href="mailto:hello@greenbowtie.com" className="hover:text-green-700 transition-colors">Contact</a>
+          <Link href="/contact" className="hover:text-green-700 transition-colors">Contact</Link>
           <span>·</span>
           <Link href="/privacy" className="hover:text-green-700 transition-colors">Privacy Policy</Link>
           <span>·</span>
