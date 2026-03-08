@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 // The middleware checks startsWith so /admin covers /admin/audit etc.
 const INTERNAL_PATHS = [
   "/admin",
+  "/audit",
   "/data",
   "/dashboard",
   "/features",
