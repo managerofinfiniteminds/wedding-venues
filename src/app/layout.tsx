@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Footer } from "@/components/Footer";
 import { Nav } from "@/components/Nav";
+import { headers } from "next/headers";
 
 
 export const metadata: Metadata = {
@@ -26,11 +27,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const host = headersList.get("x-forwarded-host") ?? headersList.get("host") ?? "";
+  const isInternal = host.startsWith("internal.");
+
   return (
     <html lang="en">
       <head>
@@ -38,8 +43,6 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Nunito+Sans:wght@300;400;600;700&display=swap"
           rel="stylesheet"
         />
-        {/* Plausible Analytics — privacy-first, no cookies, no GDPR banner needed */}
-        {/* TODO: Replace 'greenbowtie.com' with your actual domain if different */}
         <script
           defer
           data-domain="greenbowtie.com"
@@ -47,10 +50,9 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased bg-stone-50 text-gray-800 flex flex-col min-h-screen">
-
-        <Nav />
+        {!isInternal && <Nav />}
         <div className="flex-1">{children}</div>
-        <Footer />
+        {!isInternal && <Footer />}
       </body>
     </html>
   );
