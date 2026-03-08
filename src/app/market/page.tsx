@@ -295,6 +295,89 @@ export default function MarketPage() {
               </div>
             </Card>
 
+            {/* The Knot — Deep Intelligence */}
+            <Card className="p-7 border-l-4" style={{ borderLeftColor: "#dc2626" }}>
+              <div className="flex items-center gap-3 mb-5">
+                <span className="text-lg">🔍</span>
+                <h3 className="playfair text-xl font-bold text-gray-800">The Knot Worldwide — Opposition Intelligence</h3>
+                <Badge color="red">Primary Competitor</Badge>
+              </div>
+              <div className="grid md:grid-cols-3 gap-6 text-sm mb-6">
+                <div className="space-y-3">
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">Corporate Profile</div>
+                  <div><span className="font-semibold text-gray-700">Founded:</span> <span className="text-gray-600">May 1996 (as The Knot Inc.)</span></div>
+                  <div><span className="font-semibold text-gray-700">Founders:</span> <span className="text-gray-600">David Liu, Carley Roney, Tim Chi</span></div>
+                  <div><span className="font-semibold text-gray-700">HQ:</span> <span className="text-gray-600">2 Wisconsin Circle, Chevy Chase, Maryland</span></div>
+                  <div><span className="font-semibold text-gray-700">Employees:</span> <span className="text-gray-600">2,000+ (2024)</span></div>
+                  <div><span className="font-semibold text-gray-700">CEO:</span> <span className="text-gray-600">Raina Moskowitz</span></div>
+                  <div><span className="font-semibold text-gray-700">CFO:</span> <span className="text-gray-600">Andy Ivanovich</span></div>
+                </div>
+                <div className="space-y-3">
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">Ownership & Financials</div>
+                  <div><span className="font-semibold text-gray-700">Public?</span> <span className="text-gray-600">No — went <strong>private in 2019</strong> via merger</span></div>
+                  <div><span className="font-semibold text-gray-700">Owners:</span> <span className="text-gray-600">Permira Funds (PE) + Spectrum Equity</span></div>
+                  <div><span className="font-semibold text-gray-700">Merger:</span> <span className="text-gray-600">XO Group + WeddingWire — <strong>~$933M deal</strong>, closed March 2019</span></div>
+                  <div><span className="font-semibold text-gray-700">Revenue:</span> <span className="text-gray-600">~$436–455M/year (est.)</span></div>
+                  <div><span className="font-semibold text-gray-700">Revenue/employee:</span> <span className="text-gray-600">~$203K</span></div>
+                  <div><span className="font-semibold text-gray-700">Valuation:</span> <span className="text-gray-600">~$1–1.5B est. (private, no current filing)</span></div>
+                </div>
+                <div className="space-y-3">
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest">Brands Owned</div>
+                  {["The Knot", "WeddingWire", "WeddingPro", "Bodas.net", "Hitched (UK)", "The Bump", "The Bash", "Matrimonio.com", "Mariages.net"].map(b => (
+                    <div key={b} className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: "#dc2626" }} />
+                      <span className="text-gray-600">{b}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6 text-sm mb-5">
+                <div>
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Acquisition History</div>
+                  <div className="space-y-2">
+                    {[
+                      { year: "1999", event: "IPO — raised $35M on Nasdaq" },
+                      { year: "2006", event: "Acquired WeddingChannel.com" },
+                      { year: "2015", event: "Acquired GigMasters (event vendors)" },
+                      { year: "2018", event: "Merged with WeddingWire in ~$933M deal; went private" },
+                      { year: "2019", event: "Renamed The Knot Worldwide; backed by Permira + Spectrum Equity" },
+                      { year: "2020", event: "Acquired Hitched (UK wedding brand)" },
+                      { year: "2023", event: "Acquired Zankyou (Spain-based global) + Weven (venue CRM/SaaS)" },
+                    ].map(({ year, event }) => (
+                      <div key={year} className="flex gap-3">
+                        <span className="font-mono font-bold text-gray-400 flex-shrink-0 w-10">{year}</span>
+                        <span className="text-gray-600">{event}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Vulnerabilities</div>
+                  <div className="space-y-2">
+                    {[
+                      { icon: "💸", label: "$3K–$10K/yr listing fee", detail: "Locks out thousands of legitimate venues. Their directory is by definition incomplete." },
+                      { icon: "📰", label: "\"Fake Brides\" scandal (2025)", detail: "New Yorker piece + class action lawsuit filed March 2025 — vendors report fake first-contact inquiries that never convert. Credibility hit." },
+                      { icon: "🔒", label: "Private equity owned", detail: "Permira is a buyout firm. Their incentive is margin extraction, not product investment. Venues notice." },
+                      { icon: "🐌", label: "2,000-person bureaucracy", detail: "Can't move fast. We can rebuild their core product in weeks." },
+                      { icon: "🌐", label: "No organic SEO moat", detail: "They rely on brand + paid acquisition. No city-level SEO pages. We're building exactly what they don't have." },
+                    ].map(({ icon, label, detail }) => (
+                      <div key={label} className="flex gap-3 items-start">
+                        <span className="flex-shrink-0">{icon}</span>
+                        <div>
+                          <div className="font-semibold text-gray-700">{label}</div>
+                          <div className="text-gray-500 text-xs">{detail}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="text-xs text-gray-400 border-t border-gray-100 pt-3">
+                Sources: Wikipedia — The Knot Worldwide (2025), NY Post/Reuters "$933M deal" (Sept 2018), StoryAmour (2024), The New Yorker (March 2025), Growjo/RocketReach revenue estimates
+              </div>
+            </Card>
+
             {/* Other competitors */}
             <div className="grid md:grid-cols-2 gap-4">
               {[
