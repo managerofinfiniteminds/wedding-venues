@@ -259,10 +259,12 @@ export default function HandbookPage() {
 
         {/* ── 7. DATA ENRICHMENT ── */}
         <Section title="7. Data & Enrichment">
-          <Card title="Google Places API" status="live" account="wayne@managerofinfiniteminds.com" url="https://console.cloud.google.com">
-            <Row label="Purpose" value="Enriches venues with ratings, review counts, photos, addresses, phone numbers" />
-            <Row label="⚠️ Action needed" value="Restrict API key to greenbowtie.com domain — currently unrestricted" />
-            <EnvVars vars={["GOOGLE_PLACES_API_KEY"]} />
+          <Card title="Google Places API" status="paused" account="wayne@managerofinfiniteminds.com" url="https://console.cloud.google.com">
+            <Row label="Purpose" value="Used for initial venue enrichment — ratings, reviews, photos, addresses, phone numbers" />
+            <Row label="Status" value="✅ All API keys deleted March 7 2026. Enrichment complete — 17,635 venues enriched. No further Google Places spend needed." />
+            <Row label="Data" value="All enriched data is in Neon permanently. Nothing depends on this API anymore." />
+            <Row label="Future enrichment" value="Use The Knot scraper (free), OpenStreetMap/Nominatim (free geocoding), or Outscraper (~$0.001/record) instead." />
+            <Row label="Env var" value="GOOGLE_PLACES_API_KEY — remove from any scripts before running. Key no longer exists." code />
           </Card>
 
           <Card title="Knot Scraper — Phase 2" status="live">
@@ -447,7 +449,7 @@ export default function HandbookPage() {
 
           <Card title="API Key Security" status="live">
             <Row label="Storage" value="All keys in Vercel env vars. Never committed to repo. Local dev uses .env.local (gitignored)." />
-            <Row label="Google Places key" value="⚠️ Should be restricted to greenbowtie.com domain in Google Cloud Console — action needed." />
+            <Row label="Google Places key" value="✅ All Google Cloud API keys deleted March 7 2026 — no live keys, no ongoing spend." />
             <Row label="Photo URLs" value="Google Places photo URLs embed the API key — need a caching proxy before serving to users at scale." />
           </Card>
         </Section>
@@ -478,7 +480,7 @@ export default function HandbookPage() {
               { done: true,  item: "Venue owner claim + magic link login flow" },
               { done: true,  item: "Inquiry form → SendGrid + Klaviyo" },
               { done: true,  item: "Internal ops site (internal.greenbowtie.com)" },
-              { done: false, item: "Restrict Google Places API key to greenbowtie.com domain" },
+              { done: true,  item: "Google Places API keys deleted — enrichment complete, no further spend" },
               { done: false, item: "Google Search Console — submit sitemap at launch" },
               { done: false, item: "Flip robots.txt + meta robots to allow indexing at launch" },
               { done: false, item: "Cloudflare R2 + photos.greenbowtie.com for venue photos" },
