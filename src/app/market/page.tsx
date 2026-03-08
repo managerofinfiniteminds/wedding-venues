@@ -512,13 +512,13 @@ export default function MarketPage() {
           <Card className="p-7">
             <div className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-5">How We Compare: Traffic Acquisition</div>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="text-sm" style={{ minWidth: 520 }}>
                 <thead>
                   <tr className="border-b border-gray-200">
                     {["", "The Knot / WeddingWire", "Zola / WithJoy", "Green Bowtie"].map((h, i) => (
                       <th
                         key={i}
-                        className="text-left py-2 pr-4 font-semibold"
+                        className="text-left py-2 pr-6 font-semibold whitespace-nowrap"
                         style={{
                           color: i === 3 ? "#3b6341" : "#6b7280",
                           fontSize: 12,
@@ -544,11 +544,13 @@ export default function MarketPage() {
                       {row.map((cell, j) => (
                         <td
                           key={j}
-                          className="py-3 pr-4"
+                          className="py-3 pr-6 whitespace-nowrap"
                           style={{
                             fontWeight: j === 0 ? 600 : 400,
                             color: j === 3 ? "#1e3a22" : j === 0 ? "#4b5563" : "#6b7280",
                             background: j === 3 ? "#f0f7f1" : "transparent",
+                            paddingLeft: j === 3 ? 12 : 0,
+                            paddingRight: j === 3 ? 12 : undefined,
                           }}
                         >
                           {cell}
@@ -584,11 +586,11 @@ export default function MarketPage() {
                 Venues pay $49–$149/month to appear first in their city. Free base listing always available. Featured placement = priority rank + badge.
               </p>
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="text-sm" style={{ minWidth: 420 }}>
                   <thead>
                     <tr className="border-b border-gray-200">
                       {["Conversion Rate", "Paying Venues", "Avg Price", "MRR", "ARR"].map((h) => (
-                        <th key={h} className="text-left py-2 pr-4 font-semibold text-gray-500 text-xs uppercase tracking-wide">{h}</th>
+                        <th key={h} className="text-left py-2 pr-6 font-semibold text-gray-500 text-xs uppercase tracking-wide whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -601,7 +603,7 @@ export default function MarketPage() {
                       <tr key={i} className={`border-b border-gray-100 last:border-0 ${i === 1 ? "font-semibold" : ""}`}
                         style={i === 1 ? { background: "#f0f7f1" } : {}}>
                         {row.map((cell, j) => (
-                          <td key={j} className="py-2.5 pr-4" style={{ color: i === 1 && j > 2 ? "#166534" : "#374151" }}>{cell}</td>
+                          <td key={j} className="py-2.5 pr-6 whitespace-nowrap" style={{ color: i === 1 && j > 2 ? "#166534" : "#374151" }}>{cell}</td>
                         ))}
                       </tr>
                     ))}
