@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const EFFECTIVE_DATE = "March 8, 2026";
-const COMPANY = "El Salvador Imports, LLC";
+const COMPANY = "Green Bowtie";
 const DBA = "Green Bowtie";
 const EMAIL = "legal@greenbowtie.com";
 const GOVERNING_LAW = "California";
@@ -47,7 +47,7 @@ export default function TermsPage() {
         <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #e5e7eb", padding: "32px 40px" }}>
 
           <p style={{ fontSize: 15, lineHeight: 1.8, color: "#374151", marginBottom: 32 }}>
-            These Terms of Service ("Terms") govern your access to and use of the website greenbowtie.com and related services (collectively, the "Service") operated by {COMPANY}, doing business as {DBA} ("Green Bowtie," "we," "us," or "our"). By accessing or using the Service, you agree to be bound by these Terms. If you do not agree, do not use the Service.
+            These Terms of Service ("Terms") govern your access to and use of the website greenbowtie.com and related services (collectively, the "Service") operated by {COMPANY} ("we," "us," or "our"). By accessing or using the Service, you agree to be bound by these Terms. If you do not agree, do not use the Service.
           </p>
 
           <Section title="1. Eligibility">
@@ -169,7 +169,6 @@ export default function TermsPage() {
             <p>Questions about these Terms? Contact us:</p>
             <div style={{ background: "#f8f7f4", borderRadius: 10, padding: "16px 20px", marginTop: 12 }}>
               <p style={{ margin: 0 }}><strong>{COMPANY}</strong><br />
-              d/b/a {DBA}<br />
               {GOVERNING_LAW}, United States<br />
               Email: <a href={`mailto:${EMAIL}`} style={{ color: "#3b6341" }}>{EMAIL}</a>
               </p>

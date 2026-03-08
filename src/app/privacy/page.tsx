@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 const EFFECTIVE_DATE = "March 8, 2026";
-const COMPANY = "El Salvador Imports, LLC";
+const COMPANY = "Green Bowtie";
 const DBA = "Green Bowtie";
 const EMAIL = "privacy@greenbowtie.com";
 const ADDRESS = "California, United States";
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
         <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #e5e7eb", padding: "32px 40px" }}>
 
           <p style={{ fontSize: 15, lineHeight: 1.8, color: "#374151", marginBottom: 32 }}>
-            This Privacy Policy describes how {COMPANY}, doing business as {DBA} ("Green Bowtie," "we," "us," or "our"), collects, uses, discloses, and protects information about you when you use our website at greenbowtie.com (the "Service"). By using the Service, you agree to the collection and use of information in accordance with this policy.
+            This Privacy Policy describes how {COMPANY} ("Green Bowtie," "we," "us," or "our"), collects, uses, discloses, and protects information about you when you use our website at greenbowtie.com (the "Service"). By using the Service, you agree to the collection and use of information in accordance with this policy.
           </p>
 
           <Section title="1. Information We Collect">
@@ -151,7 +151,6 @@ export default function PrivacyPage() {
             <p>If you have questions, concerns, or requests regarding this Privacy Policy or our privacy practices, please contact us:</p>
             <div style={{ background: "#f8f7f4", borderRadius: 10, padding: "16px 20px", marginTop: 12 }}>
               <p style={{ margin: 0 }}><strong>{COMPANY}</strong><br />
-              d/b/a {DBA}<br />
               {ADDRESS}<br />
               Email: <a href={`mailto:${EMAIL}`} style={{ color: "#3b6341" }}>{EMAIL}</a>
               </p>
