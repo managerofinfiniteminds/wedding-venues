@@ -75,6 +75,15 @@ const cards = [
     badgeColor: "#16a34a",
     badgeBg: "#dcfce7",
   },
+  {
+    icon: "🏗️",
+    title: "Stack & SEO",
+    href: "/stack",
+    desc: "Services, SEO strategy, data pipeline, tech stack reference",
+    badge: "Reference",
+    badgeColor: "#1d4ed8",
+    badgeBg: "#dbeafe",
+  },
 ];
 
 export default async function InternalHomePage() {

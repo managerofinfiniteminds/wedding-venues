@@ -1,4 +1,10 @@
-// Internal page — no public Nav or Footer
+import { InternalNav } from "@/components/InternalNav";
+
 export default function InternalLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <>
+      <InternalNav />
+      {children}
+    </>
+  );
 }

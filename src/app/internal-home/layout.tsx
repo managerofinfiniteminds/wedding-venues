@@ -1,4 +1,10 @@
-// Internal pages get their own layout — no public Nav, no Footer, no search bar
+import { InternalNav } from "@/components/InternalNav";
+
 export default function InternalLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <>
+      <InternalNav />
+      {children}
+    </>
+  );
 }

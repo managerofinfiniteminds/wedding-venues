@@ -32,7 +32,7 @@ export default async function DashboardPage() {
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get("gb_session")?.value;
 
-  if (!sessionToken) redirect("/venues");
+  if (!sessionToken) redirect("/internal-home");
 
   const owner = await prisma.venueOwner.findUnique({
     where: { sessionToken },
@@ -51,7 +51,7 @@ export default async function DashboardPage() {
   });
 
   if (!owner || !owner.sessionExpires || owner.sessionExpires < new Date()) {
-    redirect("/venues");
+    redirect("/internal-home");
   }
 
   const venue = owner.venue;
@@ -62,13 +62,13 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f7f5]">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-screen-xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-[#3b6341] font-bold text-lg">🌿 Green Bowtie</Link>
-            <span className="text-gray-300">/</span>
-            <span className="text-gray-600 text-sm font-medium">{venue.name}</span>
+      {/* Venue context bar */}
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-screen-xl mx-auto px-4 py-2 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <span className="font-semibold text-gray-700">{venue.name}</span>
+            <span className="text-gray-300">·</span>
+            <span>Venue Dashboard</span>
           </div>
           <div className="flex items-center gap-3">
             {isFeatured ? (
