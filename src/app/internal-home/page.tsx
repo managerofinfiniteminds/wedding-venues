@@ -94,6 +94,15 @@ const cards = [
     badgeBg: "#dbeafe",
   },
   {
+    icon: "📖",
+    title: "Setup Playbook",
+    href: "/playbook",
+    desc: "Complete playbook — everything deployed, configured, and running. Accounts, env vars, commands, checklist.",
+    badge: "Reference",
+    badgeColor: "#1d4ed8",
+    badgeBg: "#dbeafe",
+  },
+  {
     icon: "📊",
     title: "Market Intelligence",
     href: "/market",
