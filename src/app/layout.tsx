@@ -35,6 +35,8 @@ export default async function RootLayout({
   const headersList = await headers();
   const host = headersList.get("x-forwarded-host") ?? headersList.get("host") ?? "";
   const isInternal = host.startsWith("internal.");
+  const pathname = headersList.get("x-pathname") ?? "";
+  const isStandalone = pathname.startsWith("/privacy") || pathname.startsWith("/terms");
 
   return (
     <html lang="en">
@@ -50,9 +52,9 @@ export default async function RootLayout({
         />
       </head>
       <body className="antialiased bg-stone-50 text-gray-800 flex flex-col min-h-screen">
-        {!isInternal && <Nav />}
+        {!isInternal && !isStandalone && <Nav />}
         <div className="flex-1">{children}</div>
-        {!isInternal && <Footer />}
+        {!isInternal && !isStandalone && <Footer />}
       </body>
     </html>
   );
