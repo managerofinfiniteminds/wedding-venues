@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const INTERNAL_PATHS = ["/data", "/monetize", "/dashboard", "/font-preview", "/internal-home", "/seo", "/market", "/handbook", "/features", "/admin"];
+// Every path that belongs on internal.greenbowtie.com
+// The middleware checks startsWith so /admin covers /admin/audit etc.
+const INTERNAL_PATHS = [
+  "/admin",
+  "/data",
+  "/dashboard",
+  "/features",
+  "/font-preview",
+  "/handbook",
+  "/internal-home",
+  "/market",
+  "/monetize",
+  "/seo",
+];
 const INTERNAL_HOST = "internal.greenbowtie.com";
 const PUBLIC_HOST = "greenbowtie.com";
 
