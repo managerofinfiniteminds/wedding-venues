@@ -5,9 +5,9 @@ const NAV_LINKS = [
   { href: "/internal-home", label: "Home" },
   { href: "/data", label: "Data" },
   { href: "/audit", label: "Audit" },
+  { href: "/seo", label: "SEO" },
   { href: "/monetize", label: "Monetize" },
-  { href: "/architecture", label: "Architecture" },
-  { href: "/stack", label: "Stack & SEO" },
+  { href: "/stack", label: "Stack" },
 ];
 
 export function InternalNav() {

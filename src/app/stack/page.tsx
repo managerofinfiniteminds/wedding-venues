@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Stack & SEO Reference — Green Bowtie Internal",
+  title: "Stack Reference — Green Bowtie Internal",
   robots: { index: false, follow: false, noarchive: true, nosnippet: true },
 };
 
@@ -15,70 +15,18 @@ export default function StackPage() {
             <Badge style={{ background: "rgba(255,255,255,0.2)", color: "white" }}>Internal Reference</Badge>
             <Badge style={{ background: "rgba(255,255,255,0.2)", color: "white" }}>Last updated: March 2026</Badge>
           </div>
-          <h1 className="playfair text-5xl font-bold mb-3">Stack &amp; SEO</h1>
+          <h1 className="playfair text-5xl font-bold mb-3">Stack Reference</h1>
           <p className="text-xl" style={{ color: "#bbf7d0" }}>
-            Complete technical reference — services, SEO strategy, data pipeline, auth &amp; deployment
+            Services, APIs, database schema, auth, deployment, and TODO checklist
           </p>
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-6 py-12 space-y-8">
 
-        {/* ── 1. SEO Strategy ─────────────────────────────── */}
+        {/* ── 1. Services & APIs ──────────────────────────── */}
         <Card className="p-8">
-          <SectionTitle>1. SEO Strategy</SectionTitle>
-          <p className="text-sm text-gray-500 mb-6">
-            Organic search = free traffic. The Knot and WeddingWire spend millions on ads. We rank organically by having more indexed pages than any competitor.
-          </p>
-
-          <SubTitle>URL Hierarchy</SubTitle>
-          <div className="space-y-2 font-mono text-sm mb-6">
-            {[
-              { path: "/venues", desc: "US hub — state picker. Ranks for 'wedding venues in the US'" },
-              { path: "/venues/california", desc: "State page — 'Wedding Venues in California'" },
-              { path: "/venues/california/los-angeles", desc: "City page — 'Wedding Venues in Los Angeles, California'" },
-              { path: "/venues/california/calamigos-ranch", desc: "Detail page — 'Calamigos Ranch Wedding Venue Malibu CA'" },
-            ].map(r => (
-              <div key={r.path} className="flex items-start gap-3 flex-wrap">
-                <code className="text-sm px-2 py-0.5 rounded flex-shrink-0" style={{ background: "#f3f4f6", color: "#374151" }}>{r.path}</code>
-                <span className="text-gray-500 text-xs leading-6">{r.desc}</span>
-              </div>
-            ))}
-          </div>
-
-          <SubTitle>Why City Pages Are the Moat</SubTitle>
-          <div className="rounded-xl p-5 mb-6 border-l-4 text-sm space-y-2" style={{ background: "#f0f7f1", borderColor: "#3b6341" }}>
-            <p>Google indexes <strong>&ldquo;Wedding Venues in Los Angeles, California&rdquo;</strong> as a unique page with unique content. Each city = a unique keyword target with its own SERP.</p>
-            <p>We have <strong>8,000+ cities</strong> = 8,000+ potential ranking pages. Competitors like The Knot have 1 generic page per state. At scale, we win simply by existing at every city URL they don&apos;t.</p>
-            <p>State pages work the same way but are harder to rank (more competition). City pages are lower competition = faster to rank = faster traffic.</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <SubTitle>What Makes Each Page Rank</SubTitle>
-              <div className="space-y-2 text-sm text-gray-700">
-                <BulletItem>Unique meta title + description per page, dynamically generated with city/state/keyword</BulletItem>
-                <BulletItem>H1 tag matches search intent exactly: &ldquo;Wedding Venues in [City], [State]&rdquo;</BulletItem>
-                <BulletItem>Breadcrumbs (Home → Venues → California → Los Angeles) tell Google the page hierarchy</BulletItem>
-                <BulletItem>Venue detail pages = long-tail keywords with low competition and high purchase intent</BulletItem>
-                <BulletItem>Dynamic sitemap.xml lists every venue + city + state URL for Googlebot to find</BulletItem>
-              </div>
-            </div>
-            <div>
-              <SubTitle>Still Needed (High Priority)</SubTitle>
-              <div className="space-y-2 text-sm text-gray-700">
-                <TodoItem>Schema.org LocalBusiness markup — unlocks rich snippets (stars, hours, price) in Google results</TodoItem>
-                <TodoItem>Google Search Console — submit sitemap so Google knows to crawl all 8,000+ pages</TodoItem>
-                <TodoItem>Photo alt text — every venue photo needs keyword-rich alt text for image search</TodoItem>
-                <TodoItem>Canonical URLs on filtered pages — prevent duplicate content penalties</TodoItem>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* ── 2. Services & APIs ──────────────────────────── */}
-        <Card className="p-8">
-          <SectionTitle>2. Services &amp; APIs</SectionTitle>
+          <SectionTitle>1. Services &amp; APIs</SectionTitle>
 
           <SubTitle>Hosting &amp; Infrastructure</SubTitle>
           <div className="space-y-3 mb-8">
@@ -136,9 +84,9 @@ export default function StackPage() {
           </div>
         </Card>
 
-        {/* ── 3. Database Schema ──────────────────────────── */}
+        {/* ── 2. Database Schema ──────────────────────────── */}
         <Card className="p-8">
-          <SectionTitle>3. Database Schema</SectionTitle>
+          <SectionTitle>2. Database Schema</SectionTitle>
           <p className="text-sm text-gray-500 mb-6">4 models. Managed via Prisma migrations. Production on Neon.</p>
 
           <div className="grid md:grid-cols-2 gap-5">
@@ -157,39 +105,9 @@ export default function StackPage() {
           </div>
         </Card>
 
-        {/* ── 4. Data Pipeline ────────────────────────────── */}
+        {/* ── 3. Tech Stack ───────────────────────────────── */}
         <Card className="p-8">
-          <SectionTitle>4. Data Pipeline</SectionTitle>
-          <p className="text-sm text-gray-500 mb-6">Run in order. Each step builds on the previous. All scripts in <Code>scripts/</Code>.</p>
-
-          <div className="space-y-3">
-            <PipelineStep num={1} name="Seed" script="outscraper-scrape.ts, outscraper-seed.ts" status="done">
-              Raw data from Google Places API or Outscraper. Gets: venue name, address, phone, website URL, Google rating, review count, Google photo references. This is the foundation row — all other steps enrich it.
-            </PipelineStep>
-            <PipelineStep num={2} name="Phase 1 — Website Scrape" script="phase1-website.ts" status="done">
-              Playwright visits each venue&apos;s own website. Extracts: description text, amenities list, policies, contact info, og:image for photos. Higher quality than aggregator data because it&apos;s directly from the venue.
-            </PipelineStep>
-            <PipelineStep num={3} name="Deep Enrich (AI)" script="deep-enrich.ts" status="done">
-              OpenRouter AI generates polished venue descriptions, classifies style tags (rustic, modern, garden, etc.), and scores data completeness. Per-state checkpoints so it can resume after interruption. Pay-per-token via OpenRouter.
-            </PipelineStep>
-            <PipelineStep num={4} name="Phase 2 — The Knot Scrape" script="phase2-knot-cities.ts" status="running">
-              Playwright scrapes The Knot city pages. Fuzzy-matches venues by name. Adds: starting price, guest capacity (min/max). Currently running — ~1,156 / 8,089 cities done. State stored in <Code>phase2-state.json</Code>.
-            </PipelineStep>
-            <PipelineStep num={5} name="Geocoding" script="geocode-venues.ts" status="done">
-              Nominatim (OpenStreetMap) converts venue addresses to lat/lng. Required for map page pins. 1 req/sec rate limit — run overnight for large batches. Idempotent (skips already-geocoded venues).
-            </PipelineStep>
-            <PipelineStep num={6} name="Photo Sync" script="scripts/photos/" status="partial">
-              Downloads og:image from venue websites, uploads to Cloudflare R2 bucket <Code>greenbowtie-photos</Code>. Google Places photo URLs embed the API key so they need to be proxied/cached. Currently done for CA.
-            </PipelineStep>
-            <PipelineStep num={7} name="Neon Sync" script="sync_to_neon.ts" status="done">
-              Pushes local SQLite enrichment results to production Neon PostgreSQL. Run after any enrichment step to make changes live. Idempotent upsert by venue ID.
-            </PipelineStep>
-          </div>
-        </Card>
-
-        {/* ── 5. Tech Stack ───────────────────────────────── */}
-        <Card className="p-8">
-          <SectionTitle>5. Tech Stack</SectionTitle>
+          <SectionTitle>3. Tech Stack</SectionTitle>
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <SubTitle>Frontend</SubTitle>
@@ -225,9 +143,9 @@ export default function StackPage() {
           </div>
         </Card>
 
-        {/* ── 6. Auth & Security ──────────────────────────── */}
+        {/* ── 4. Auth & Security ──────────────────────────── */}
         <Card className="p-8">
-          <SectionTitle>6. Auth &amp; Security</SectionTitle>
+          <SectionTitle>4. Auth &amp; Security</SectionTitle>
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <SubTitle>Access Control</SubTitle>
@@ -260,9 +178,9 @@ export default function StackPage() {
           </div>
         </Card>
 
-        {/* ── 7. Deployment ───────────────────────────────── */}
+        {/* ── 5. Deployment ───────────────────────────────── */}
         <Card className="p-8">
-          <SectionTitle>7. Deployment</SectionTitle>
+          <SectionTitle>5. Deployment</SectionTitle>
           <div className="flex flex-wrap items-center gap-3 mb-6 text-xs">
             {[
               "👨‍💻 Push to GitHub main",
@@ -308,9 +226,9 @@ export default function StackPage() {
           </div>
         </Card>
 
-        {/* ── 8. TODO Checklist ───────────────────────────── */}
+        {/* ── 6. TODO Checklist ───────────────────────────── */}
         <Card className="p-8">
-          <SectionTitle>8. TODO Checklist</SectionTitle>
+          <SectionTitle>6. TODO Checklist</SectionTitle>
           <p className="text-sm text-gray-500 mb-6">Open items to get to full production readiness.</p>
           <div className="space-y-3">
             <TodoRow priority="high" label="Schema.org structured data (LocalBusiness markup)">
@@ -448,39 +366,6 @@ function SchemaCard({ name, icon, fieldCount, children }: { name: string; icon: 
   );
 }
 
-function PipelineStep({
-  num, name, script, status, children,
-}: {
-  num: number;
-  name: string;
-  script: string;
-  status: "done" | "running" | "partial" | "planned";
-  children: React.ReactNode;
-}) {
-  const statusMap = {
-    done:    { label: "Done",    color: "green" },
-    running: { label: "Running", color: "blue" },
-    partial: { label: "Partial", color: "amber" },
-    planned: { label: "Planned", color: "gray" },
-  };
-  const s = statusMap[status];
-  return (
-    <div className="flex gap-4 items-start">
-      <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold text-white" style={{ background: "#3b6341" }}>
-        {num}
-      </div>
-      <div className="flex-1 rounded-xl p-4 border text-sm" style={{ background: "#fafafa", borderColor: "#e5e7eb" }}>
-        <div className="flex items-center gap-2 flex-wrap mb-1">
-          <span className="font-bold text-gray-800">{name}</span>
-          <Badge color={s.color}>{s.label}</Badge>
-          <Code>{script}</Code>
-        </div>
-        <div className="text-gray-600">{children}</div>
-      </div>
-    </div>
-  );
-}
-
 function StackItem({
   icon, title, badge, badgeColor, children,
 }: {
@@ -519,15 +404,6 @@ function BulletItem({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-2">
       <span className="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full" style={{ background: "#3b6341", marginTop: 7 }} />
-      <span>{children}</span>
-    </div>
-  );
-}
-
-function TodoItem({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-start gap-2 text-amber-700">
-      <span className="font-bold flex-shrink-0">○</span>
       <span>{children}</span>
     </div>
   );

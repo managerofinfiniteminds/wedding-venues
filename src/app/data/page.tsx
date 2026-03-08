@@ -22,6 +22,34 @@ export default function DataPage() {
         <p>Descriptions go through a humanizer pass that strips AI writing patterns (em dashes, "nestled", "boasts", rule-of-three, vague praise) and rewrites for natural, specific, voice-forward copy.</p>
       </Section>
 
+      {/* ── PIPELINE OVERVIEW ── */}
+      <Section title="Pipeline Overview">
+        <p>The enrichment pipeline runs in 7 stages. Each builds on the previous.</p>
+        <div style={{ marginTop: 16 }}>
+          <PipelineStep num={1} name="Seed" script="outscraper-scrape.ts, outscraper-seed.ts" status="done">
+            Raw data from Google Places API or Outscraper. Gets: venue name, address, phone, website URL, Google rating, review count, Google photo references. This is the foundation row — all other steps enrich it.
+          </PipelineStep>
+          <PipelineStep num={2} name="Phase 1 — Website Scrape" script="phase1-website.ts" status="done">
+            Playwright visits each venue&apos;s own website. Extracts: description text, amenities list, policies, contact info, og:image for photos. Higher quality than aggregator data because it&apos;s directly from the venue.
+          </PipelineStep>
+          <PipelineStep num={3} name="Deep Enrich (AI)" script="deep-enrich.ts" status="done">
+            OpenRouter AI generates polished venue descriptions, classifies style tags (rustic, modern, garden, etc.), and scores data completeness. Per-state checkpoints so it can resume after interruption. Pay-per-token via OpenRouter.
+          </PipelineStep>
+          <PipelineStep num={4} name="Phase 2 — The Knot Scrape" script="phase2-knot-cities.ts" status="running">
+            Playwright scrapes The Knot city pages. Fuzzy-matches venues by name. Adds: starting price, guest capacity (min/max). Currently running — ~1,156 / 8,089 cities done. State stored in <Code>phase2-state.json</Code>.
+          </PipelineStep>
+          <PipelineStep num={5} name="Geocoding" script="geocode-venues.ts" status="done">
+            Nominatim (OpenStreetMap) converts venue addresses to lat/lng. Required for map page pins. 1 req/sec rate limit — run overnight for large batches. Idempotent (skips already-geocoded venues).
+          </PipelineStep>
+          <PipelineStep num={6} name="Photo Sync" script="scripts/photos/" status="partial">
+            Downloads og:image from venue websites, uploads to Cloudflare R2 bucket <Code>greenbowtie-photos</Code>. Google Places photo URLs embed the API key so they need to be proxied/cached. Currently done for CA.
+          </PipelineStep>
+          <PipelineStep num={7} name="Neon Sync" script="sync_to_neon.ts" status="done">
+            Pushes local SQLite enrichment results to production Neon PostgreSQL. Run after any enrichment step to make changes live. Idempotent upsert by venue ID.
+          </PipelineStep>
+        </div>
+      </Section>
+
       {/* ── ENRICHMENT STAGES ── */}
       <Section title="Enrichment Stages (in order)">
         <Step n="1" title="Seed — Google Places via Outscraper" color="#e0f2fe">
@@ -543,6 +571,39 @@ R2_PUBLIC_URL=https://photos.greenbowtie.com`}</Pre>
 }
 
 // ── Small layout components ───────────────────────────────────────────────
+
+function PipelineStep({
+  num, name, script, status, children,
+}: {
+  num: number;
+  name: string;
+  script: string;
+  status: "done" | "running" | "partial" | "planned";
+  children: React.ReactNode;
+}) {
+  const statusMap = {
+    done:    { label: "Done",    bg: "#dcfce7", color: "#166534" },
+    running: { label: "Running", bg: "#dbeafe", color: "#1e40af" },
+    partial: { label: "Partial", bg: "#fef3c7", color: "#92400e" },
+    planned: { label: "Planned", bg: "#f3f4f6", color: "#374151" },
+  };
+  const s = statusMap[status];
+  return (
+    <div style={{ display: "flex", gap: 16, alignItems: "flex-start", marginBottom: 12 }}>
+      <div style={{ flexShrink: 0, width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "#fff", background: "#3b6341" }}>
+        {num}
+      </div>
+      <div style={{ flex: 1, background: "#fafafa", border: "1px solid #e5e7eb", borderRadius: 8, padding: "12px 16px", fontSize: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
+          <span style={{ fontWeight: 700, color: "#1a1a1a" }}>{name}</span>
+          <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: s.bg, color: s.color, textTransform: "uppercase", letterSpacing: "0.04em" }}>{s.label}</span>
+          <Code>{script}</Code>
+        </div>
+        <div style={{ color: "#374151" }}>{children}</div>
+      </div>
+    </div>
+  );
+}
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
