@@ -382,7 +382,7 @@ export default function HandbookPage() {
               ["/monetize", "Revenue streams, 13 streams, cautionary tales, 4-phase roadmap"],
               ["/seo", "SEO strategy — URL hierarchy, city moat, ranking factors"],
               ["/stack", "Full tech stack reference, DB schema, auth, deployment checklist"],
-              ["/audit", "Venue data quality audit reports"],
+              ["/admin/audit", "Venue data quality audit — publish/hide/delete with filters"],
             ].map(([route, desc]) => (
               <Row key={route} label={route} value={desc} />
             ))}

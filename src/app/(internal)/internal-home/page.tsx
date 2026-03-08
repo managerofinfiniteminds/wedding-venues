@@ -68,9 +68,9 @@ const cards = [
   },
   {
     icon: "🔍",
-    title: "Audit",
-    href: "/audit",
-    desc: "Venue data quality audit reports",
+    title: "Venue Audit",
+    href: "/admin/audit",
+    desc: "Venue data quality — publish, hide, delete, filter by issue type",
     badge: "Live",
     badgeColor: "#16a34a",
     badgeBg: "#dcfce7",
