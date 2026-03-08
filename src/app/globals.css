@@ -34,3 +34,9 @@ body {
   box-shadow: 0 8px 24px rgba(0,0,0,0.10);
   transform: translateY(-2px);
 }
+
+/* Internal nav link hover */
+.internal-nav-link:hover {
+  color: rgba(255,255,255,1) !important;
+  background: rgba(255,255,255,0.12) !important;
+}

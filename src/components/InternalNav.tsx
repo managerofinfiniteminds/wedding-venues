@@ -5,7 +5,6 @@ const NAV_LINKS = [
   { href: "/internal-home", label: "Home" },
   { href: "/handbook", label: "Handbook" },
   { href: "/data", label: "Data" },
-
   { href: "/seo", label: "SEO" },
   { href: "/market", label: "Market" },
   { href: "/monetize", label: "Monetize" },
@@ -13,48 +12,71 @@ const NAV_LINKS = [
 
 export function InternalNav() {
   return (
-    <>
-      {/* Confidential banner */}
-      <div style={{
-        background: "#7f1d1d",
-        color: "#fecaca",
-        textAlign: "center",
-        fontSize: 11,
-        fontWeight: 700,
-        letterSpacing: "0.08em",
-        textTransform: "uppercase",
-        padding: "5px 16px",
-      }}>
-        🔒 Confidential — Internal Use Only · Not for distribution
-      </div>
+    <header style={{
+      background: "#2d4f33",
+      borderBottom: "1px solid #1e3824",
+      boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
+    }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 60 }}>
 
-      {/* Nav bar */}
-      <header style={{ background: "#1a2e1d", borderBottom: "1px solid #2d4a31" }}>
-        <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/internal-home" className="flex items-center gap-2">
-              <Image src="/greenbowtie-logo.svg" alt="Green Bowtie" width={24} height={24} />
-              <span style={{ fontWeight: 700, color: "#86efac", fontSize: 14 }}>Green Bowtie</span>
-            </Link>
-            <span style={{ color: "#2d4a31", fontSize: 14 }}>·</span>
-            <span style={{ color: "#6b7280", fontSize: 13, fontWeight: 600, letterSpacing: "0.02em" }}>
-              Operations Center
-            </span>
-          </div>
-          <nav className="flex items-center gap-0.5">
+          {/* Branding */}
+          <Link href="/internal-home" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 12 }}>
+            <Image
+              src="/greenbowtie-logo.svg"
+              alt="Green Bowtie"
+              width={36}
+              height={36}
+              style={{ filter: "brightness(0) invert(1)" }}
+            />
+            <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              <span style={{
+                fontFamily: "'Tenor Sans', serif",
+                color: "#ffffff",
+                fontSize: 18,
+                fontWeight: 700,
+                letterSpacing: "-0.01em",
+                lineHeight: 1,
+              }}>
+                Green Bowtie
+              </span>
+              <span style={{
+                color: "rgba(255,255,255,0.45)",
+                fontSize: 10,
+                fontWeight: 600,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                lineHeight: 1,
+              }}>
+                Operations Center · Confidential
+              </span>
+            </div>
+          </Link>
+
+          {/* Nav links */}
+          <nav style={{ display: "flex", alignItems: "center", gap: 2 }}>
             {NAV_LINKS.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                style={{ fontSize: 12, color: "#9ca3af", fontWeight: 600, padding: "5px 10px", borderRadius: 8, transition: "all 0.15s" }}
-                className="hover:text-white hover:bg-white/10"
+                style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "rgba(255,255,255,0.7)",
+                  padding: "6px 12px",
+                  borderRadius: 8,
+                  textDecoration: "none",
+                  transition: "all 0.15s",
+                  letterSpacing: "0.01em",
+                }}
+                className="internal-nav-link"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
         </div>
-      </header>
-    </>
+      </div>
+    </header>
   );
 }
