@@ -85,6 +85,15 @@ const cards = [
     badgeBg: "#dbeafe",
   },
   {
+    icon: "🔑",
+    title: "Services & Accounts",
+    href: "/services",
+    desc: "Every external service we use — hosting, DB, email, payments, analytics",
+    badge: "Reference",
+    badgeColor: "#1d4ed8",
+    badgeBg: "#dbeafe",
+  },
+  {
     icon: "📊",
     title: "Market Intelligence",
     href: "/market",
